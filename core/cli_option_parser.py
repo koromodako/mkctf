@@ -4,7 +4,7 @@
 # date:    2017-01-05
 # author:  paul dautry
 # purpose:
-#      Code du compilateur de fichiers .sgs
+#      Commandline options parser 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class CLIOptionsParser(object):

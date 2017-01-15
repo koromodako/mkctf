@@ -6,6 +6,7 @@
 # author:  paul dautry
 # purpose:
 #       This is a framework designed to create challenges and maintain them.
+#       Entry point script.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #===============================================================================
 #  IMPORTS
@@ -32,7 +33,7 @@ from core.functions import usage
 DEBUG = False
 VERBOSE = False
 OPTIONS = [
-        #['-c', '--configure', 'Create a configuration file for the framework', configure, False],
+        ['-c', '--configure', 'Create a configuration file for the framework', configure, False],
         ['-n', '--new', 'Create a new challenge', create_challenge, False],
         ['-r', '--remove', 'Delete an existing challenge', delete_challenge, False],
         ['-l', '--list', 'List all challenges', list_challenges, False],

@@ -3,34 +3,35 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # file:    functions.py
 # date:    2017-01-13
-# author:  
+# author:  paul dautry
 # purpose:
-#
+#       All functions used with dispatcher.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import os
 import string
 from shutil import rmtree
 from subprocess import call
-from configparser import ConfigParser
+from core.config import Config
 from core.logger import Logger
 from core.utils import read_input
 
 CHARSET = string.ascii_lowercase + string.digits + '-'
 ROOT = os.getcwd()
 SUBDIRS = ['chall', 'exploit', 'flags', 'src']
-CONFIG_FILE = 'py_chall_factory.ini'
-CONFIG = ConfigParser()
-if os.path.isfile(CONFIG_FILE):
-    if len(CONFIG.read(CONFIG_FILE)) == 0:
-        Logger.wrn('failed to read configuration file!')
+CONFIG = Config()
+CONFIG.load()
 
 def configure(params):
     """configure"""
-    pass
+    workspace = read_input('Enter workspace directory or skip (empty): ', True)
+    if len(workspace) > 0:
+        CONFIG.set_property(
+            Config.S_DIR, Config.K_WORKSPACE, workspace)
+    CONFIG.save()
 
 def create_challenge(params):
     """create_challenge"""
-    root = CONFIG.get('DIR', 'challs_root', fallback='challenges')
+    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
     if not os.path.exists(root):
         Logger.inf('creating missing directory: %s' % root)
         os.makedirs(root)
@@ -85,7 +86,7 @@ package:
 
 def delete_challenge(params):
     """delete_challenge"""
-    root = CONFIG.get('DIR', 'challs_root', fallback='challenges')
+    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
     resp = read_input('which challenge do you want to delete ? [<package_name>|all]\n')
     if resp == 'all':
         challs = os.listdir(root)
@@ -104,14 +105,14 @@ def delete_challenge(params):
 
 def list_challenges(params):
     """list_challenge"""
-    root = CONFIG.get('DIR', 'challs_root', fallback='challenges')
+    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
     print('\nChallenges:')
     for chall in os.listdir(root):
         print('\t%s' % chall)
 
 def build_challenge(params):
     """build_challenge"""
-    root = CONFIG.get('DIR', 'challs_root', fallback='challenges')
+    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
     resp = read_input('which challenge do you want to build ? [<package_name>|all]\n')
     if resp == 'all':
         challs = os.listdir(root)
@@ -130,7 +131,7 @@ def build_challenge(params):
 
 def package_challenge(params):
     """package_challenge"""
-    root = CONFIG.get('DIR', 'challs_root', fallback='challenges')
+    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
     packages = CONFIG.get('DIR', 'challs_dist', fallback='packages')
     if not os.path.exists(packages):
         Logger.inf('creating missing directory: %s' % packages)
