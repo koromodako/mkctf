@@ -13,6 +13,7 @@ from configparser import ConfigParser
 class Config(object):
     S_DIR = 'DIR'
     K_WORKSPACE = 'workspace'
+    K_PACKAGES = 'packages'
     """docstring for Configuration"""
     def __init__(self, configfile='py_chall_factory.ini'):
         super(Config, self).__init__()

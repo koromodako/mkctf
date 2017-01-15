@@ -132,7 +132,7 @@ def build_challenge(params):
 def package_challenge(params):
     """package_challenge"""
     root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
-    packages = CONFIG.get('DIR', 'challs_dist', fallback='packages')
+    packages = CONFIG.get_property(Config.S_DIR, Config.K_PACKAGES, 'packages')
     if not os.path.exists(packages):
         Logger.inf('creating missing directory: %s' % packages)
         os.makedirs(packages)
