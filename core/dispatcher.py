@@ -5,7 +5,8 @@
 # date:    2017-01-13
 # author:  paul dautry
 # purpose:
-#
+#       Created to evolutive functionnality-oriented application. 
+#       Associates each command with a function.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def not_implemented(params):
     print('Dispatcher: not implemented')

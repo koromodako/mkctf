@@ -1,3 +1,4 @@
 challenges/
 packages/
 __pycache__/
+*.ini
