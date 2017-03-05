@@ -22,8 +22,6 @@ from core.functions import configure
 from core.functions import create_challenge
 from core.functions import delete_challenge
 from core.functions import list_challenges
-from core.functions import build_challenge
-from core.functions import package_challenge
 from core.functions import debug_on
 from core.functions import verbose_on
 from core.functions import usage
@@ -37,8 +35,6 @@ OPTIONS = [
         ['-n', '--new', 'Create a new challenge', create_challenge, False],
         ['-r', '--remove', 'Delete an existing challenge', delete_challenge, False],
         ['-l', '--list', 'List all challenges', list_challenges, False],
-        ['-b', '--build', 'Build a specific challenge or all challenges', build_challenge, False],
-        ['-p', '--package', 'Package a specific challenge or all challenges', package_challenge, False],
         ['-d', '--debug', 'Run in debugging mode', debug_on, True],
         ['-v', '--verbose', 'Run in verbose mode', verbose_on, True],
         ['-h', '--help', 'Display help message', usage, False]

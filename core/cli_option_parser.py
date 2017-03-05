@@ -28,14 +28,14 @@ class CLIOptionsParser(object):
                     self.options[e] = ''
                     separate_value_expected=e
                 elif '--' in e:
-                    parse_long(e)
+                    self.parse_long(e)
                     separate_value_expected=None
                 else:
                     self.options[separate_value_expected] = e
                     separate_value_expected=None
             else:
                 if '--' in e:
-                    parse_long(e)
+                    self.parse_long(e)
                 elif '-' in e:
                     self.options[e] = ''
                     separate_value_expected=e
