@@ -29,14 +29,15 @@ CATEGORIES = [
     'web'
 ]
 SUBDIRS = [
-    'public-files', 
-    'exploit', 
+    'server-files',
+    'public-files',
+    'exploit',
     'src'
 ]
 SUBFILES = [
-    'writeup.md', 
-    'flag.txt', 
-    'public-files/description.md', 
+    'writeup.md',
+    'flag.txt',
+    'public-files/description.md',
     'exploit/exploit.py'
 ]
 CONFIG = Config()
@@ -115,7 +116,8 @@ def list_challenges(params):
     for category in CATEGORIES:
         print('\t%s:' % category)
         for chall in os.listdir(os.path.join(root, category)):
-            print('\t\t%s' % chall)
+            if chall[0] != '.':
+                print('\t\t%s' % chall)
 
 def debug_on(params):
     """debug_on"""
