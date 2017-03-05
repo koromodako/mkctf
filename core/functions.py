@@ -14,10 +14,31 @@ from subprocess import call
 from core.config import Config
 from core.logger import Logger
 from core.utils import read_input
+from core.utils import select_category
 
 CHARSET = string.ascii_lowercase + string.digits + '-'
 ROOT = os.getcwd()
-SUBDIRS = ['chall', 'exploit', 'flags', 'src']
+CATEGORIES = [
+    'bugbounty',
+    'crypto',
+    'forensics',
+    'misc',
+    'programming',
+    'pwn',
+    'reverse',
+    'web'
+]
+SUBDIRS = [
+    'public-files', 
+    'exploit', 
+    'src'
+]
+SUBFILES = [
+    'writeup.md', 
+    'flag.txt', 
+    'public-files/description.md', 
+    'exploit/exploit.py'
+]
 CONFIG = Config()
 CONFIG.load()
 
@@ -29,133 +50,72 @@ def configure(params):
             Config.S_DIR, Config.K_WORKSPACE, workspace)
     CONFIG.save()
 
-def create_challenge(params):
-    """create_challenge"""
-    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
+def make_fs_tree(root):
     if not os.path.exists(root):
         Logger.inf('creating missing directory: %s' % root)
         os.makedirs(root)
-    challname = read_input('enter challenge name: ')
-    challname = challname.strip().lower()
-    challname = challname.replace(' ', '-')
-    for l in challname:
+    for category in CATEGORIES:
+        if not os.path.exists(os.path.join(root, category)):
+            Logger.inf('creating missing directory: %s' % root)
+            os.makedirs(os.path.join(root, category))
+
+def create_challenge(params):
+    """create_challenge"""
+    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
+    make_fs_tree(root)
+    chall_name = read_input('enter challenge name: ')
+    chall_name = chall_name.strip().lower()
+    chall_name = chall_name.replace(' ', '-')
+    for l in chall_name:
         if not l in CHARSET:
-            challname = challname.replace(l, '')
-    challpath = os.path.join(root, challname)
-    if os.path.exists(challpath):
+            chall_name = chall_name.replace(l, '')
+    chall_category = select_category(CATEGORIES)
+    chall_path = os.path.join(root, chall_category, chall_name)
+    if os.path.exists(chall_path):
         Logger.err('challenge already exists!')
         return
-    os.makedirs(challpath)
+    os.makedirs(chall_path)
     for subdir in SUBDIRS:
-        os.makedirs(os.path.join(root, challname, subdir))
-    with open(os.path.join(root, challname, 'Makefile'), 'w') as makefile:
-        makefile.write("""
-#-------------------------------------------------------------------------------
-#  Makefile generated using PyChallFactory :)
-#-------------------------------------------------------------------------------
-#===============================================================================
-# variables
-#===============================================================================
-MKDIR=mkdir
-CP=cp
-ZIP=zip
-MD5SUM=md5sum
-RM=rm
-CHALL=%s
-CHALL_ZIP=$(CHALL).zip
-CHALL_MD5=$(CHALL).md5
-#===============================================================================
-# rules
-#===============================================================================
-# all rule
-all: build
+        os.makedirs(os.path.join(chall_path, subdir))
+    for subfile in SUBFILES:
+        with open(os.path.join(chall_path, subfile), 'w') as sf:
+            sf.write('\n')
 
-# this rule is supposed to call dependencies and/or execute commands to prepare 
-# challenge elements and put them in chall/ directory 
-build:
-\t# write your commands here
-
-# this rule creates a "standard challenge package"
-package:
-\t$(MKDIR) $(CHALL)
-\t$(CP) -r chall/* $(CHALL)/
-\t$(ZIP) -r $(CHALL_ZIP) $(CHALL)/
-\t$(MD5SUM) $(CHALL_ZIP) > $(CHALL_MD5)
-\t$(RM) -rf $(CHALL)
-""" % challname)
+def delete_chall(root, category, target):
+    if target == 'all':
+        challs = os.listdir(os.path.join(root, category))
+    else:
+        challs = [ target ]
+    for chall_name in challs:
+        chall_path = os.path.join(root, category, chall_name)
+        if not os.path.exists(chall_path):
+            Logger.err('challenge does not exists!')
+            continue
+        resp = read_input('do you really want to remove %s ? [yes/*]\n' % chall_name)
+        if resp == 'yes':
+            Logger.inf('removing challenge %s...' % chall_name)
+            rmtree(chall_path)
+            Logger.inf('done!')
 
 def delete_challenge(params):
     """delete_challenge"""
     root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
-    resp = read_input('which challenge do you want to delete ? [<package_name>|all]\n')
-    if resp == 'all':
-        challs = os.listdir(root)
+    target = read_input('which challenge do you want to delete ? [<package_name>|all]\n')
+    category = select_category(CATEGORIES + ['all'])
+    if category == 'all':
+        for c in CATEGORIES:
+            delete_chall(root, c, target)
     else:
-        challs = [ resp ]
-    for chall in challs:
-        challpath = os.path.join(root, chall)
-        if not os.path.exists(challpath):
-            Logger.err('challenge does not exists!')
-            continue
-        resp = read_input('do you really want to remove %s ? [yes/*]\n' % chall)
-        if resp == 'yes':
-            Logger.inf('removing challenge %s...' % chall)
-            rmtree(challpath)
-            Logger.inf('done!')
+        delete_chall(root, category, target)
 
 def list_challenges(params):
     """list_challenge"""
     root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
     print('\nChallenges:')
-    for chall in os.listdir(root):
-        print('\t%s' % chall)
-
-def build_challenge(params):
-    """build_challenge"""
-    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
-    resp = read_input('which challenge do you want to build ? [<package_name>|all]\n')
-    if resp == 'all':
-        challs = os.listdir(root)
-    else:
-        challs = [ resp ]
-    for chall in challs:
-        challpath = os.path.join(root, chall)
-        if not os.path.exists(challpath):
-            Logger.err('challenge does not exists!')
-            continue
-        Logger.inf('building challenge %s...' % chall)
-        os.chdir(challpath)
-        call(['make'])
-        os.chdir(ROOT)
-        Logger.inf('done!')
-
-def package_challenge(params):
-    """package_challenge"""
-    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
-    packages = CONFIG.get_property(Config.S_DIR, Config.K_PACKAGES, 'packages')
-    if not os.path.exists(packages):
-        Logger.inf('creating missing directory: %s' % packages)
-        os.makedirs(packages)
-    resp = read_input('which challenge do you want to package ? [<package_name>|all]\n')
-    if resp == 'all':
-        challs = os.listdir(root)
-    else:
-        challs = [ resp ]
-    for chall in challs:
-        challpath = os.path.join(root, chall)
-        if not os.path.exists(challpath):
-            Logger.err('challenge does not exists!')
-            continue
-        Logger.inf('packaging challenge %s...' % chall)
-        os.chdir(challpath)
-        call(['make', 'package'])
-        os.chdir(ROOT)
-        challbase = chall.replace('/', '')
-        challzip = challbase + '.zip'
-        challmd5 = challbase + '.md5'
-        os.rename(os.path.join(challpath, challzip), os.path.join(packages, challzip))
-        os.rename(os.path.join(challpath, challmd5), os.path.join(packages, challmd5))
-        Logger.inf('done!')
+    for category in CATEGORIES:
+        print('\t%s:' % category)
+        for chall in os.listdir(os.path.join(root, category)):
+            print('\t\t%s' % chall)
 
 def debug_on(params):
     """debug_on"""
