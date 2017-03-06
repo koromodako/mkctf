@@ -8,6 +8,7 @@
 #       All functions used with dispatcher.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import os
+import stat
 import string
 from shutil import rmtree
 from subprocess import call
@@ -35,10 +36,11 @@ SUBDIRS = [
     'src'
 ]
 SUBFILES = [
-    'writeup.md',
-    'flag.txt',
-    'public-files/description.md',
-    'exploit/exploit.py'
+#   (filename, executable?)
+    ('writeup.md', False),
+    ('flag.txt', False),
+    ('public-files/description.md', False),
+    ('exploit/exploit.py', True)
 ]
 CONFIG = Config()
 CONFIG.load()
@@ -78,9 +80,12 @@ def create_challenge(params):
     os.makedirs(chall_path)
     for subdir in SUBDIRS:
         os.makedirs(os.path.join(chall_path, subdir))
-    for subfile in SUBFILES:
-        with open(os.path.join(chall_path, subfile), 'w') as sf:
+    for subfile, executable in SUBFILES:
+        file_path = os.path.join(chall_path, subfile)
+        with open(file_path, 'w') as sf:
             sf.write('\n')
+        if executable:
+            os.chmod(file_path, stat.S_IRWXU|stat.S_IRGRP|stat.S_IXGRP|stat.S_IROTH|stat.S_IXOTH)
 
 def delete_chall(root, category, target):
     if target == 'all':
