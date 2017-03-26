@@ -72,8 +72,9 @@ def create_challenge(params):
     for l in chall_name:
         if not l in CHARSET:
             chall_name = chall_name.replace(l, '')
+    chall_points = read_input('enter challenge points: ', expect_digit=True)
     chall_category = select_category(CATEGORIES)
-    chall_path = os.path.join(root, chall_category, chall_name)
+    chall_path = os.path.join(root, chall_category, chall_name + "-" + str(chall_points))
     if os.path.exists(chall_path):
         Logger.err('challenge already exists!')
         return
@@ -106,19 +107,25 @@ def delete_chall(root, category, target):
 def delete_challenge(params):
     """delete_challenge"""
     root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
-    target = read_input('which challenge do you want to delete ? [<package_name>|all]\n')
-    category = select_category(CATEGORIES + ['all'])
-    if category == 'all':
+    print('[?] > first, select the category where the challenge you want to delete is.')
+    category = select_category(CATEGORIES + ['all (delete all challenges)'])
+    if category == 'all (delete all challenges)':
         for c in CATEGORIES:
             delete_chall(root, c, target)
     else:
+        list_challenges({"from_category": category})
+        target = read_input('now, what is the name of the challenge you want to delete? [<package_name>|all]\n')
         delete_chall(root, category, target)
 
 def list_challenges(params):
     """list_challenge"""
+    if "from_category" in params:
+        categories_to_print = [params['from_category']]
+    else:
+        categories_to_print = CATEGORIES
     root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
     print('\nChallenges:')
-    for category in CATEGORIES:
+    for category in categories_to_print:
         print('\t%s:' % category)
         for chall in os.listdir(os.path.join(root, category)):
             if chall[0] != '.':
