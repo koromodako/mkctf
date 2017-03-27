@@ -1,6 +1,6 @@
 # PyChallFactory
 
-## Get started
+## Getting started
 
 `python3 py_chall_factory.py [options]` 
 or 
