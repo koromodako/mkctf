@@ -1,6 +1,6 @@
-# PyChallFactory
+# PyChallFactory
 
-## Get started
+## Get started
 
 `python3 py_chall_factory.py [options]` 
 or 
@@ -8,7 +8,7 @@ or
 
 Use option `-h` or `--help` to get started.
 
-## All you need to know
+## All you need to know
 
 First, edit and rename `py_chall_factory.ini.dist` to `py_chall_factory.ini` 
 
