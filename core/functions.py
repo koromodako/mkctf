@@ -40,7 +40,7 @@ SUBFILES = [
     ('writeup.md', False),
     ('flag.txt', False),
     ('public-files/description.md', False),
-    ('exploit/exploit.py', True)
+    ('exploit/exploit', True)
 ]
 CONFIG = Config()
 CONFIG.load()

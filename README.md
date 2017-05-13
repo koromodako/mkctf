@@ -24,4 +24,4 @@ The following files will be created:
  + `flag.txt`: write a unique file on a single line in this one.
  + `writeup.md`: write a WriteUp for your challenge.
  + `public-files/description.md`: write a description of your challenge in this one.
- + `exploit/exploit.py`: write a working exploit in this one.
+ + `exploit/exploit`: write a working exploit in this one.
