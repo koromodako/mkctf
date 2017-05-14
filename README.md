@@ -1,13 +1,13 @@
 # PyChallFactory
 
-## Why ?
+## Why ?
 
 This tool might help your team to create challenges following a predefined format.
 
 ##  Origins
 
 This project was, initially, created for managing file for INS'hAck 2017 event.
-You can find challenges and ctf framework [here](https://github.com/HugoDelval/inshack-2017)
+You can find challenges and ctf framework [here](https://github.com/HugoDelval/inshack-2017).
 
 ## Getting started
 
@@ -86,7 +86,7 @@ Challenges:
     bugbounty:
         test-100
 [?] > now, what is the name of the challenge you want to delete? [<package_name>|all]: test-100
-[?] > do you really want to remove </home/paul/documents/informatique/hacking/insecurity/orga/inshack-2017/challenges/bugbounty/test-100> ? [yes/*]
+[?] > do you really want to remove </home/.../bugbounty/test-100> ? [yes/*]
 yes
 
 See you soon! :)
