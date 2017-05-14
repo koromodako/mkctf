@@ -8,44 +8,67 @@
 #       Contains interface to configuration file
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from configparser import ConfigParser
+import os
+import json
+from core.logger import Logger
 
 class Config(object):
-    S_DIR = 'DIR'
-    K_WORKSPACE = 'workspace'
-    K_PACKAGES = 'packages'
+    K_WORKSPACE     = 'workspace'
+    K_CATEGORIES    = 'categories'
+    K_DIRECTORIES   = 'directories'
+    K_FILES         = 'files' 
     """docstring for Configuration"""
-    def __init__(self, configfile='py_chall_factory.ini'):
+    def __init__(self):
         super(Config, self).__init__()
-        self.configfile = configfile
-        self.parser = ConfigParser()
-        self.error = 'n/a'
+        self.config = {
+            Config.K_WORKSPACE: '~/challenges',
+            Config.K_CATEGORIES: [
+                'bugbounty', 
+                'crypto', 
+                'forensics', 
+                'misc', 
+                'programming', 
+                'pwn', 
+                'reverse', 
+                'web'
+            ],
+            Config.K_DIRECTORIES: [
+                'server-files', 
+                'public-files', 
+                'exploit', 
+                'src'
+            ],
+            Config.K_FILES: [
+                [ 'writeup.md', False ], 
+                [ 'flag.txt', False ], 
+                [ 'public-files/description.md', False ], 
+                [ 'exploit/exploit', True ]
+            ]
+        }
 
-    def load(self, configfile=None):
-        if configfile is not None:
-            if not os.path.isfile(configfile):
-                self.error = 'sepcified configfile is not a file or cannot be found.'
-                return False
-            self.configfile = configfile
-        if len(self.parser.read(self.configfile)) == 0:
-            self.error = 'failed to read configuration file!'
+    def load(self, configfile):
+        if not os.path.isfile(configfile):
+            Logger.err('specified configfile is not a file or cannot be found.')
             return False
+        Logger.inf('configuration file is: %s' % configfile)
+        with open(configfile, 'r') as f:
+            try:
+                conf = json.loads(f.read())
+            except Exception as e:
+                conf = None
+        if conf is None:
+            Logger.err('failed to read configuration file!')
+            return False
+        self.config = conf
         return True
 
-    def save(self, configfile=None):
-        if configfile is not None:
-            if not os.path.isfile(configfile):
-                self.error = 'sepcified configfile is not a file or cannot be found.'
-                return False
-            self.configfile = configfile
-        with open(self.configfile, 'w') as f: 
-            self.parser.write(f)
+    def save(self, configfile):
+        with open(configfile, 'w') as f: 
+            f.write(json.dumps(self.config, indent=4))
 
-    def set_property(self, section, key, value):
-        if not self.parser.has_section(section):
-            self.parser.add_section(section)
-        self.parser.set(section, key, value)
+    def set_property(self, key, value):
+        self.config[key] = value
 
-    def get_property(self, section, key, default=None):
-        return self.parser.get(section, key, fallback=default)
+    def get_property(self, key, default=None):
+        return self.config.get(key, default)
     

@@ -26,12 +26,22 @@ def read_input(prompt, allow_empty=False, expect_digit=False):
         uinput = int(uinput, 10)
     return uinput
 
+def read_input_loop(prompt, subprompt, expect_digit=False):
+    out = []
+    print('[?] > ' + prompt)
+    uinput = read_input(subprompt, True, expect_digit)
+    while uinput != '.' and len(uinput) > 0:
+        out.append(uinput)
+        uinput = read_input(subprompt, False, expect_digit)
+    return out
+
 def select_category(categories):
     """select_categories"""
     uinput = -1
     if not isinstance(categories, list):
         Logger.err('select_category categories argument must be a list.')
     k = 0
+    print('Categories:')
     for category in categories:
         print('\t%d - %s' % (k, category))
         k += 1

@@ -15,45 +15,47 @@ from subprocess import call
 from core.config import Config
 from core.logger import Logger
 from core.utils import read_input
+from core.utils import read_input_loop
 from core.utils import select_category
 
 CHARSET = string.ascii_lowercase + string.digits + '-'
 ROOT = os.getcwd()
-CATEGORIES = [
-    'bugbounty',
-    'crypto',
-    'forensics',
-    'misc',
-    'programming',
-    'pwn',
-    'reverse',
-    'web'
-]
-SUBDIRS = [
-    'server-files',
-    'public-files',
-    'exploit',
-    'src'
-]
-SUBFILES = [
-#   (filename, executable?)
-    ('writeup.md', False),
-    ('flag.txt', False),
-    ('public-files/description.md', False),
-    ('exploit/exploit', True)
-]
+CONFIG_FILE = 'py_chall_factory.pref'
 CONFIG = Config()
-CONFIG.load()
+CONFIG.load(CONFIG_FILE)
+# override defaults if a valid configuration is found
+CATEGORIES = CONFIG.get_property(Config.K_CATEGORIES, default=[])
+DIRECTORIES = CONFIG.get_property(Config.K_DIRECTORIES, default=[])
+FILES = CONFIG.get_property(Config.K_FILES, default=[])
+#
 
-def configure(params):
+def configure():
     """configure"""
-    workspace = read_input('Enter workspace directory or skip (empty): ', True)
+    global CONFIG
+    CONFIG = Config()
+    workspace = read_input('Enter workspace directory: ', False)
+    categories = read_input_loop('Enter categories (finish with [dot]) or use default (empty):', 
+        'Enter next category: ')
+    directories = read_input_loop('Enter directories (finish with [dot]) or use default (empty):',
+        'Enter next directory: ')
+    files = read_input_loop('Enter files (finish with [dot]) or  use default (empty):',
+        'Enter next file: ')
     if len(workspace) > 0:
-        CONFIG.set_property(
-            Config.S_DIR, Config.K_WORKSPACE, workspace)
-    CONFIG.save()
+        CONFIG.set_property(Config.K_WORKSPACE, workspace)
+    if len(categories) > 0:
+        CONFIG.set_property(Config.K_CATEGORIES, categories)
+    if len(directories) > 0:
+        CONFIG.set_property(Config.K_DIRECTORIES, directories)
+    if len(files) > 0:
+        files_tuples = []
+        for f in files:
+            resp = read_input('Should <%s> be an executable ? [yes/*]: ' % f)
+            files_tuples.append([f, resp == 'yes'])
+        CONFIG.set_property(Config.FILES, files_tuples)
+    CONFIG.save(CONFIG_FILE)
+    Logger.inf('configuration file saved.')
 
-def make_fs_tree(root):
+def __make_fs_tree(root):
     if not os.path.exists(root):
         Logger.inf('creating missing directory: %s' % root)
         os.makedirs(root)
@@ -62,10 +64,10 @@ def make_fs_tree(root):
             Logger.inf('creating missing directory: %s' % root)
             os.makedirs(os.path.join(root, category))
 
-def create_challenge(params):
+def create_challenge():
     """create_challenge"""
-    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
-    make_fs_tree(root)
+    root = CONFIG.get_property(Config.K_WORKSPACE, 'challenges')
+    __make_fs_tree(root)
     chall_name = read_input('enter challenge name: ')
     chall_name = chall_name.strip().lower()
     chall_name = chall_name.replace(' ', '-')
@@ -79,75 +81,83 @@ def create_challenge(params):
         Logger.err('challenge already exists!')
         return
     os.makedirs(chall_path)
-    for subdir in SUBDIRS:
+    for subdir in DIRECTORIES:
         os.makedirs(os.path.join(chall_path, subdir))
-    for subfile, executable in SUBFILES:
+    for subfile, executable in FILES:
         file_path = os.path.join(chall_path, subfile)
         with open(file_path, 'w') as sf:
             sf.write('\n')
         if executable:
             os.chmod(file_path, stat.S_IRWXU|stat.S_IRGRP|stat.S_IXGRP|stat.S_IROTH|stat.S_IXOTH)
 
-def delete_chall(root, category, target):
-    if target == 'all':
-        challs = os.listdir(os.path.join(root, category))
-    else:
-        challs = [ target ]
-    for chall_name in challs:
-        chall_path = os.path.join(root, category, chall_name)
-        if not os.path.exists(chall_path):
-            Logger.err('challenge does not exists!')
-            continue
-        resp = read_input('do you really want to remove %s ? [yes/*]\n' % chall_name)
+def __confirm_rmtree(path):
+    if os.path.exists(path):
+        resp = read_input('do you really want to remove <%s> ? [yes/*]\n' % path)
         if resp == 'yes':
-            Logger.inf('removing challenge %s...' % chall_name)
-            rmtree(chall_path)
+            Logger.inf('removing challenge <%s> ...' % path)
+            rmtree(path)
             Logger.inf('done!')
+            return True
+    else:
+        Logger.wrn('could not find <%s> ...' % path)
+    return False
 
-def delete_challenge(params):
+def __delete_all_challs_in(root, category):
+    path = os.path.join(root, category)
+    if __confirm_rmtree(path):
+        os.makedirs(path)
+
+def __delete_challs(root, category, target):
+    if category == 'all':
+        if target == 'all':
+            for c in CATEGORIES: 
+                __delete_all_challs_in(c)
+        else:
+            for c in CATEGORIES:
+                path = os.path.join(root, category, target)
+                __confirm_rmtree(path)
+    else:
+        if target == 'all':
+            __delete_all_challs_in(category)
+        else:
+            path = os.path.join(root, category, target)
+            __confirm_rmtree(path)
+
+def delete_challenge():
     """delete_challenge"""
-    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
+    root = CONFIG.get_property(Config.K_WORKSPACE, 'challenges')
     print('[?] > first, select the category where the challenge you want to delete is.')
-    category = select_category(CATEGORIES + ['all (delete all challenges)'])
+    category = select_category(CATEGORIES + ['all (search in all categories)'])
     if category == 'all (delete all challenges)':
-        for c in CATEGORIES:
-            delete_chall(root, c, target)
+        category = 'all'
+        list_challenges()
     else:
-        list_challenges({"from_category": category})
-        target = read_input('now, what is the name of the challenge you want to delete? [<package_name>|all]\n')
-        delete_chall(root, category, target)
+        list_challenges(category)
+    target = read_input('now, what is the name of the challenge you want to delete? [<package_name>|all]: ')
+    __delete_challs(root, category, target)
 
-def list_challenges(params):
+def list_challenges(category=None):
     """list_challenge"""
-    if "from_category" in params:
-        categories_to_print = [params['from_category']]
-    else:
+    root = CONFIG.get_property(Config.K_WORKSPACE, 'challenges')
+    if category is None:
+        category = select_category(CATEGORIES + ['all (delete all challenges)'])
+    if category == 'all (delete all challenges)':
         categories_to_print = CATEGORIES
-    root = CONFIG.get_property(Config.S_DIR, Config.K_WORKSPACE, 'challenges')
+    else:
+        categories_to_print = [category]
     print('\nChallenges:')
     for category in categories_to_print:
         print('\t%s:' % category)
-        for chall in os.listdir(os.path.join(root, category)):
-            if chall[0] != '.':
-                print('\t\t%s' % chall)
-
-def debug_on(params):
-    """debug_on"""
-    Logger.DEBUG = True
-
-def verbose_on(params):
-    """verbose_on"""
-    Logger.VERBOSE = True
-
-def usage(params):
-    """usage"""
-    prog = params['prog']
-    options = params['options']
-    print('\n------------------------ PyChallFactory Help ------------------------')
-    print("""
-python3 %s [options]
-
-options:""" % prog)
-    for opt in options:
-        print('\t%s, %s: %s' % (opt[0], opt[1], opt[2]))
-    print('\n---------------------------------------------------------------------')
+        path = os.path.join(root, category)
+        if os.path.isdir(path):
+            challs = []
+            for entry in os.listdir(path):
+                if os.path.isdir(os.path.join(path, entry)):
+                    challs.append(entry)    
+            for c in challs:
+                if c[0] != '.':
+                    print('\t\t%s' % c)
+            if len(challs) == 0:
+                print('\t\t> no challenge in this directory.')
+        else:
+            print('\t\tmissing directory.')
