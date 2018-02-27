@@ -1,4 +1,4 @@
-# PyChallFactory
+# mkctf
 
 ## Why ?
 
@@ -7,95 +7,31 @@ This tool might help your team to create challenges following a predefined forma
 ##  Origins
 
 This project was, initially, created for managing file for INS'hAck 2017 event.
-You can find challenges and ctf framework [here](https://github.com/HugoDelval/inshack-2017).
+You can find challenges and CTF framework [here](https://github.com/HugoDelval/inshack-2017).
+
+This project was updated for INS'hAck 2018 event.
 
 ## Getting started
 
-```bash
-# [only the first time]
-$> python3 py_chall_factory.py configure 
-# ... follow configuration process ...
-# ------------------------------------------------------------------------------
-# create a new challenge 'test' in bugbounty category
-$> python3 py_chall_factory.py create
-[?] > enter challenge name: test
-[?] > enter challenge points: 100
-Categories:
-    0 - bugbounty
-    1 - crypto
-    2 - forensics
-    3 - misc
-    4 - programming
-    5 - pwn
-    6 - reverse
-    7 - web
-[?] > please select a category using its number: 0
-
-See you soon! :)
-# ------------------------------------------------------------------------------
-# list challenges
-$> python3 py_chall_factory.py list
-Categories:
-    0 - bugbounty
-    1 - crypto
-    2 - forensics
-    3 - misc
-    4 - programming
-    5 - pwn
-    6 - reverse
-    7 - web
-    8 - all (delete all challenges)
-[?] > please select a category using its number: 0
-
-Challenges:
-    bugbounty:
-        test-100
-
-See you soon! :)
-# ------------------------------------------------------------------------------
-# check content of test-100 folder
-$> tree ~/../bugbounty/test-100
-~/../bugbounty/test-100
-├── exploit
-│   └── exploit
-├── flag.txt
-├── public-files
-│   └── description.md
-├── server-files
-├── src
-└── writeup.md
-
-4 directories, 4 files
-# ------------------------------------------------------------------------------
-# finally delete the 'test' challenge
-$> python3 py_chall_factory.py delete
-[?] > first, select the category where the challenge you want to delete is.
-Categories:
-    0 - bugbounty
-    1 - crypto
-    2 - forensics
-    3 - misc
-    4 - programming
-    5 - pwn
-    6 - reverse
-    7 - web
-    8 - all (search in all categories)
-[?] > please select a category using its number: 0
-
-Challenges:
-    bugbounty:
-        test-100
-[?] > now, what is the name of the challenge you want to delete? [<package_name>|all]: test-100
-[?] > do you really want to remove </home/.../bugbounty/test-100> ? [yes/*]
-yes
-
-See you soon! :)
-
+```
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/pdautry/mkctf/master/install.sh)"
 ```
 
-## All you need to know
+You might need to add `~/bin` to your `$PATH` (most of the time you just reload `.profile`)
 
-First, edit and rename `py_chall_factory.pref.dist` to `py_chall_factory.pref` 
+Then lets say you want to create a CTF for INS'hAck 2018:
+
+```
+mkdir inshack-2018
+cd inshack-2018
+mkctf init
+```
+
+Follow the instructions.
+
+You need help: `mkctf -h`
+
+## All you need to know
 
 The default configuration creates the following elements:
 
