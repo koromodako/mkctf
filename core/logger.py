@@ -24,10 +24,10 @@ class Logger(object):
     ## @param      debug    The debug
     ## @param      verbose  The verbose
     ##
-    def __init__(self, debug, verbose):
+    def __init__(self, debug, quiet):
         super().__init__()
-        self.debug = debug
-        self.verbose = verbose
+        self._debug = debug
+        self._quiet = quiet
     ##
     ## @brief      Prints message out using prog_prompt with given indicator
     ##
@@ -36,9 +36,8 @@ class Logger(object):
     ## @param      end        The end
     ##
     def _print(self, indicator, msg, end):
-        line = prog_prompt(indicator)
-        line += msg
-        print(line, end=end)
+        if not self._quiet:
+            print("{}{}".format(prog_prompt(indicator), msg), end=end)
     ##
     ## @brief      { function_description }
     ##
@@ -71,7 +70,7 @@ class Logger(object):
     ## @param      end   The end
     ##
     def debug(self, msg, end='\n'):
-        if self.debug:
+        if self._debug:
             self._print('DEBUG', msg, end)
     ##
     ## @brief      { function_description }
@@ -80,5 +79,4 @@ class Logger(object):
     ## @param      end   The end
     ##
     def info(self, msg, end='\n'):
-        if self.verbose:
-            self._print('INFO', msg, end)
+        self._print('INFO', msg, end)
