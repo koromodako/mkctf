@@ -9,6 +9,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+import os
 import os.path as path
 from core.config import yaml_dump
 # =============================================================================
@@ -27,6 +28,11 @@ def init(args, conf, logger):
     if path.isfile(conf_path):
         logger.info("directory is already a mkctf repository.")
         return False
+
+    for directory in conf['categories']:
+        dir_path = path.join(args.working_dir, directory)
+        if not path.isdir(dir_path):
+            os.mkdir(dir_path)
 
     yaml_dump(conf_path, {
         "working-dir": args.working_dir

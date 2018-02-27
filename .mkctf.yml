@@ -30,10 +30,8 @@ files:
         - deploy
         - exploit/exploit
     config:
-        ctf:
-            - .mkctf.yml
-        challenge:
-            - mkctf.yml
+        ctf: .mkctf.yml
+        challenge: mkctf.yml
 #
 # Flag information
 #
