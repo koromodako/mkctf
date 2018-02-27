@@ -1,37 +1,84 @@
-#!/usr/bin/env python3
-# -!- encoding: utf8 -!-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# file:    logger.py
-# date:    2017-01-13
-# author:  paul dautry
-# purpose:
-#       This is a traditionnal logging class
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#     file: logger.py
+#     date: 2018-02-27
+#   author: paul.dautry
+#  purpose:
+#
+#  license:
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# =============================================================================
+#  IMPORTS
+# =============================================================================
+from core.config import prog_prompt
+# =============================================================================
+#  CLASSES
+# =============================================================================
+##
+## @brief      Class for logger.
+##
 class Logger(object):
-    DEBUG = False
-    VERBOSE = False
-
-    @staticmethod
-    def fat(msg, end='\n'):
-        print('[!] > %s' % msg, end=end)
+    ##
+    ## @brief      Constructs the object.
+    ##
+    ## @param      debug    The debug
+    ## @param      verbose  The verbose
+    ##
+    def __init__(self, debug, verbose):
+        super().__init__()
+        self.debug = debug
+        self.verbose = verbose
+    ##
+    ## @brief      Prints message out using prog_prompt with given indicator
+    ##
+    ## @param      indicator  The indicator
+    ## @param      msg        The message
+    ## @param      end        The end
+    ##
+    def _print(self, indicator, msg, end):
+        line = prog_prompt(indicator)
+        line += msg
+        print(line, end=end)
+    ##
+    ## @brief      { function_description }
+    ##
+    ## @param      msg   The message
+    ## @param      end   The end
+    ##
+    def fatal(self, msg, end='\n'):
+        self._print('FATAL', msg, end)
         exit(1)
-
-    @staticmethod
-    def err(msg, end='\n'):
-        print('[E] > %s' % msg, end=end)
-
-    @staticmethod
-    def wrn(msg, end='\n'):
-        print('[W] > %s' % msg, end=end)
-
-    @staticmethod
-    def dbg(msg, end='\n'):
-        if Logger.DEBUG:
-            print('[D] > %s' % msg, end=end)
-    
-    @staticmethod
-    def inf(msg, end='\n'):
-        if Logger.VERBOSE:
-            print('[I] > %s' % msg, end=end)
-        
-        
+    ##
+    ## @brief      { function_description }
+    ##
+    ## @param      msg   The message
+    ## @param      end   The end
+    ##
+    def error(self, msg, end='\n'):
+        self._print('ERROR', msg, end)
+    ##
+    ## @brief      { function_description }
+    ##
+    ## @param      msg   The message
+    ## @param      end   The end
+    ##
+    def warning(self, msg, end='\n'):
+        self._print('WARNING', msg, end)
+    ##
+    ## @brief      { function_description }
+    ##
+    ## @param      msg   The message
+    ## @param      end   The end
+    ##
+    def debug(self, msg, end='\n'):
+        if self.debug:
+            self._print('DEBUG', msg, end)
+    ##
+    ## @brief      { function_description }
+    ##
+    ## @param      msg   The message
+    ## @param      end   The end
+    ##
+    def info(self, msg, end='\n'):
+        if self.verbose:
+            self._print('INFO', msg, end)

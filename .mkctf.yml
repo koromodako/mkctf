@@ -1,0 +1,42 @@
+#
+# Categories to be created for each CTF
+#
+categories:
+    - bugbounty
+    - crypto
+    - for
+    - misc
+    - prog
+    - pwn
+    - re
+    - web
+#
+# Directories to be created for each challenge
+#
+directories:
+    - server-files
+    - public-files
+    - exploit
+    - src
+#
+# Files to be created for each challenge
+#
+files:
+    txt:
+        - writeup.md
+        - public-files/description.md
+    bin:
+        - build
+        - deploy
+        - exploit/exploit
+    config:
+        ctf:
+            - .mkctf.yml
+        challenge:
+            - mkctf.yml
+#
+# Flag information
+#
+flag:
+    prefix: 'INSA{'
+    suffix: '}'
