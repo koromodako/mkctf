@@ -28,10 +28,11 @@ files:
     bin:
         - build
         - deploy
+        - Dockerfile
         - exploit/exploit
     config:
-        ctf: .mkctf.yml
         challenge: mkctf.yml
+        repository: .mkctf.yml
 #
 # Flag information
 #

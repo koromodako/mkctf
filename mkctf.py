@@ -15,6 +15,7 @@ import os
 import signal
 import argparse
 import traceback
+import os.path as path
 from core.logger import Logger
 from core.config import load_config
 from core.command.init import init
@@ -35,6 +36,16 @@ def sigint_handler(*args):
     print()
     exit(0)
 ##
+## @brief      { function_description }
+##
+def resolve_script_dir(fpath):
+    while path.islink(fpath):
+        fpath = os.readlink(fpath)
+        if fpath.startswith('..'):
+            print('script path impossible to resolve...')
+            exit(2)
+    return path.dirname(fpath)
+##
 ## @brief      Entry point
 ##
 def main():
@@ -47,6 +58,8 @@ def main():
                         help="decrease program verbosity")
     parser.add_argument('-d', '--debug', action='store_true',
                         help="output debug messages")
+    parser.add_argument('--no-color', action='store_true',
+                        help="disable colored output")
     parser.add_argument('-w', '--working-dir', default=os.getcwd(),
                         help="")
 
@@ -88,9 +101,10 @@ def main():
 
     args = parser.parse_args()
 
-    args.glob_conf_path = os.path.join(os.path.dirname(__file__), '.mkctf.yml')
 
-    logger = Logger(args.debug, args.quiet)
+    args.glob_conf_path = path.join(resolve_script_dir(__file__), '.mkctf.glob.yml')
+
+    logger = Logger(args.debug, args.quiet, args.no_color)
 
     config = load_config(args)
 
@@ -98,11 +112,10 @@ def main():
 
     try:
         code = 0 if args.func(args, config, logger) else 1
-        print('\nSee you soon! :)\n')
     except Exception as e:
         code = 42
-        print('\nOuuuuupss.....:(\n')
         traceback.print_exc()
+        logger.fatal('Ouuuuupss.....:(')
 
     exit(code)
 # =============================================================================
