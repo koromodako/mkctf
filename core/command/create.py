@@ -10,4 +10,5 @@
 #  FUNCTIONS
 # =============================================================================
 def create(args, repo, logger):
-    repo.create_chall()
+    return repo.create_chall()
+
