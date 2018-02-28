@@ -18,6 +18,7 @@ import traceback
 import os.path as path
 from core.logger import Logger
 from core.config import load_config
+from core.repository import Repository
 from core.command.init import init
 from core.command.show import show
 from core.command.create import create
@@ -106,12 +107,13 @@ def main():
 
     logger = Logger(args.debug, args.quiet, args.no_color)
 
-    config = load_config(args)
+    glob_conf = load_config(args)
 
-    logger.debug(config)
+    logger.debug(glob_conf)
+    repo = Repository(args, logger, glob_conf)
 
     try:
-        code = 0 if args.func(args, config, logger) else 1
+        code = 0 if args.func(args, repo, logger) else 1
     except Exception as e:
         code = 42
         traceback.print_exc()
