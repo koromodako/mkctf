@@ -13,6 +13,6 @@ from core.cli import CLI
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def delete(args, conf, logger):
+def delete(args, repo, logger):
     cli = CLI(logger)
     raise NotImplementedError('implement me!')

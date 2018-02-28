@@ -13,6 +13,6 @@ from core.cli import CLI
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def configure(args, conf, logger):
+def configure(args, repo, logger):
     cli = CLI(logger)
     raise NotImplementedError('implement me!')

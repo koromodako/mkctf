@@ -13,6 +13,5 @@ from core.cli import CLI
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def update(args, conf, logger):
-    cli = CLI(logger)
+def update(args, repo, logger):
     raise NotImplementedError('implement me!')

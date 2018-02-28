@@ -25,16 +25,16 @@ class Challenge(object):
     ##
     ## @brief      Constructs the object.
     ##
-    def __init__(self, path, ctf_conf, logger):
+    def __init__(self, path, repo_conf, logger):
         super().__init__()
         self.path = path
         self.logger = logger
-        self.files_bin = ctf_conf['files']['bin']
-        self.files_txt = ctf_conf['files']['txt']
-        self.conf_file = ctf_conf['files']['config']['challenge']
-        self.directories = ctf_conf['directories']
-        self.flag_prefix = ctf_conf['flag']['prefix']
-        self.flag_suffix = ctf_conf['flag']['suffix']
+        self.files_bin = repo_conf['files']['bin']
+        self.files_txt = repo_conf['files']['txt']
+        self.conf_file = repo_conf['files']['config']['challenge']
+        self.directories = repo_conf['directories']
+        self.flag_prefix = repo_conf['flag']['prefix']
+        self.flag_suffix = repo_conf['flag']['suffix']
     ##
     ## @brief      Creates a dir.
     ##

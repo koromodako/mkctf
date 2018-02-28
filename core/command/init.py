@@ -9,21 +9,17 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-
-from core.repository import Repository
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 ##
 ## @brief      { function_description }
 ##
-## @param      args    The arguments
-## @param      conf    The conf
-## @param      logger  The logger
+## @param      args         The arguments
+## @param      glob_conf    The global conf
+## @param      logger       The logger
 ##
-def init(args, conf, logger):
-    repo = Repository(args.working_dir, conf, logger)
-
+def init(args, repo, logger):
     if repo.exists():
         logger.info("already a mkctf repository.")
         return False
