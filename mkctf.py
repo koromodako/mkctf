@@ -72,6 +72,8 @@ def main():
 
     show_parser = subparsers.add_parser('show',
                                         help="show one or many challenges.")
+    show_parser.add_argument('--category',
+                             help="category name.")
     show_parser.add_argument('-c', '--challenge',
                              help="challenge name.")
     show_parser.set_defaults(func=show)
