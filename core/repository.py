@@ -11,6 +11,7 @@
 # =============================================================================
 import os
 import os.path as path
+from shutil import rmtree
 from slugify import slugify
 from core.cli import CLI
 from core.config import yaml_load, yaml_dump
@@ -109,6 +110,10 @@ class Repository(object):
     ## @param      challenge  The challenge
     ##
     def delete_chall(self, category, challenge):
-        raise NotImplementedError('implement me!')
+        chall_path = path.join(self.args.working_dir, category, challenge)
+        if path.isdir(chall_path):
+            if self.cli.confirm("do you really want to remove "
+                                "{}/{} ?".format(category, challenge)):
+                rmtree(chall_path)
 
 
