@@ -14,5 +14,4 @@ from core.cli import CLI
 #  FUNCTIONS
 # =============================================================================
 def delete(args, repo, logger):
-    cli = CLI(logger)
-    raise NotImplementedError('implement me!')
+    return repo.delete_chall(args.category, args.challenge)

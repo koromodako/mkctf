@@ -22,7 +22,6 @@ from core.repository import Repository
 from core.command.init import init
 from core.command.show import show
 from core.command.create import create
-from core.command.update import update
 from core.command.delete import delete
 from core.command.configure import configure
 # =============================================================================
@@ -73,8 +72,6 @@ def main():
 
     show_parser = subparsers.add_parser('show',
                                         help="show one or many challenges.")
-    show_parser.add_argument('-g', '--category',
-                             help="challenge category.")
     show_parser.add_argument('-c', '--challenge',
                              help="challenge name.")
     show_parser.set_defaults(func=show)
@@ -83,21 +80,16 @@ def main():
                                           help="create a challenge.")
     create_parser.set_defaults(func=create)
 
-    update_parser = subparsers.add_parser('update',
-                                          help="update a challenge.")
-    update_parser.add_argument('-c', '--challenge',
-                               help="challenge name.")
-    update_parser.set_defaults(func=update)
-
     delete_parser = subparsers.add_parser('delete',
                                           help="delete a challenge.")
-    delete_parser.add_argument('-c', '--challenge',
-                               help="challenge name.")
+    delete_parser.add_argument('challenge', help="challenge name.")
     delete_parser.set_defaults(func=delete)
 
     configure_parser = subparsers.add_parser('configure',
-                                             help="edit mkctf global "
+                                             help="edit ctf or challenge "
                                                   "configuration.")
+    configure_parser.add_argument('-c', '--challenge',
+                                  help="challenge name.")
     configure_parser.set_defaults(func=configure)
 
     args = parser.parse_args()
