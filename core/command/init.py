@@ -9,9 +9,8 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-import os
-import os.path as path
-from core.config import yaml_dump
+
+from core.repository import Repository
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -23,18 +22,12 @@ from core.config import yaml_dump
 ## @param      logger  The logger
 ##
 def init(args, conf, logger):
-    conf_path = path.join(args.working_dir, conf['files']['config']['ctf'])
+    repo = Repository(args.working_dir, conf, logger)
 
-    if path.isfile(conf_path):
-        logger.info("directory is already a mkctf repository.")
+    if repo.exists():
+        logger.info("already a mkctf repository.")
         return False
 
-    for directory in conf['categories']:
-        dir_path = path.join(args.working_dir, directory)
-        if not path.isdir(dir_path):
-            os.mkdir(dir_path)
+    repo.init()
 
-    yaml_dump(conf_path, {
-        "working-dir": args.working_dir
-    })
     return True
