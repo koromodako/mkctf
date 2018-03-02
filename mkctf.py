@@ -29,7 +29,7 @@ from core.command.enable import enable
 from core.command.export import export
 from core.command.disable import disable
 from core.command.configure import configure
-from core.command.update_flag import update_flag
+from core.command.renew_flag import renew_flag
 from core.object.repository import Repository
 # =============================================================================
 #  FUNCTIONS
@@ -114,16 +114,18 @@ def parse_args():
                           help="export disabled challenges too.")
     export_p.set_defaults(func=export)
     # ---- update-flag
-    update_flag_p = sps.add_parser('update-flag',
-                                   help="updates flags. You might want to "
-                                        "build and deploy.")
-    update_flag_p.add_argument('-c', '--category', help="challenge's category.")
-    update_flag_p.add_argument('-s', '--slug', help="challenge's slug.")
-    update_flag_p.set_defaults(func=update_flag)
+    renew_flag_p = sps.add_parser('renew-flag',
+                                   help="renews flags. You might want to "
+                                        "build and deploy/export after that.")
+    renew_flag_p.add_argument('-c', '--category', help="challenge's category.")
+    renew_flag_p.add_argument('-s', '--slug', help="challenge's slug.")
+    renew_flag_p.add_argument('--size', type=int, default=32,
+                              help="flag's random string size (in bytes).")
+    renew_flag_p.set_defaults(func=renew_flag)
     # ---- build
     build_p = sps.add_parser('build',
                              help="builds challenges. After building "
-                                  "challenges you might want to deploy.")
+                                  "challenges you might want to deploy/export.")
     build_p.add_argument('-c', '--category', help="challenge's category.")
     build_p.add_argument('-s', '--slug', help="challenge's slug.")
     build_p.set_defaults(func=build)
