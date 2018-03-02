@@ -28,10 +28,9 @@ files:
         - Dockerfile
         - writeup.md
         - public-files/description.md
-    bin:
-        - build
-        - deploy
-        - exploit/exploit
+    build: build
+    deploy: deploy
+    status: exploit/exploit
     config:
         challenge: .mkctf.yml
         repository: .repo.mkctf.yml

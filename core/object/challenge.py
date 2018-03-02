@@ -133,7 +133,13 @@ class Challenge(Configurable):
                 self.logger.warning("failed to create file: "
                                     "{}".format(file))
 
-        for file in self.repo_conf['files']['bin']:
+        bin_files = [
+            self.repo_conf['files']['build'],
+            self.repo_conf['files']['deploy'],
+            self.repo_conf['files']['status']
+        ]
+
+        for file in bin_files:
             if not self.__create_file(file, executable=True):
                 self.logger.warning("failed to create file: "
                                     "{}".format(file))

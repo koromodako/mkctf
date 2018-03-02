@@ -46,8 +46,10 @@ class Repository(Configurable):
         def_pub_dirs = None
         def_priv_dirs = None
         def_txt_files = None
-        def_bin_files = None
         def_chall_file = None
+        def_build_file = None
+        def_deploy_file = None
+        def_status_file = None
         def_flag_prefix = None
         def_flag_suffix = None
 
@@ -57,8 +59,10 @@ class Repository(Configurable):
             def_pub_dirs = prev_conf['directories']['public']
             def_priv_dirs = prev_conf['directories']['private']
             def_txt_files = prev_conf['files']['txt']
-            def_bin_files = prev_conf['files']['bin']
             def_chall_file = prev_conf['files']['config']['challenge']
+            def_build_file = prev_conf['files']['build']
+            def_deploy_file = prev_conf['files']['deploy']
+            def_status_file = prev_conf['files']['status']
             def_flag_prefix = prev_conf['flag']['prefix']
             def_flag_suffix = prev_conf['flag']['suffix']
 
@@ -76,11 +80,14 @@ class Repository(Configurable):
         txt_files = self.cli.choose_many("select text files:",
                                          def_txt_files,
                                          default=def_txt_files)
-        bin_files = self.cli.choose_many("select binary files:",
-                                         def_bin_files,
-                                         default=def_bin_files)
-        challenge_file = self.cli.readline("enter challenge file:",
-                                           default=def_chall_file)
+        chall_file = self.cli.readline("enter challenge file name:",
+                                       default=def_chall_file)
+        build_file = self.cli.readline("enter build file name:",
+                                       default=def_build_file)
+        deploy_file = self.cli.readline("enter deploy file name:",
+                                        default=def_deploy_file)
+        status_file = self.cli.readline("enter status file name:",
+                                        default=def_status_file)
         flag_prefix = self.cli.readline("enter flag prefix:",
                                         default=def_flag_prefix)
         flag_suffix = self.cli.readline("enter flag suffix:",
@@ -95,7 +102,9 @@ class Repository(Configurable):
             },
             'files': {
                 'txt': txt_files,
-                'bin': bin_files,
+                'build': build_file,
+                'deploy': deploy_file,
+                'status': status_file,
                 'config': {
                     'challenge': challenge_file
                 }
