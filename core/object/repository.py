@@ -41,19 +41,19 @@ class Repository(Configurable):
     ## @param      prev_conf  The repo conf
     ##
     def __make_repo_conf(self, prev_conf=None):
-        def_name = None
-        def_categories = None
-        def_pub_dirs = None
-        def_priv_dirs = None
-        def_txt_files = None
-        def_chall_file = None
-        def_build_file = None
-        def_deploy_file = None
-        def_status_file = None
-        def_flag_prefix = None
-        def_flag_suffix = None
-
-        if prev_conf is not None:
+        if prev_conf is None:
+            def_name = None
+            def_categories = None
+            def_pub_dirs = None
+            def_priv_dirs = None
+            def_txt_files = None
+            def_chall_file = None
+            def_build_file = None
+            def_deploy_file = None
+            def_status_file = None
+            def_flag_prefix = None
+            def_flag_suffix = None
+        else:
             def_name = prev_conf.get('name')
             def_categories = prev_conf['categories']
             def_pub_dirs = prev_conf['directories']['public']
@@ -121,19 +121,22 @@ class Repository(Configurable):
     def __make_chall_conf(self, prev_conf=None):
         repo_conf = self.get_conf()
 
-        def_name = None
-        enabled = False
-        def_static = None
-        def_points = None
-        def_category = None
-        flag = None
-        if prev_conf is not None:
-            def_name = prev_conf['name']
+        if prev_conf is None:
+            flag = Challenge.make_flag()
+            enabled = False
+            parameters = {}
+            def_name = None
+            def_static = None
+            def_points = None
+            def_category = None
+        else:
+            flag = prev_conf['flag']
             enabled = prev_conf['enabled']
+            parameters = prev_conf['parameters']
+            def_name = prev_conf['name']
             def_points = prev_conf['points']
             def_category = prev_conf['category']
             def_standalone = prev_conf['standalone']
-            flag = prev_conf['flag']
 
         name = self.cli.readline("enter challenge name:",
                                  default=def_name)
@@ -154,7 +157,7 @@ class Repository(Configurable):
             'points': points,
             'enabled': enabled,
             'category': category,
-            'parameters': {},
+            'parameters': parameters,
             'standalone': standalone
         }
     ##
