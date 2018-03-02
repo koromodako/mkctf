@@ -14,10 +14,12 @@ categories:
 # Directories to be created for each challenge
 #
 directories:
-    - server-files
-    - public-files
-    - exploit
-    - src
+    public:
+        - public-files
+    private:
+        - server-files
+        - exploit
+        - src
 #
 # Files to be created for each challenge
 #

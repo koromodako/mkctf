@@ -12,6 +12,7 @@
 import os
 import os.path as path
 from stat import S_IRWXU
+from core.wrapper import lazy
 from core.object.configurable import Configurable
 # =============================================================================
 #  CLASSES
@@ -71,6 +72,41 @@ class Challenge(Configurable):
 
         return False
     ##
+    ## @brief      { function_description }
+    ##
+    @lazy('__category')
+    def category(self):
+        return path.split(path.split(self.working_dir())[0])[-1]
+    ##
+    ## @brief      { function_description }
+    ##
+    @lazy('__slug')
+    def slug(self):
+        return path.split(self.working_dir())[-1]
+    ##
+    ## @brief      Determines if static.
+    ##
+    ## @return     True if static, False otherwise.
+    ##
+    def is_static(self):
+        return self.get_conf('static')
+    ##
+    ## @brief      Determines if static.
+    ##
+    ## @return     True if static, False otherwise.
+    ##
+    def enabled(self):
+        return self.get_conf('enabled')
+    ##
+    ## @brief      { function_description }
+    ##
+    ## @param      enabled  The enabled
+    ##
+    def enable(self, enabled):
+        conf = self.get_conf()
+        conf['enabled'] = enabled
+        self.set_conf(conf)
+    ##
     ## @brief      Creates a new challenge
     ##
     ## @param      self  The object
@@ -84,7 +120,10 @@ class Challenge(Configurable):
         except:
             return False
 
-        for directory in self.repo_conf['directories']:
+        directories = self.repo_conf['directories']['public'][::]
+        directories += self.repo_conf['directories']['private']
+
+        for directory in directories:
             if not self.__create_dir(directory):
                 self.logger.warning("failed to create directory: "
                                     "{}".format(directory))
@@ -100,3 +139,12 @@ class Challenge(Configurable):
                                     "{}".format(file))
 
         return True
+    ##
+    ## @brief      { function_description }
+    ##
+    def exportable(self):
+        wd = self.working_dir()
+        for directory in self.repo_conf['directories']['public']:
+            dir_path = path.join(wd, directory)
+            for de in self._scandir(dir_path):
+                yield de

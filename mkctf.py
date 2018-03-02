@@ -22,6 +22,9 @@ from core.command.init import init
 from core.command.show import show
 from core.command.create import create
 from core.command.delete import delete
+from core.command.enable import enable
+from core.command.export import export
+from core.command.disable import disable
 from core.command.configure import configure
 from core.object.repository import Repository
 # =============================================================================
@@ -33,6 +36,7 @@ from core.object.repository import Repository
 ## @param      args  The arguments
 ##
 def sigint_handler(*args):
+    print("\nOuch... that's harsh you know... :/")
     exit(1)
 ##
 ## @brief      { function_description }
@@ -49,53 +53,64 @@ def resolve_script_dir(logger, fpath):
 ## @brief      Parses commandline arguments
 ##
 def parse_args():
-    parser = argparse.ArgumentParser(add_help=True,
+    main_p = argparse.ArgumentParser(add_help=True,
         description="Manage CTF challenges repository.")
-
-    parser.add_argument('-q', '--quiet', action='store_true',
+    main_p.add_argument('-q', '--quiet', action='store_true',
                         help="decrease program verbosity")
-    parser.add_argument('-d', '--debug', action='store_true',
+    main_p.add_argument('-d', '--debug', action='store_true',
                         help="output debug messages")
-    parser.add_argument('--no-color', action='store_true',
+    main_p.add_argument('--no-color', action='store_true',
                         help="disable colored output")
-    parser.add_argument('-w', '--working-dir', default=os.getcwd(),
+    main_p.add_argument('-w', '--working-dir', default=os.getcwd(),
                         help="")
+    # -- add subparsers
+    sps = main_p.add_subparsers(dest='command', metavar='COMMAND')
+    sps.required = True
+    # ---- init
+    init_p = sps.add_parser('init', help="initializes mkctf repository.")
+    init_p.set_defaults(func=init)
+    # ---- show
+    show_p = sps.add_parser('show', help="shows challenges.")
+    show_p.add_argument('--category', help="challenge's category.")
+    show_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    show_p.set_defaults(func=show)
+    # ---- create
+    create_p = sps.add_parser('create', help="creates a challenge.")
+    create_p.set_defaults(func=create)
+    # ---- delete
+    delete_p = sps.add_parser('delete', help="deletes a challenge.")
+    delete_p.add_argument('category', help="challenge's category.")
+    delete_p.add_argument('chall_slug', help="challenge's slug.")
+    delete_p.set_defaults(func=delete)
+    # ---- configure
+    configure_p = sps.add_parser('configure', help="edits repository's config "
+                                                   "or challenge's config.")
+    configure_p.add_argument('--category', help="challenge's category.")
+    configure_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    configure_p.set_defaults(func=configure)
+    # ---- enable
+    enable_p = sps.add_parser('enable', help="enables a challenge.")
+    enable_p.add_argument('category', help="challenge's category.")
+    enable_p.add_argument('chall_slug', help="challenge's slug.")
+    enable_p.set_defaults(func=enable)
+    # ---- disable
+    disable_p = sps.add_parser('disable', help="disables a challenge.")
+    disable_p.add_argument('category', help="challenge's category.")
+    disable_p.add_argument('chall_slug', help="challenge's slug.")
+    disable_p.set_defaults(func=disable)
+    # ---- export
+    export_p = sps.add_parser('export', help="exports enabled static "
+                                             "challenges.")
+    export_p.add_argument('export_dir', help="folder where archives must be "
+                                             "written. If the folder does not "
+                                             "exist it will be created.")
+    export_p.add_argument('--category', help="challenge's category.")
+    export_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    export_p.add_argument('--include-disabled', action='store_true',
+                          help="export disabled challenges too.")
+    export_p.set_defaults(func=export)
 
-    subparsers = parser.add_subparsers(dest='command', metavar='COMMAND')
-    subparsers.required = True
-    # -- init
-    init_parser = subparsers.add_parser('init',
-                                        help="initializes mkctf repository.")
-    init_parser.set_defaults(func=init)
-    # -- show
-    show_parser = subparsers.add_parser('show',
-                                        help="shows challenges.")
-    show_parser.add_argument('--category',
-                             help="challenge's category.")
-    show_parser.add_argument('-c', '--chall-slug',
-                             help="challenge's slug.")
-    show_parser.set_defaults(func=show)
-    # -- create
-    create_parser = subparsers.add_parser('create',
-                                          help="creates a challenge.")
-    create_parser.set_defaults(func=create)
-    # -- delete
-    delete_parser = subparsers.add_parser('delete',
-                                          help="deletes a challenge.")
-    delete_parser.add_argument('category', help="challenge's category.")
-    delete_parser.add_argument('chall_slug', help="challenge's slug.")
-    delete_parser.set_defaults(func=delete)
-    # -- configure
-    configure_parser = subparsers.add_parser('configure',
-                                             help="edits repository's config "
-                                                  "or challenge's config.")
-    configure_parser.add_argument('--category',
-                                  help="challenge's category.")
-    configure_parser.add_argument('-c', '--chall-slug',
-                                  help="challenge's slug.")
-    configure_parser.set_defaults(func=configure)
-
-    return parser.parse_args()
+    return main_p.parse_args()
 ##
 ## @brief      Entry point
 ##
