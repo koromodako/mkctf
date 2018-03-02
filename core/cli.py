@@ -55,8 +55,9 @@ class CLI(object):
 
         if default is not None:
 
-            if expect_digit and not isinstance(default, int):
-                raise ValueError("default argument must be an integer.")
+            if expect_digit:
+                if not isinstance(default, int):
+                    raise ValueError("default argument must be an integer.")
 
             elif not isinstance(default, str):
                 raise ValueError("default argument must be an string.")
@@ -136,10 +137,12 @@ class CLI(object):
                    allow_custom=False):
         selection = default
 
-        if not isinstance(choices, list) or len(choices) < 2:
-            raise ValueError("choices must be a list with at least 2 elements.")
+        if not isinstance(choices, list): # do not check number of elements
+            raise ValueError("choices must be a list")
 
-        if default is not None and not default in choices:
+        has_default = default is not None
+
+        if has_default and not default in choices:
             raise ValueError("default value must be one of choices.")
 
         print(self.prompt(prompt))
@@ -147,22 +150,23 @@ class CLI(object):
         k = 0
         for choice in choices:
 
-            is_default = ''
+            default_str = ''
             if choice == default:
-                is_default = ' [default]'
+                default_str = ' [default]'
 
-            print("\t{:02d}: {}{}".format(k, choices[k], is_default))
-            k += 1
-
-        if default is not None:
-            print("\t{:02d}: default value".format(k))
+            print("\t{:02d}: {}{}".format(k, choices[k], default_str))
             k += 1
 
         if allow_custom:
             print("\t{:02d}: custom value".format(k))
 
         while True:
-            choice = self.readline("enter a number: ", expect_digit=True)
+            choice = self.readline("enter a number: ",
+                                   allow_empty=has_default,
+                                   expect_digit=True)
+
+            if choice is None:
+                return default
 
             if choice >= 0 or choice <= k:
                 break
@@ -171,8 +175,6 @@ class CLI(object):
 
         if allow_custom and choice == k:
             selection = self.readline("enter custom value: ")
-        elif default is not None and choice == (k-1):
-            pass
         else:
             selection = choices[choice]
 
@@ -196,11 +198,11 @@ class CLI(object):
                     allow_custom=False,
                     allow_multiple=False):
         if min_choices is not None:
-            if min_choices < 2:
+            if min_choices < 1:
                 raise ValueError("min_choices argument must be strictly "
                                  "greater than 1 if not None.")
         else:
-            min_choices = 2
+            min_choices = 1
 
         if max_choices is not None and max_choices < min_choices:
             raise ValueError("max_choices argument must be greater than {} if "
@@ -211,9 +213,13 @@ class CLI(object):
                 raise ValueError("default argument must be a list.")
 
             length = len(default)
-            if length < min_choices and length > max_choices:
-                raise ValueError("default list must match min/max "
-                                 "requirements.")
+            if length < min_choices:
+                raise ValueError("default list must respect min_choices value.")
+
+            if max_choices is not None and length > max_choices:
+                raise ValueError("default list must respect max_choices value.")
+
+        print(self.prompt(prompt))
 
         if default is not None:
             print("default selection: {}".format(default))

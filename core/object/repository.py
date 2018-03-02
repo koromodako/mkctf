@@ -66,6 +66,7 @@ class Repository(Configurable):
             def_flag_prefix = prev_conf['flag']['prefix']
             def_flag_suffix = prev_conf['flag']['suffix']
 
+
         name = self.cli.readline("enter repository name:",
                                  default=def_name)
         categories = self.cli.choose_many("select categories:",
@@ -106,7 +107,7 @@ class Repository(Configurable):
                 'deploy': deploy_file,
                 'status': status_file,
                 'config': {
-                    'challenge': challenge_file
+                    'challenge': chall_file
                 }
             },
             'flag': {
@@ -129,33 +130,32 @@ class Repository(Configurable):
         if prev_conf is not None:
             def_name = prev_conf['name']
             enabled = prev_conf['enabled']
-            def_static = prev_conf['static']
             def_points = prev_conf['points']
             def_category = prev_conf['category']
+            def_standalone = prev_conf['standalone']
             flag = prev_conf['flag']
 
         name = self.cli.readline("enter challenge name:",
                                  default=def_name)
 
-        if flag is None or not self.cli.confirm("do you want to keep the old "
-                                                "flag ({})?".format(flag)):
-            flag = Challenge.make_flag(repo_conf)
-
-        static = self.cli.confirm("is it a static challenge?")
         points = self.cli.readline("enter number of points:",
                                    default=def_points,
                                    expect_digit=True)
         category = self.cli.choose_one("select a category:",
-                                       choices=repo_conf['categories'])
+                                       choices=repo_conf['categories'],
+                                       default=def_category)
+        standalone = self.cli.confirm("is it a standalone challenge?",
+                                      default=def_standalone)
+
         return {
             'name': name,
             'slug': slugify(name),
             'flag': flag,
-            'enabled': enabled,
-            'static': static,
             'points': points,
+            'enabled': enabled,
             'category': category,
-            'parameters': {}
+            'parameters': {},
+            'standalone': standalone
         }
     ##
     ## @brief      { function_description }
@@ -248,7 +248,7 @@ class Repository(Configurable):
     ## @param      slug      The slug
     ##
     def configure_chall(self, category, slug):
-        chall = self.find_chall(category, challenge)
+        chall = self.find_chall(category, slug)
         if chall is None:
             return False
 

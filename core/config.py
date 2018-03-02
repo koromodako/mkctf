@@ -10,7 +10,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-import pyaml
+from ruamel import yaml
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -24,7 +24,7 @@ def prog_prompt(indicator):
 ##
 def yaml_load(fpath):
     with open(fpath, 'r') as f:
-        return pyaml.yaml.load(f)
+        return yaml.safe_load(f)
 ##
 ## @brief      Dumps a configuration to a YAML file
 ##
@@ -33,7 +33,12 @@ def yaml_load(fpath):
 ##
 def yaml_dump(fpath, conf):
     with open(fpath, 'w') as f:
-        pyaml.yaml.dump(conf, f)
+        f.write("""#
+# This file was generated using mkctf utility. Do not edit it manually unless
+# you know exactly what you're doing. #PEBCAK
+#
+""")
+        yaml.dump(conf, f)
 ##
 ## @brief      Loads a configuration.
 ##
