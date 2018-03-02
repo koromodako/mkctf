@@ -36,6 +36,7 @@ def __print_chall(logger, challenge, no_color):
         chall_entry = colored(chall_entry, color, attrs=['bold'])
         del conf['enabled']
 
+    del conf['category']
     del conf['static']
     del conf['slug']
 
