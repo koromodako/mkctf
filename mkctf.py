@@ -128,17 +128,23 @@ def parse_args():
                                   "challenges you might want to deploy/export.")
     build_p.add_argument('-c', '--category', help="challenge's category.")
     build_p.add_argument('-s', '--slug', help="challenge's slug.")
+    build_p.add_argument('-t', '--timeout', type=int, default=4,
+                         help="override default timeout for subprocesses.")
     build_p.set_defaults(func=build)
     # ---- deploy
     deploy_p = sps.add_parser('deploy', help="deploy challenges.")
     deploy_p.add_argument('-c', '--category', help="challenge's category.")
     deploy_p.add_argument('-s', '--slug', help="challenge's slug.")
+    deploy_p.add_argument('-t', '--timeout', type=int, default=4,
+                          help="override default timeout for subprocesses.")
     deploy_p.set_defaults(func=deploy)
     # ---- status
     status_p = sps.add_parser('status', help="check deployed challenge's "
                                              "status using exploit/exploit.")
     status_p.add_argument('-c', '--category', help="challenge's category.")
     status_p.add_argument('-s', '--slug', help="challenge's slug.")
+    status_p.add_argument('-t', '--timeout', type=int, default=4,
+                          help="override default timeout for subprocesses.")
     status_p.set_defaults(func=status)
 
     return main_p.parse_args()

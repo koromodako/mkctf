@@ -85,7 +85,7 @@ the following rules:
 + a _script_ **cannot take mandatory arguments**.
 + a _script_ must have a **return code of 0** when it succeeds, _other
   behavior will be considered as a failure_.
-+ a _script_ **must complete its execution within 4 seconds**.
++ a _script_ **execution time must be lesser than a timeout** which defaults to 4 seconds. `--timeout` option enable you to override this value.
 
 ### Challenge
 

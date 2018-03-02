@@ -14,7 +14,7 @@ from termcolor import colored
 #  FUNCTIONS
 # =============================================================================
 def status(args, repo, logger):
-    no_color = args.no_color
+    no_color, timeout = args.no_color, args.timeout
     category, slug = args.category, args.slug
 
     chall_sep = '=' * 80
@@ -34,7 +34,7 @@ def status(args, repo, logger):
             if slug is None or slug == challenge.slug():
                 try:
                     exception = None
-                    (status, code, stdout, stderr) = challenge.status()
+                    (status, code, stdout, stderr) = challenge.status(timeout)
 
                     if status is None and code is None:
                         s_str = 'TIMED OUT'

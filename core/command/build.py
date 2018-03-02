@@ -18,7 +18,7 @@ def build(args, repo, logger):
     if not repo.cli.confirm('do you really want to build?'):
         return True
 
-    no_color = args.no_color
+    no_color, timeout = args.no_color, args.timeout
     category, slug = args.category, args.slug
 
     chall_sep = '=' * 80
@@ -38,7 +38,7 @@ def build(args, repo, logger):
             if slug is None or slug == challenge.slug():
                 try:
                     exception = None
-                    (status, code, stdout, stderr) = challenge.build()
+                    (status, code, stdout, stderr) = challenge.build(timeout)
 
                     if status is None and code is None:
                         s_str = 'TIMED OUT'
