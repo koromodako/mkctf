@@ -75,11 +75,11 @@ class Challenge(Configurable):
     ##
     ## @brief      { function_description }
     ##
-    def __run(self, args):
+    def __run(self, args, timeout):
         proc = Popen(args, stdout=PIPE, stderr=PIPE, cwd=self.working_dir())
 
         try:
-            stdout, stderr = proc.communicate(timeout=4)
+            stdout, stderr = proc.communicate(timeout=timeout)
         except TimeoutExpired as e:
             proc.terminate()
             return (None, None, e.stdout, e.stderr)
@@ -183,26 +183,26 @@ class Challenge(Configurable):
     ##
     ## @brief      { function_description }
     ##
-    def build(self):
+    def build(self, timeout=4):
         script = self.repo_conf['files']['build']
         if not '/' in script:
             script = './{}'.format(script)
-        return self.__run([script])
+        return self.__run([script], timeout)
     ##
     ## @brief      { function_description }
     ##
-    def deploy(self):
+    def deploy(self, timeout=4):
         script = self.repo_conf['files']['deploy']
         if not '/' in script:
             script = './{}'.format(script)
-        return self.__run([script])
+        return self.__run([script], timeout)
     ##
     ## @brief      { function_description }
     ##
-    def status(self):
+    def status(self, timeout=4):
         script = self.repo_conf['files']['status']
         if not '/' in script:
             script = './{}'.format(script)
-        return self.__run([script])
+        return self.__run([script], timeout)
 
 
