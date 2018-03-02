@@ -10,33 +10,39 @@
 #  IMPORTS
 # =============================================================================
 import os
-import pprint
 import os.path as path
 from stat import S_IRWXU
-from core.cli import CLI
-from core.config import yaml_load, yaml_dump
+from core.object.configurable import Configurable
 # =============================================================================
 #  CLASSES
 # =============================================================================
 ##
 ## @brief      Class for challenge.
 ##
-class Challenge(object):
+class Challenge(Configurable):
+    ##
+    ## @brief      { function_description }
+    ##
+    ## @param      size       The size
+    ##
+    @staticmethod
+    def make_flag(repo_conf, size=32):
+        return "{}{}{}".format(repo_conf['flag']['prefix'],
+                               os.urandom(size).hex(),
+                               repo_conf['flag']['suffix'])
     ##
     ## @brief      Constructs the object.
     ##
-    def __init__(self, path, repo_conf, logger):
-        super().__init__()
-        self.path = path
+    def __init__(self, logger, chall_conf_path, repo_conf):
+        super().__init__(logger, chall_conf_path)
         self.repo_conf = repo_conf
-        self.logger = logger
     ##
     ## @brief      Creates a dir.
     ##
     ## @param      directory  The directory
     ##
     def __create_dir(self, directory):
-        dir_path = path.join(self.path, directory)
+        dir_path = path.join(self.working_dir(), directory)
 
         if not path.isdir(dir_path):
             os.mkdir(dir_path)
@@ -50,7 +56,7 @@ class Challenge(object):
     ## @param      directory  The directory
     ##
     def __create_file(self, file, executable=False):
-        file_path = path.join(self.path, file)
+        file_path = path.join(self.working_dir(), file)
 
         os.makedirs(path.dirname(file_path), exist_ok=True)
 
@@ -65,67 +71,18 @@ class Challenge(object):
 
         return False
     ##
-    ## @brief      { function_description }
-    ##
-    ## @param      size       The size
-    ##
-    def new_flag(self, size=32):
-        return "{}{}{}".format(self.repo_conf['flag']['prefix'],
-                               os.urandom(size).hex(),
-                               self.repo_conf['flag']['suffix'])
-    ##
-    ## @brief      { function_description }
-    ##
-    def exists(self):
-        return path.isdir(self.path)
-    ##
-    ## @brief      { function_description }
-    ##
-    def conf_path(self):
-        return path.join(self.path,
-                         self.repo_conf['files']['config']['challenge'])
-    ##
-    ## @brief      { function_description }
-    ##
-    def conf(self):
-        conf_path = self.conf_path()
-        if not path.isfile(conf_path):
-           return None
-
-        return yaml_load(conf_path)
-    ##
-    ## @brief      { function_description }
-    ##
-    def print_conf(self):
-        pprint.pprint(self.conf())
-    ##
     ## @brief      Creates a new challenge
     ##
-    ## @param      chall_path   The path
-    ## @param      name         The name
-    ## @param      points       The points
-    ## @param      repo_conf    The repo conf
+    ## @param      self  The object
+    ## @param      conf  The conf
     ##
-    def create(self, name, points):
-        if self.exists():
-            self.logger.error("challenge already exists...")
+    ## @return     { description_of_the_return_value }
+    ##
+    def create(self):
+        try:
+            os.makedirs(self.working_dir())
+        except:
             return False
-
-        os.makedirs(self.path)
-
-        conf_path = path.join(self.path,
-                              self.repo_conf['files']['config']['challenge'])
-
-        conf = {
-            "enable": True,
-            "static": False,
-            "parameters": {
-                "name": name,
-                "points": points,
-                "flag": self.new_flag()
-            }
-        }
-        yaml_dump(self.conf_path(), conf)
 
         for directory in self.repo_conf['directories']:
             if not self.__create_dir(directory):
