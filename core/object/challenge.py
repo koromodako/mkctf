@@ -12,6 +12,7 @@
 import os
 import os.path as path
 from stat import S_IRWXU
+from subprocess import PIPE, Popen, TimeoutExpired, CalledProcessError
 from core.wrapper import lazy
 from core.object.configurable import Configurable
 # =============================================================================
@@ -74,11 +75,28 @@ class Challenge(Configurable):
     ##
     ## @brief      { function_description }
     ##
+    def __run(self, args):
+        proc = Popen(args, stdout=PIPE, stderr=PIPE, cwd=self.working_dir())
+
+        try:
+            stdout, stderr = proc.communicate(timeout=4)
+        except TimeoutExpired as e:
+            proc.terminate()
+            return (None, None, e.stdout, e.stderr)
+        except CalledProcessError as e:
+            proc.terminate()
+            return (None, e.returncode, e.stdout, e.stderr)
+
+        code = proc.returncode
+        return (code == 0, code, stdout, stderr)
+    ##
+    ## @brief      Returns challenge's category
+    ##
     @lazy('__category')
     def category(self):
         return path.split(path.split(self.working_dir())[0])[-1]
     ##
-    ## @brief      { function_description }
+    ## @brief      Returns challenge's slug
     ##
     @lazy('__slug')
     def slug(self):
@@ -91,14 +109,14 @@ class Challenge(Configurable):
     def is_static(self):
         return self.get_conf('static')
     ##
-    ## @brief      Determines if static.
+    ## @brief      Determines if enabled.
     ##
-    ## @return     True if static, False otherwise.
+    ## @return     True if enabled, False otherwise.
     ##
     def enabled(self):
         return self.get_conf('enabled')
     ##
-    ## @brief      { function_description }
+    ## @brief      Enables/Disables challenge
     ##
     ## @param      enabled  The enabled
     ##
@@ -146,7 +164,7 @@ class Challenge(Configurable):
 
         return True
     ##
-    ## @brief      { function_description }
+    ## @brief      Yields files contained in public folders
     ##
     def exportable(self):
         wd = self.working_dir()
@@ -154,3 +172,20 @@ class Challenge(Configurable):
             dir_path = path.join(wd, directory)
             for de in self._scandirs(dir_path):
                 yield de
+    ##
+    ## @brief      { function_description }
+    ##
+    def build(self):
+        return self.__run([self.repo_conf['files']['build']])
+    ##
+    ## @brief      { function_description }
+    ##
+    def deploy(self):
+        return self.__run([self.repo_conf['files']['deploy']])
+    ##
+    ## @brief      { function_description }
+    ##
+    def status(self):
+        return self.__run([self.repo_conf['files']['status']])
+
+

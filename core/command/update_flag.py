@@ -10,8 +10,11 @@
 #  FUNCTIONS
 # =============================================================================
 def update_flag(args, repo, logger):
+    if not repo.cli.confirm('do you really want to update flags?'):
+        return False
+
     category, slug = args.category, args.slug
-    build_and_deploy = args.build_and_deploy
-    raise NotImplementedError
+
+    raise NotImplementedError('implement me!')
 
 
