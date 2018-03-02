@@ -18,12 +18,12 @@ import traceback
 import os.path as path
 from core.logger import Logger
 from core.config import load_config
-from core.repository import Repository
 from core.command.init import init
 from core.command.show import show
 from core.command.create import create
 from core.command.delete import delete
 from core.command.configure import configure
+from core.object.repository import Repository
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -33,24 +33,22 @@ from core.command.configure import configure
 ## @param      args  The arguments
 ##
 def sigint_handler(*args):
-    print()
-    exit(0)
+    exit(1)
 ##
 ## @brief      { function_description }
 ##
-def resolve_script_dir(fpath):
+def resolve_script_dir(logger, fpath):
     while path.islink(fpath):
         fpath = os.readlink(fpath)
+
         if fpath.startswith('..'):
-            print('script path impossible to resolve...')
-            exit(2)
+            logger.fatal("relative path is impossible to resolve properly...")
+
     return path.dirname(fpath)
 ##
-## @brief      Entry point
+## @brief      Parses commandline arguments
 ##
-def main():
-    signal.signal(signal.SIGINT, sigint_handler)
-
+def parse_args():
     parser = argparse.ArgumentParser(add_help=True,
         description="Manage CTF challenges repository.")
 
@@ -65,55 +63,78 @@ def main():
 
     subparsers = parser.add_subparsers(dest='command', metavar='COMMAND')
     subparsers.required = True
-
+    # -- init
     init_parser = subparsers.add_parser('init',
-                                        help="Initialize mkctf repository.")
+                                        help="initializes mkctf repository.")
     init_parser.set_defaults(func=init)
-
+    # -- show
     show_parser = subparsers.add_parser('show',
-                                        help="show one or many challenges.")
+                                        help="shows challenges.")
     show_parser.add_argument('--category',
-                             help="category name.")
-    show_parser.add_argument('-c', '--challenge',
-                             help="challenge name.")
+                             help="challenge's category.")
+    show_parser.add_argument('-c', '--chall-slug',
+                             help="challenge's slug.")
     show_parser.set_defaults(func=show)
-
+    # -- create
     create_parser = subparsers.add_parser('create',
-                                          help="create a challenge.")
+                                          help="creates a challenge.")
     create_parser.set_defaults(func=create)
-
+    # -- delete
     delete_parser = subparsers.add_parser('delete',
-                                          help="delete a challenge.")
-    delete_parser.add_argument('challenge', help="challenge name.")
+                                          help="deletes a challenge.")
+    delete_parser.add_argument('category', help="challenge's category.")
+    delete_parser.add_argument('chall_slug', help="challenge's slug.")
     delete_parser.set_defaults(func=delete)
-
+    # -- configure
     configure_parser = subparsers.add_parser('configure',
-                                             help="edit ctf or challenge "
-                                                  "configuration.")
-    configure_parser.add_argument('-c', '--challenge',
-                                  help="challenge name.")
+                                             help="edits repository's config "
+                                                  "or challenge's config.")
+    configure_parser.add_argument('--category',
+                                  help="challenge's category.")
+    configure_parser.add_argument('-c', '--chall-slug',
+                                  help="challenge's slug.")
     configure_parser.set_defaults(func=configure)
 
-    args = parser.parse_args()
+    return parser.parse_args()
+##
+## @brief      Entry point
+##
+def main():
+    signal.signal(signal.SIGINT, sigint_handler)
 
-
-    args.glob_conf_path = path.join(resolve_script_dir(__file__), '.mkctf.glob.yml')
+    args = parse_args()
 
     logger = Logger(args.debug, args.quiet, args.no_color)
+    logger.info("mkctf starts.")
+    logger.debug(args)
+
+    args.glob_conf_path = path.join(resolve_script_dir(logger, __file__),
+                                    '.mkctf.glob.yml')
 
     glob_conf = load_config(args)
+    repo_conf_path = path.join(args.working_dir,
+                               glob_conf['files']['config']['repository'])
 
     logger.debug(glob_conf)
-    repo = Repository(args, logger, glob_conf)
+    repo = Repository(logger, repo_conf_path, glob_conf)
+
+    if args.command != 'init' and repo.get_conf() is None:
+        logger.fatal("mkctf repository must be initialized first. Run "
+                     "`mkctf init`.")
 
     try:
-        code = 0 if args.func(args, repo, logger) else 1
+        success = args.func(args, repo, logger)
     except Exception as e:
         code = 42
         traceback.print_exc()
-        logger.fatal('Ouuuuupss.....:(')
+        logger.fatal("Ouuuuupss.....:(")
 
-    exit(code)
+    if success:
+        logger.info("mkctf ended successfully.")
+    else:
+        logger.error("mkctf ended with errors.")
+
+    exit(0 if success else 1)
 # =============================================================================
 #  SCRIPT
 # =============================================================================
