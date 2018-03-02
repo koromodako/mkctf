@@ -125,6 +125,14 @@ class Challenge(Configurable):
         conf['enabled'] = enabled
         self.set_conf(conf)
     ##
+    ## @brief      { function_description }
+    ##
+    def renew_flag(self, size):
+        conf = self.get_conf()
+        conf['flag'] = Challenge.make_flag(self.repo_conf, size)
+        self.set_conf(conf)
+        return conf['flag']
+    ##
     ## @brief      Creates a new challenge
     ##
     ## @param      self  The object

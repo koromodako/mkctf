@@ -16,7 +16,7 @@ from core.command.deploy import deploy
 # =============================================================================
 def build(args, repo, logger):
     if not repo.cli.confirm('do you really want to build?'):
-        return False
+        return True
 
     no_color = args.no_color
     category, slug = args.category, args.slug

@@ -15,7 +15,7 @@ from termcolor import colored
 # =============================================================================
 def deploy(args, repo, logger):
     if not repo.cli.confirm('do you really want to deploy?'):
-        return False
+        return True
 
     no_color = args.no_color
     category, slug = args.category, args.slug
@@ -61,7 +61,6 @@ def deploy(args, repo, logger):
 
                 chall_desc = "[{}] -> {}".format(challenge.category(),
                                                  challenge.slug())
-
                 if not no_color:
                     chall_desc = colored(chall_desc, 'blue')
 
