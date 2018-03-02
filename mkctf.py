@@ -116,25 +116,27 @@ def parse_args():
     # ---- update-flag
     update_flag_p = sps.add_parser('update-flag',
                                    help="updates flags. You might want to "
-                                        "--build-and-deploy.")
+                                        "build and deploy.")
     update_flag_p.add_argument('-c', '--category', help="challenge's category.")
     update_flag_p.add_argument('-s', '--slug', help="challenge's slug.")
     update_flag_p.set_defaults(func=update_flag)
     # ---- build
-    build_p = sps.add_parser('build', help="builds challenges.")
+    build_p = sps.add_parser('build',
+                             help="builds challenges. After building "
+                                  "challenges you might want to deploy.")
     build_p.add_argument('-c', '--category', help="challenge's category.")
     build_p.add_argument('-s', '--slug', help="challenge's slug.")
     build_p.set_defaults(func=build)
     # ---- deploy
     deploy_p = sps.add_parser('deploy', help="deploy challenges.")
-    deploy_p.add_argument('--category', help="challenge's category.")
-    deploy_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    deploy_p.add_argument('-c', '--category', help="challenge's category.")
+    deploy_p.add_argument('-s', '--slug', help="challenge's slug.")
     deploy_p.set_defaults(func=deploy)
     # ---- status
     status_p = sps.add_parser('status', help="check deployed challenge's "
                                              "status using exploit/exploit.")
-    status_p.add_argument('--category', help="challenge's category.")
-    status_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    status_p.add_argument('-c', '--category', help="challenge's category.")
+    status_p.add_argument('-s', '--slug', help="challenge's slug.")
     status_p.set_defaults(func=status)
 
     return main_p.parse_args()
