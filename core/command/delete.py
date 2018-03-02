@@ -14,10 +14,12 @@ from core.cli import CLI
 #  FUNCTIONS
 # =============================================================================
 def delete(args, repo, logger):
-    if repo.delete_chall(args.category, args.chall_slug):
-        logger.info("challenge {}/{} successfully deleted.")
+    categ, slug = args.category, args.chall_slug
+    if repo.delete_chall(categ, slug):
+        logger.info("challenge {}/{} successfully deleted.".format(categ,
+                                                                   slug))
         return True
 
-    logger.error("challenge {}/{} deletion failed.")
+    logger.error("challenge {}/{} deletion failed.".format(categ, slug))
     return False
 
