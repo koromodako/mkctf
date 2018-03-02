@@ -9,35 +9,47 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+import os
+import tarfile
 import os.path as path
-from tarfile import TarFile
+from core.hashing import hash_file
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 ##
 ## @brief      { function_description }
 ##
-## @param      logger  The logger
-## @param      args    The arguments
-## @param      chall   The chall
+## @param      logger            The logger
+## @param      export_dir        The export dir
+## @param      include_disabled  The include disabled
+## @param      chall             The chall
 ##
-def __export_chall(logger, args, chall):
-    if (args.include_disabled or chall.enabled()) and chall.is_static():
-        logger.info("exporting {}/{}...".format(chall.category(),
-                                                chall.slug()))
+def __export_chall(logger, export_dir, include_disabled, chall):
+    if not chall.is_static():
+        logger.warning("challenge ignored (not static): "
+                       "{}/{}.".format(chall.category(),chall.slug()))
+        return False
 
-        archive = "{}.tgz".format(chall.slug())
+    if not include_disabled and not chall.enabled():
+        logger.warning("challenge ignored (disabled): "
+                       "{}/{}.".format(chall.category(),chall.slug()))
+        return False
 
-        with TarFile(path.join(export_dir, archive), 'w:gz') as a:
-            for entry in chall.exportable():
-                a.add(entry.path, arcname=entry.name)
+    logger.info("exporting {}/{}...".format(chall.category(),
+                                            chall.slug()))
 
-        logger.info("done.")
-        return True
+    archive_name = "{}.{}.tgz".format(chall.category(), chall.slug())
+    archive_path = path.join(export_dir, archive_name)
+    with tarfile.open(archive_path, 'w:gz') as arch:
+        for entry in chall.exportable():
+            arch.add(entry.path, arcname=entry.name)
 
-    logger.warning("challenge ignored: {}/{}.".format(chall.category(),
-                                                      chall.slug()))
-    return False
+    checksum_path = "{}.sha256".format(archive_path)
+    with open(checksum_path, 'w') as f:
+        f.write("{}  {}\n".format(hash_file(archive_path), archive_name))
+
+    logger.info("done.")
+    return True
 ##
 ## @brief      { function_description }
 ##
@@ -48,6 +60,7 @@ def __export_chall(logger, args, chall):
 def export(args, repo, logger):
     export_dir = path.abspath(args.export_dir)
     category, slug = args.category, args.chall_slug
+    include_disabled = args.include_disabled
 
     if category is None and slug is not None:
         logger.error("you must specify --category if you use --chall-slug.")
@@ -62,4 +75,10 @@ def export(args, repo, logger):
                                                              chall.slug()))
             return False
 
-        return __export_chall(logger, args, chall)
+        return __export_chall(logger, export_dir, include_disabled, chall)
+
+    for category, challenges in repo.scan(category):
+        for chall in challenges:
+            __export_chall(logger, export_dir, include_disabled, chall)
+
+    return True

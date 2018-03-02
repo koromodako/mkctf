@@ -25,16 +25,16 @@ directories:
 #
 files:
     txt:
+        - Dockerfile
         - writeup.md
         - public-files/description.md
     bin:
         - build
         - deploy
-        - Dockerfile
         - exploit/exploit
     config:
-        challenge: mkctf.yml
-        repository: .mkctf.yml
+        challenge: .mkctf.yml
+        repository: .repo.mkctf.yml
 #
 # Flag information
 #

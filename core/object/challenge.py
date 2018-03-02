@@ -146,5 +146,5 @@ class Challenge(Configurable):
         wd = self.working_dir()
         for directory in self.repo_conf['directories']['public']:
             dir_path = path.join(wd, directory)
-            for de in self._scandir(dir_path):
+            for de in self._scandirs(dir_path):
                 yield de

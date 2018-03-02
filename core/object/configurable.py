@@ -63,6 +63,9 @@ class Configurable(object):
     ## @brief      Returns the configuration or a specific value
     ##
     def get_conf(self, keys=[]):
+        if isinstance(keys, str):
+            keys = [keys]
+
         if not path.isfile(self.conf_path):
             self.logger.warning("file not found: {}".format(self.conf_path))
             return None
