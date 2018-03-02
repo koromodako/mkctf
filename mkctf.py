@@ -20,12 +20,16 @@ from core.logger import Logger
 from core.config import load_config
 from core.command.init import init
 from core.command.show import show
+from core.command.build import build
+from core.command.deploy import deploy
+from core.command.status import status
 from core.command.create import create
 from core.command.delete import delete
 from core.command.enable import enable
 from core.command.export import export
 from core.command.disable import disable
 from core.command.configure import configure
+from core.command.update_flag import update_flag
 from core.object.repository import Repository
 # =============================================================================
 #  FUNCTIONS
@@ -131,7 +135,7 @@ def parse_args():
                                              "status using exploit/exploit.")
     status_p.add_argument('--category', help="challenge's category.")
     status_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
-    status_p.set_defaults(func=deploy)
+    status_p.set_defaults(func=status)
 
     return main_p.parse_args()
 ##
