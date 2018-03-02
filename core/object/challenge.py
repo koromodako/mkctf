@@ -106,8 +106,8 @@ class Challenge(Configurable):
     ##
     ## @return     True if static, False otherwise.
     ##
-    def is_static(self):
-        return self.get_conf('static')
+    def is_standalone(self):
+        return self.get_conf('standalone')
     ##
     ## @brief      Determines if enabled.
     ##

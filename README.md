@@ -31,20 +31,74 @@ Follow the instructions.
 
 You need help: `mkctf -h`
 
-## All you need to know
+## What you need to understand
 
-The default configuration creates the following elements:
+`mkctf` helps you manipulate two CTF concepts described bellow. These objects
+rely on YAML configuration files.
 
-For each challenge a small file tree is created containing the following folders:
+### Repository
 
- + `src`: put all your challenge resources here. It's like your working folder.
- + `public-files`: every file you put here will be accessible from ctf website.
- + `server-files`: every file you put here will be run on the server like a service.
- + `exploit`: put a working exploit for your challenge for a future write-up publication.
+Represents a collection of categories which contain instances of `Challenge`.
 
-The following files will be created:
+**How is it configured?**
 
- + `flag.txt`: write a unique file on a single line in this one.
- + `writeup.md`: write a WriteUp for your challenge.
- + `public-files/description.md`: write a description of your challenge in this one.
- + `exploit/exploit`: write a working exploit in this one.
+```
+categories: [bugbounty, crypto, for, misc, prog, pwn, re, web, quest]
+directories:
+  public: [public-files]
+  private: [server-files, exploit, src]
+files:
+  build: build
+  deploy: deploy
+  status: exploit/exploit
+  config:
+    challenge: .mkctf.yml
+  txt: [writeup.md, Dockerfile, public-files/description.md]
+flag:
+  prefix: 'INSA{'
+  suffix: '}'
+name: INS'hAck 2018
+```
+
++ `categories`: categories to be used to classify CTF challenges
++ `directories`: folders to be created for each challenge
+    + `public`: exportable folders
+    + `private`: non-exportable folders
++ `files`: files to be created for each challenge
+    + `build`: an executable file used to build a challenge
+    + `deploy`: an executable file used to deploy a challenge
+    + `status`: an executable file used to test the availability of the
+                challenge. It's usually an exploit
+    + `config`: configuration-related files
+        + `challenge`: challenge configuration file name usually `.mkctf.yml`
+    + `txt`: list of non-executable mandatory files
++ `flag`: flag properties
+    + `prefix`: flag's prefix usually ends with `{`
+    + `suffix`: flag's suffix usually a single `}`
++ `name`: CTF's name
+
+### Challenge
+
+Represents a CTF challenge.
+
+**How is it configured?**
+
+```
+category: for
+enabled: false
+flag: INSA{[redacted]}
+name: Virtual Printer
+parameters: {}
+points: 100
+slug: virtual-printer
+standalone: false
+```
+
++ `category`: challenge's category
++ `enabled`: is the challenge enabled?
++ `flag`: challenge's flag
++ `name`: challenge's name
++ `parameters`: _dict_ of challenge-specific parameters
++ `points`: challenge's value
++ `slug`: challenge's slug (should match challenge folder name)
++ `standalone`: is the challenge standalone? (meaning it does not rely on a server)

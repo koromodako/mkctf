@@ -26,7 +26,7 @@ def __print_chall(logger, challenge, no_color):
                                            challenge.slug()))
         return False
 
-    static = ' [STATIC]' if conf['static'] else ''
+    static = ' [STANDALONE]' if conf['standalone'] else ''
 
     chall_entry = "{t}{t}- {slug}{static}".format(t=TAB,
                                                   slug=challenge.slug(),
@@ -36,8 +36,8 @@ def __print_chall(logger, challenge, no_color):
         chall_entry = colored(chall_entry, color, attrs=['bold'])
         del conf['enabled']
 
+    del conf['standalone']
     del conf['category']
-    del conf['static']
     del conf['slug']
 
     text = dict2str(conf).replace("\n", "\n{t}{t}{t}".format(t=TAB))
