@@ -75,32 +75,32 @@ def parse_args():
     init_p.set_defaults(func=init)
     # ---- show
     show_p = sps.add_parser('show', help="shows challenges.")
-    show_p.add_argument('--category', help="challenge's category.")
-    show_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    show_p.add_argument('-c', '--category', help="challenge's category.")
+    show_p.add_argument('-s', '--slug', help="challenge's slug.")
     show_p.set_defaults(func=show)
     # ---- create
     create_p = sps.add_parser('create', help="creates a challenge.")
     create_p.set_defaults(func=create)
     # ---- delete
     delete_p = sps.add_parser('delete', help="deletes a challenge.")
-    delete_p.add_argument('category', help="challenge's category.")
-    delete_p.add_argument('chall_slug', help="challenge's slug.")
+    delete_p.add_argument('-c', '--category', help="challenge's category.")
+    delete_p.add_argument('-s', '--slug', help="challenge's slug.")
     delete_p.set_defaults(func=delete)
     # ---- configure
     configure_p = sps.add_parser('configure', help="edits repository's config "
                                                    "or challenge's config.")
-    configure_p.add_argument('--category', help="challenge's category.")
-    configure_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    configure_p.add_argument('-c', '--category', help="challenge's category.")
+    configure_p.add_argument('-s', '--slug', help="challenge's slug.")
     configure_p.set_defaults(func=configure)
     # ---- enable
     enable_p = sps.add_parser('enable', help="enables a challenge.")
     enable_p.add_argument('category', help="challenge's category.")
-    enable_p.add_argument('chall_slug', help="challenge's slug.")
+    enable_p.add_argument('slug', help="challenge's slug.")
     enable_p.set_defaults(func=enable)
     # ---- disable
     disable_p = sps.add_parser('disable', help="disables a challenge.")
     disable_p.add_argument('category', help="challenge's category.")
-    disable_p.add_argument('chall_slug', help="challenge's slug.")
+    disable_p.add_argument('slug', help="challenge's slug.")
     disable_p.set_defaults(func=disable)
     # ---- export
     export_p = sps.add_parser('export', help="exports enabled static "
@@ -108,8 +108,8 @@ def parse_args():
     export_p.add_argument('export_dir', help="folder where archives must be "
                                              "written. If the folder does not "
                                              "exist it will be created.")
-    export_p.add_argument('--category', help="challenge's category.")
-    export_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    export_p.add_argument('-c', '--category', help="challenge's category.")
+    export_p.add_argument('-s', '--slug', help="challenge's slug.")
     export_p.add_argument('--include-disabled', action='store_true',
                           help="export disabled challenges too.")
     export_p.set_defaults(func=export)
@@ -117,13 +117,13 @@ def parse_args():
     update_flag_p = sps.add_parser('update-flag',
                                    help="updates flags. You might want to "
                                         "--build-and-deploy.")
-    update_flag_p.add_argument('--category', help="challenge's category.")
-    update_flag_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    update_flag_p.add_argument('-c', '--category', help="challenge's category.")
+    update_flag_p.add_argument('-s', '--slug', help="challenge's slug.")
     update_flag_p.set_defaults(func=update_flag)
     # ---- build
     build_p = sps.add_parser('build', help="builds challenges.")
-    build_p.add_argument('--category', help="challenge's category.")
-    build_p.add_argument('-c', '--chall-slug', help="challenge's slug.")
+    build_p.add_argument('-c', '--category', help="challenge's category.")
+    build_p.add_argument('-s', '--slug', help="challenge's slug.")
     build_p.set_defaults(func=build)
     # ---- deploy
     deploy_p = sps.add_parser('deploy', help="deploy challenges.")

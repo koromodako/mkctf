@@ -10,4 +10,8 @@
 #  FUNCTIONS
 # =============================================================================
 def update_flag(args, repo, logger):
-    raise NotImplementedError('implement me!')
+    category, slug = args.category, args.slug
+    build_and_deploy = args.build_and_deploy
+    raise NotImplementedError
+
+

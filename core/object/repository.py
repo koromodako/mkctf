@@ -193,7 +193,7 @@ class Repository(Configurable):
                 yield (cat.name, challenges)
                 continue
 
-            if category == cat:
+            if category == cat.name:
                 yield (cat.name, challenges)
                 break
     ##

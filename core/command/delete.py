@@ -10,7 +10,7 @@
 #  FUNCTIONS
 # =============================================================================
 def delete(args, repo, logger):
-    category, slug = args.category, args.chall_slug
+    category, slug = args.category, args.slug
     if repo.delete_chall(category, slug):
         logger.info("challenge {}/{} successfully deleted.".format(category,
                                                                    slug))

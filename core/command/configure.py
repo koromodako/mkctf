@@ -10,7 +10,7 @@
 #  FUNCTIONS
 # =============================================================================
 def configure(args, repo, logger):
-    category, slug = args.category, args.chall_slug
+    category, slug = args.category, args.slug
     if category is None and slug is None:
 
         if repo.configure():

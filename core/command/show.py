@@ -17,13 +17,14 @@ from core.formatting import dict2str
 ##
 ## @brief      { function_description }
 ##
-def __print_chall(logger, category, chall):
-    print("{t}{t}- {slug}".format(t=TAB, slug=chall.slug()))
-    conf = chall.get_conf()
+def __print_chall(logger, challenge):
+    print("{t}{t}- {slug}".format(t=TAB, slug=challenge.slug()))
+    conf = challenge.get_conf()
 
     if conf is None:
         logger.error("configuration missing. Run `mkctf configure "
-                     "--category={} -c {}`".format(category, chall.slug()))
+                     "-c {} -s {}`".format(challenge.category(),
+                                           challenge.slug()))
         return False
 
     del conf['slug']
@@ -42,21 +43,26 @@ def __print_chall(logger, category, chall):
 ## @return     { description_of_the_return_value }
 ##
 def show(args, repo, logger):
+    found = False
     success = True
-    chall_slug = args.chall_slug
+    category, slug = args.category, args.slug
 
     print("challenges:")
-    for category, challenges in repo.scan(args.category):
-        print("{}+ {}".format(TAB, category))
+    for cat, challenges in repo.scan(category):
+        print("{}+ {}".format(TAB, cat))
 
-        for chall in challenges:
-            if chall_slug is None or chall_slug == chall.get_conf('slug'):
+        for challenge in challenges:
+            if slug is None or slug == challenge.slug():
+                found = True
                 try:
-                    if not __print_chall(logger, category, chall):
+                    if not __print_chall(logger, challenge):
                         success = False
                 except Exception as e:
                     logger.error("configuration is invalid (missing key: "
                                  "{}).".format(e))
                     success = False
+
+    if not found:
+        logger.warning("no challenge found matching given constraints.")
 
     return success
