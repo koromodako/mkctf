@@ -53,6 +53,7 @@ class Configurable(object):
     ##
     def get_conf(self, keys=[]):
         if not path.isfile(self.conf_path):
+            self.logger.warning("file not found: {}".format(self.conf_path))
             return None
 
         conf = yaml_load(self.conf_path)
@@ -68,9 +69,11 @@ class Configurable(object):
             value = value.get(key)
 
             if value is None:
+                self.logger.warning("missing key: {}".format(key))
                 return None
 
             if len(keys) > 0 and not isinstance(value, dict):
+                self.logger.warning("missing key: {}".format(keys[0]))
                 return None
 
         return value
