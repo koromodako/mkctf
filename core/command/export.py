@@ -59,7 +59,7 @@ def __export_chall(logger, export_dir, include_disabled, chall):
 ##
 def export(args, repo, logger):
     export_dir = path.abspath(args.export_dir)
-    category, slug = args.category, args.chall_slug
+    category, slug = args.category, args.slug
     include_disabled = args.include_disabled
 
     if category is None and slug is not None:

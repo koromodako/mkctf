@@ -10,5 +10,5 @@
 #  FUNCTIONS
 # =============================================================================
 def disable(args, repo, logger):
-    return repo.disable_chall(args.category, args.chall_slug)
+    return repo.disable_chall(args.category, args.slug)
 
