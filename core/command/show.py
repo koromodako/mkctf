@@ -9,6 +9,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from termcolor import colored
 from core.formatting import TAB
 from core.formatting import dict2str
 # =============================================================================
@@ -17,19 +18,30 @@ from core.formatting import dict2str
 ##
 ## @brief      { function_description }
 ##
-def __print_chall(logger, challenge):
-    print("{t}{t}- {slug}".format(t=TAB, slug=challenge.slug()))
+def __print_chall(logger, challenge, no_color):
     conf = challenge.get_conf()
-
     if conf is None:
         logger.error("configuration missing. Run `mkctf configure "
                      "-c {} -s {}`".format(challenge.category(),
                                            challenge.slug()))
         return False
 
+    static = ' [STATIC]' if conf['static'] else ''
+
+    chall_entry = "{t}{t}- {slug}{static}".format(t=TAB,
+                                                  slug=challenge.slug(),
+                                                  static=static)
+    if not no_color:
+        color = 'green' if conf['enabled'] else 'red'
+        chall_entry = colored(chall_entry, color, attrs=['bold'])
+        del conf['enabled']
+
+    del conf['static']
     del conf['slug']
 
     text = dict2str(conf).replace("\n", "\n{t}{t}{t}".format(t=TAB))
+
+    print(chall_entry)
     print(text[1:])
 
     return True
@@ -55,7 +67,7 @@ def show(args, repo, logger):
             if slug is None or slug == challenge.slug():
                 found = True
                 try:
-                    if not __print_chall(logger, challenge):
+                    if not __print_chall(logger, challenge, args.no_color):
                         success = False
                 except Exception as e:
                     logger.error("configuration is invalid (missing key: "
