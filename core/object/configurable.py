@@ -9,6 +9,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+import os
 import os.path as path
 from pprint import pprint
 from core.config import yaml_load, yaml_dump
@@ -31,17 +32,27 @@ class Configurable(object):
         self.conf_path = conf_path
         self.logger = logger
     ##
+    ## @brief      { function_description }
+    ##
+    ## @param      root  The root
+    ##
+    def _scandirs(self, root, keep=None):
+        dirs = []
+
+        for de in os.scandir(root):
+
+            if keep is not None and not keep(de):
+                continue
+
+            dirs.append(de)
+
+        return dirs
+    ##
     ## @brief      Returns the working directory
     ##
     @lazy('__working_dir')
     def working_dir(self):
         return path.dirname(self.conf_path)
-    ##
-    ## @brief      { function_description }
-    ##
-    @lazy('__slug')
-    def slug(self):
-        return path.split(self.working_dir())[-1]
     ##
     ## @brief      Returns True if configuration exists,
     ##             otherwise returns False

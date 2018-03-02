@@ -7,19 +7,14 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # =============================================================================
-#  IMPORTS
-# =============================================================================
-from core.cli import CLI
-# =============================================================================
 #  FUNCTIONS
 # =============================================================================
 def delete(args, repo, logger):
-    categ, slug = args.category, args.chall_slug
-    if repo.delete_chall(categ, slug):
-        logger.info("challenge {}/{} successfully deleted.".format(categ,
+    category, slug = args.category, args.chall_slug
+    if repo.delete_chall(category, slug):
+        logger.info("challenge {}/{} successfully deleted.".format(category,
                                                                    slug))
         return True
 
-    logger.error("challenge {}/{} deletion failed.".format(categ, slug))
+    logger.error("challenge {}/{} deletion failed.".format(category, slug))
     return False
-

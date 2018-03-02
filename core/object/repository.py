@@ -38,23 +38,13 @@ class Repository(Configurable):
     ##
     ## @brief      { function_description }
     ##
-    ## @param      root  The root
-    ##
-    def __scandirs(self, root):
-        dirs = []
-        for de in os.scandir(root):
-            if de.is_dir() and not de.name.startswith('.'):
-                dirs.append(de)
-        return dirs
-    ##
-    ## @brief      { function_description }
-    ##
     ## @param      prev_conf  The repo conf
     ##
     def __make_repo_conf(self, prev_conf=None):
         def_name = None
         def_categories = None
-        def_directories = None
+        def_pub_dirs = None
+        def_priv_dirs = None
         def_txt_files = None
         def_bin_files = None
         def_chall_file = None
@@ -64,7 +54,8 @@ class Repository(Configurable):
         if prev_conf is not None:
             def_name = prev_conf.get('name')
             def_categories = prev_conf['categories']
-            def_directories = prev_conf['directories']
+            def_pub_dirs = prev_conf['directories']['public']
+            def_priv_dirs = prev_conf['directories']['private']
             def_txt_files = prev_conf['files']['txt']
             def_bin_files = prev_conf['files']['bin']
             def_chall_file = prev_conf['files']['config']['challenge']
@@ -76,9 +67,12 @@ class Repository(Configurable):
         categories = self.cli.choose_many("select categories:",
                                           def_categories,
                                           default=def_categories)
-        directories = self.cli.choose_many("select directories:",
-                                           def_directories,
-                                           default=def_directories)
+        pub_dirs = self.cli.choose_many("select public directories:",
+                                        def_pub_dirs,
+                                        default=def_pub_dirs)
+        priv_dirs = self.cli.choose_many("select private directories:",
+                                         def_priv_dirs,
+                                         default=def_priv_dirs)
         txt_files = self.cli.choose_many("select text files:",
                                          def_txt_files,
                                          default=def_txt_files)
@@ -95,7 +89,10 @@ class Repository(Configurable):
         return {
             'name': name,
             'categories': categories,
-            'directories': directories,
+            'directories': {
+                'public': pub_dirs,
+                'private': priv_dirs
+            },
             'files': {
                 'txt': txt_files,
                 'bin': bin_files,
@@ -115,14 +112,14 @@ class Repository(Configurable):
         repo_conf = self.get_conf()
 
         def_name = None
-        enable = False
+        enabled = False
         def_static = None
         def_points = None
         def_category = None
         flag = None
         if prev_conf is not None:
             def_name = prev_conf['name']
-            enable = prev_conf['enable']
+            enabled = prev_conf['enabled']
             def_static = prev_conf['static']
             def_points = prev_conf['points']
             def_category = prev_conf['category']
@@ -145,7 +142,7 @@ class Repository(Configurable):
             'name': name,
             'slug': slugify(name),
             'flag': flag,
-            'enable': enable,
+            'enabled': enabled,
             'static': static,
             'points': points,
             'category': category,
@@ -170,14 +167,18 @@ class Repository(Configurable):
     def scan(self, category=None):
         wd = self.working_dir()
         repo_conf = self.get_conf()
-        for cat in self.__scandirs(wd):
+        keep = lambda e: e.is_dir() and not e.name.startswith('.')
+
+        for cat in self._scandirs(wd, keep):
             challenges = []
-            for chall in self.__scandirs(cat.path):
+            for chall in self._scandirs(cat.path, keep):
                 chall_conf_path = path.join(chall.path,
                                             repo_conf['files']['config']['challenge'])
                 challenges.append(Challenge(self.logger,
                                             chall_conf_path,
                                             repo_conf))
+
+            challenges = sorted(challenges, key=lambda e: e.slug())
 
             if category is None:
                 yield (cat.name, challenges)
@@ -186,6 +187,26 @@ class Repository(Configurable):
             if category == cat:
                 yield (cat.name, challenges)
                 break
+    ##
+    ## @brief      { function_description }
+    ##
+    ## @param      category  The category
+    ## @param      slug      The slug
+    ##
+    def find_chall(self, category, slug):
+        chall_path = path.join(self.working_dir(), category, slug)
+
+        if not path.isdir(chall_path):
+            self.logger.warning("challenge not found: "
+                                "{}/{}".format(category, slug))
+            return None
+
+        repo_conf = self.get_conf()
+
+        chall_conf_path = path.join(chall_path,
+                                    repo_conf['files']['config']['challenge'])
+
+        return Challenge(self.logger, chall_conf_path, repo_conf)
     ##
     ## @brief      { function_description }
     ##
@@ -214,20 +235,13 @@ class Repository(Configurable):
     ##
     ## @brief      { function_description }
     ##
-    ## @param      challenge  The challenge
+    ## @param      category  The category
+    ## @param      slug      The slug
     ##
-    def configure_chall(self, category, challenge):
-        chall_path = path.join(self.working_dir(), category, challenge)
-
-        if not path.isdir(chall_path):
+    def configure_chall(self, category, slug):
+        chall = self.find_chall(category, challenge)
+        if chall is None:
             return False
-
-        repo_conf = self.get_conf()
-
-        chall_conf_path = path.join(chall_path,
-                                    repo_conf['files']['config']['challenge'])
-
-        chall = Challenge(self.logger, chall_conf_path, repo_conf)
 
         new_chall_conf = self.__make_chall_conf(chall.get_conf())
 
@@ -236,20 +250,45 @@ class Repository(Configurable):
     ##
     ## @brief      { function_description }
     ##
-    ## @param      challenge  The challenge
+    ## @param      category  The category
+    ## @param      slug      The slug
     ##
-    def delete_chall(self, category, challenge):
-        chall_path = path.join(self.working_dir(), category, challenge)
-
-        if not path.isdir(chall_path):
+    def delete_chall(self, category, slug):
+        chall = self.find_chall(category, slug)
+        if chall is None:
             return False
 
-        if not self.cli.confirm("do you really want to remove {}/{}?".format(
-                            category, challenge)):
+        if not self.cli.confirm("do you really want to remove "
+                                "{}/{}?".format(category, slug)):
             return False
 
-        rmtree(chall_path)
+        rmtree(chall.working_dir())
         return True
+    ##
+    ## @brief      Enables the chall.
+    ##
+    ## @param      category  The category
+    ## @param      slug      The slug
+    ##
+    def enable_chall(self, category, slug):
+        chall = self.find_chall(category, slug)
+        if chall is None:
+            return False
 
+        chall.enable(True)
+        return True
+    ##
+    ## @brief      Enables the chall.
+    ##
+    ## @param      category  The category
+    ## @param      slug      The slug
+    ##
+    def disable_chall(self, category, slug):
+        chall = self.find_chall(category, slug)
+        if chall is None:
+            return False
+
+        chall.enable(False)
+        return True
 
 

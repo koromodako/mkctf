@@ -10,8 +10,8 @@
 #  FUNCTIONS
 # =============================================================================
 def configure(args, repo, logger):
-    categ, slug = args.category, args.chall_slug
-    if categ is None and slug is None:
+    category, slug = args.category, args.chall_slug
+    if category is None and slug is None:
 
         if repo.configure():
             logger.info("repo configured.")
@@ -20,8 +20,8 @@ def configure(args, repo, logger):
         logger.error("repo configuration failed.")
         return False
 
-    if categ is not None and slug is not None:
-        if repo.configure_chall(categ, slug):
+    if category is not None and slug is not None:
+        if repo.configure_chall(category, slug):
             logger.info("challenge configured.")
             return True
 
