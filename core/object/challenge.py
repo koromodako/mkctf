@@ -184,16 +184,25 @@ class Challenge(Configurable):
     ## @brief      { function_description }
     ##
     def build(self):
-        return self.__run([self.repo_conf['files']['build']])
+        script = self.repo_conf['files']['build']
+        if not '/' in script:
+            script = './{}'.format(script)
+        return self.__run([script])
     ##
     ## @brief      { function_description }
     ##
     def deploy(self):
-        return self.__run([self.repo_conf['files']['deploy']])
+        script = self.repo_conf['files']['deploy']
+        if not '/' in script:
+            script = './{}'.format(script)
+        return self.__run([script])
     ##
     ## @brief      { function_description }
     ##
     def status(self):
-        return self.__run([self.repo_conf['files']['status']])
+        script = self.repo_conf['files']['status']
+        if not '/' in script:
+            script = './{}'.format(script)
+        return self.__run([script])
 
 

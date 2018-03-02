@@ -65,9 +65,9 @@ name: INS'hAck 2018
     + `public`: exportable folders
     + `private`: non-exportable folders
 + `files`: files to be created for each challenge
-    + `build`: an executable file used to build a challenge
-    + `deploy`: an executable file used to deploy a challenge
-    + `status`: an executable file used to test the availability of the
+    + `build`: a _script_ used to build a challenge
+    + `deploy`: a _script_ used to deploy a challenge
+    + `status`: a _script_ used to test the availability of the
                 challenge. It's usually an exploit
     + `config`: configuration-related files
         + `challenge`: challenge configuration file name usually `.mkctf.yml`
@@ -76,6 +76,16 @@ name: INS'hAck 2018
     + `prefix`: flag's prefix usually ends with `{`
     + `suffix`: flag's suffix usually a single `}`
 + `name`: CTF's name
+
+**Scripts**
+
+Scripts like `build`, `deploy` and `status` are expected to behave according to
+the following rules:
+
++ a _script_ **cannot take mandatory arguments**.
++ a _script_ must have a **return code of 0** when it succeeds, _other
+  behavior will be considered as a failure_.
++ a _script_ **must complete its execution within 4 seconds**.
 
 ### Challenge
 
