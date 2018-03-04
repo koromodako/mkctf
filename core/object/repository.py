@@ -122,13 +122,14 @@ class Repository(Configurable):
         repo_conf = self.get_conf()
 
         if prev_conf is None:
-            flag = Challenge.make_flag()
+            flag = Challenge.make_flag(repo_conf)
             enabled = False
             parameters = {}
             def_name = None
             def_static = None
             def_points = None
             def_category = None
+            def_standalone = None
         else:
             flag = prev_conf['flag']
             enabled = prev_conf['enabled']
