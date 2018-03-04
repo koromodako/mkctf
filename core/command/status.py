@@ -10,6 +10,7 @@
 #  IMPORTS
 # =============================================================================
 from termcolor import colored
+from core.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -33,42 +34,25 @@ def status(args, repo, logger):
         for challenge in challenges:
             if slug is None or slug == challenge.slug():
                 try:
-                    exception = None
-                    (status, code, stdout, stderr) = challenge.status(timeout)
-
-                    if status is None and code is None:
-                        s_str = 'TIMED OUT'
-                        s_color = 'magenta'
-                    elif status:
-                        s_str = 'SUCCESS'
-                        s_color = 'green'
-                    else:
-                        s_str = 'FAILURE'
-                        s_color = 'red'
-
-                    s_str += ' (code={})'.format(code)
+                    (code, stdout, stderr) = challenge.status(timeout)
                 except Exception as e:
                     exception = e
-                    status  = True
-                    s_str = 'EXCEPTION'
-                    s_color = 'magenta'
+                    code = -1
 
-                if not args.no_color:
-                    s_str = colored(s_str, s_color, attrs=['bold'])
-
-                chall_desc = "[{}] -> {}".format(challenge.category(),
-                                                 challenge.slug())
-
+                chall_description = "[{}] -> {}".format(challenge.category(),
+                                                        challenge.slug())
                 if not no_color:
-                    chall_desc = colored(chall_desc, 'blue')
+                    chall_description = colored(chall_description, 'blue')
+
+                chall_status = returncode2str(code, args.no_color)
 
                 print(chall_sep)
-                print("{} {}".format(chall_desc, s_str))
+                print("{} {}".format(chall_description, chall_status))
 
-                if exception is not None:
+                if code < 0:
                     print(exc_sep)
                     print(exception)
-                elif not status:
+                elif code > 0:
                     print(out_sep)
                     print(stdout.decode().strip())
                     print(err_sep)
