@@ -65,27 +65,17 @@ name: INS'hAck 2018
     + `public`: exportable folders
     + `private`: non-exportable folders
 + `files`: files to be created for each challenge
-    + `build`: a _script_ used to build a challenge
-    + `deploy`: a _script_ used to deploy a challenge
+    + `build`: a _script_ used to build a challenge (cf. Scripts)
+    + `deploy`: a _script_ used to deploy a challenge (cf. Scripts)
     + `status`: a _script_ used to test the availability of the
-                challenge. It's usually an exploit
+                challenge. It's usually an exploit (cf. Scripts)
     + `config`: configuration-related files
         + `challenge`: challenge configuration file name usually `.mkctf.yml`
     + `txt`: list of non-executable mandatory files
 + `flag`: flag properties
-    + `prefix`: flag's prefix usually ends with `{`
-    + `suffix`: flag's suffix usually a single `}`
+    + `prefix`: flag's prefix, usually ends with `{`
+    + `suffix`: flag's suffix, usually a single `}`
 + `name`: CTF's name
-
-**Scripts**
-
-Scripts like `build`, `deploy` and `status` are expected to behave according to
-the following rules:
-
-+ a _script_ **cannot take mandatory arguments**.
-+ a _script_ must have a **return code of 0** when it succeeds, _other
-  behavior will be considered as a failure_.
-+ a _script_ **execution time must be lesser than a timeout** which defaults to 4 seconds. `--timeout` option enable you to override this value.
 
 ### Challenge
 
@@ -112,3 +102,27 @@ standalone: false
 + `points`: challenge's value
 + `slug`: challenge's slug (should match challenge folder name)
 + `standalone`: is the challenge standalone? (meaning it does not rely on a server)
+
+### Scripts
+
+Scripts like `build`, `deploy` and `status` are expected to behave according to
+the following rules:
+
+1. a _script_ **cannot take mandatory arguments**.
+2. a _script_ **execution time must be lesser than a timeout** which defaults to 4 seconds. `--timeout` option enable you to override this value.
+3. a _script_ **return code** will be interpreted according to the following table:
+
+| **exit code** | **status** | **description** |
+|:-------------:|:----------:|:----------------|
+| `0` | `SUCCESS` | Script execution succeeded. |
+| `2` | `N/A` | Script does not apply/have a meaning to this challenge. |
+| `3` | `MANUAL` | You need to use your fingers, no script can perform this task. |
+| `4` | `NOT IMPLEMENTED` | Script is not implemented. |
+| _other values_ | `FAILURE` | Script execution failed. |
+
+The special status `TIMED-OUT` may occur if your script took too long to
+execute as explained in (2.).
+
+If the **exit code differs from 0** both _stdout_ and _stderr_ will be
+printed. You can use this behavior to print meaningful
+instructions/exceptions within these _scripts_.
