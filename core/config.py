@@ -38,7 +38,7 @@ def yaml_dump(fpath, conf):
 # you know exactly what you're doing. #PEBCAK
 #
 """)
-        yaml.dump(conf, f)
+        yaml.safe_dump(conf, f, default_flow_style=False)
 ##
 ## @brief      Loads a configuration.
 ##
