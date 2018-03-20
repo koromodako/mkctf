@@ -44,5 +44,5 @@ def yaml_dump(fpath, conf):
 ##
 ## @param      args  The arguments
 ##
-def load_config(args):
-    return yaml_load(args.glob_conf_path)
+def load_config(glob_conf_path):
+    return yaml_load(glob_conf_path)
