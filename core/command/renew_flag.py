@@ -14,8 +14,8 @@ from termcolor import colored
 #  FUNCTIONS
 # =============================================================================
 def renew_flag(args, repo, logger):
-    if not repo.cli.confirm('do you really want to renew flags?'):
-        return True
+    if not args.force and not repo.cli.confirm('do you really want to renew flags?'):
+        return {'status': True} if args.json else True
 
     no_color = args.no_color
     category, slug = args.category, args.slug
@@ -24,17 +24,26 @@ def renew_flag(args, repo, logger):
     if not no_color:
         chall_sep = colored(chall_sep, 'blue', attrs=['bold'])
 
+    results = []
+
     for cat, challenges in repo.scan(category):
         for challenge in challenges:
             if slug is None or slug == challenge.slug():
                 new_flag = challenge.renew_flag(args.size)
 
-                chall_desc = "[{}] -> {}".format(challenge.category(),
-                                                 challenge.slug())
-                if not no_color:
-                    chall_desc = colored(chall_desc, 'blue')
+                if args.json:
+                    results.append({
+                        'slug': challenge.slug(),
+                        'category': challenge.category(),
+                        'flag': new_flag
+                    })
+                else:
+                    chall_desc = "[{}] -> {}".format(challenge.category(),
+                                                     challenge.slug())
+                    if not no_color:
+                        chall_desc = colored(chall_desc, 'blue')
 
-                print(chall_sep)
-                print("{} => {}".format(chall_desc, new_flag))
+                    print(chall_sep)
+                    print("{} => {}".format(chall_desc, new_flag))
 
-    return True
+    return results if args.json else True

@@ -10,4 +10,5 @@
 #  FUNCTIONS
 # =============================================================================
 def enable(args, repo, logger):
-    return repo.enable_chall(args.category, args.slug)
+    status = repo.enable_chall(args.category, args.slug)
+    return {'status': status} if args.json else status

@@ -56,6 +56,8 @@ class MKCTFAPI:
                        help="repository's root folder absolute path.")
         p.add_argument('-j', '--json', action='store_true',
                        help="json formatted output.")
+        p.add_argument('-f', '--force', action='store_true',
+                       help="do not ask for confirmation.")
         # -- add subparsers
         sps = p.add_subparsers(dest='command', metavar='COMMAND')
         sps.required = True
@@ -197,6 +199,7 @@ class MKCTFAPI:
     def init(self):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'init'
         ns.func = init
         # perform
@@ -207,6 +210,7 @@ class MKCTFAPI:
     def show(self):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'show'
         ns.func = show
         # perform
@@ -217,6 +221,7 @@ class MKCTFAPI:
     def create(self, configuration):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'create'
         ns.func = create
         # parameters
@@ -229,6 +234,7 @@ class MKCTFAPI:
     def delete(self, category=None, slug=None):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'delete'
         ns.func = delete
         # parameters
@@ -242,6 +248,7 @@ class MKCTFAPI:
     def configure(self, configuration, category=None, slug=None):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'configure'
         ns.func = enable
         # parameters
@@ -256,6 +263,7 @@ class MKCTFAPI:
     def enable(self, category, slug):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'enable'
         ns.func = enable
         # parameters
@@ -269,6 +277,7 @@ class MKCTFAPI:
     def disable(self, category, slug):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'disable'
         ns.func = disable
         # parameters
@@ -284,6 +293,7 @@ class MKCTFAPI:
                include_disabled=False):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'export'
         ns.func = export
         # parameters
@@ -299,6 +309,7 @@ class MKCTFAPI:
     def renew_flag(self, category=None, slug=None, size=DEFAULT_SIZE):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'renew_flag'
         ns.func = renew_flag
         # parameters
@@ -313,6 +324,7 @@ class MKCTFAPI:
     def build(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'build'
         ns.func = build
         # parameters
@@ -327,6 +339,7 @@ class MKCTFAPI:
     def deploy(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'deploy'
         ns.func = deploy
         # parameters
@@ -341,6 +354,7 @@ class MKCTFAPI:
     def status(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
         ns = Namespace()
         ns.json = True
+        ns.force = True
         ns.command = 'status'
         ns.func = status
         # parameters

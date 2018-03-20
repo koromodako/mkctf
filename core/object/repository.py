@@ -223,16 +223,17 @@ class Repository(Configurable):
     ##
     ## @brief      { function_description }
     ##
-    def configure(self):
-        repo_conf = self.__make_repo_conf(self.get_conf())
+    def configure(self, configuration):
+        repo_conf = self.__make_repo_conf(previous_conf=self.get_conf(),
+                                          override_conf=configuration)
         self.set_conf(repo_conf)
         return True
     ##
     ## @brief      Creates a chall.
     ##
-    def create_chall(self):
+    def create_chall(self, configuration):
         repo_conf = self.get_conf()
-        chall_conf = self.__make_chall_conf()
+        chall_conf = self.__make_chall_conf(override_conf=configuration)
         chall_conf_path = path.join(self.working_dir(),
                                     chall_conf['category'],
                                     chall_conf['slug'],
@@ -251,12 +252,13 @@ class Repository(Configurable):
     ## @param      category  The category
     ## @param      slug      The slug
     ##
-    def configure_chall(self, category, slug):
+    def configure_chall(self, category, slug, configuration):
         chall = self.find_chall(category, slug)
         if chall is None:
             return False
 
-        new_chall_conf = self.__make_chall_conf(chall.get_conf())
+        new_chall_conf = self.__make_chall_conf(previous_conf=chall.get_conf(),
+                                                override_conf=configuration)
 
         chall.set_conf(new_chall_conf)
         return True
