@@ -9,6 +9,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+import sys
 from termcolor import colored
 from core.config import prog_prompt
 # =============================================================================
@@ -24,11 +25,12 @@ class Logger(object):
     ## @param      debug    The debug
     ## @param      verbose  The verbose
     ##
-    def __init__(self, debug, quiet, no_color):
+    def __init__(self, debug, quiet, no_color, out=None):
         super().__init__()
         self._debug = debug
         self._quiet = quiet
         self._no_color = no_color
+        self._out = out or sys.stderr
     ##
     ## @brief      Prints message out using prog_prompt with given indicator
     ##
@@ -42,7 +44,7 @@ class Logger(object):
             if not self._no_color:
                 attrs = ['bold'] if bold else []
                 line = colored(line, color, attrs=attrs)
-            print(line, end=end)
+            self._out.write('{}{}'.format(line, end))
     ##
     ## @brief      { function_description }
     ##
@@ -51,7 +53,7 @@ class Logger(object):
     ##
     def fatal(self, msg, end='\n'):
         self._print('FATAL', 'magenta', msg, end, bold=True)
-        exit(1)
+        exit(101)
     ##
     ## @brief      { function_description }
     ##
