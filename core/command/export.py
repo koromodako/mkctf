@@ -62,23 +62,33 @@ def export(args, repo, logger):
     category, slug = args.category, args.slug
     include_disabled = args.include_disabled
 
+    status = True
+
     if category is None and slug is not None:
         logger.error("you must specify --category if you use --chall-slug.")
-        return False
+        status = False
+    else:
+        os.makedirs(export_dir, exist_ok=True)
 
-    os.makedirs(export_dir, exist_ok=True)
+        if slug is not None:
+            chall = repo.find_chall(category, slug)
 
-    if slug is not None:
-        chall = repo.find_chall(category, slug)
-        if chall is None:
-            logger.error("challenge not found: {}/{}".format(chall.category(),
-                                                             chall.slug()))
-            return False
+            if chall is None:
+                logger.error("challenge not found: {}/{}".format(chall.category(),
+                                                                 chall.slug()))
+                status = False
+            else:
+                status = __export_chall(logger,
+                                        export_dir,
+                                        include_disabled,
+                                        chall)
+        else:
+            for category, challenges in repo.scan(category):
+                for chall in challenges:
+                    if not __export_chall(logger,
+                                          export_dir,
+                                          include_disabled,
+                                          chall):
+                        status = False
 
-        return __export_chall(logger, export_dir, include_disabled, chall)
-
-    for category, challenges in repo.scan(category):
-        for chall in challenges:
-            __export_chall(logger, export_dir, include_disabled, chall)
-
-    return True
+    return {'status': status} if args.json else status

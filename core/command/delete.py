@@ -11,10 +11,13 @@
 # =============================================================================
 def delete(args, repo, logger):
     category, slug = args.category, args.slug
+    status = True
+
     if repo.delete_chall(category, slug):
         logger.info("challenge {}/{} successfully deleted.".format(category,
                                                                    slug))
-        return True
+    else:
+        logger.error("challenge {}/{} deletion failed.".format(category, slug))
+        status = False
 
-    logger.error("challenge {}/{} deletion failed.".format(category, slug))
-    return False
+    return {'status': status} if args.json else status

@@ -10,5 +10,5 @@
 #  FUNCTIONS
 # =============================================================================
 def disable(args, repo, logger):
-    return repo.disable_chall(args.category, args.slug)
-
+    status = repo.disable_chall(args.category, args.slug)
+    return {'status': status} if args.json else status

@@ -58,17 +58,26 @@ def __print_chall(logger, challenge, no_color):
 def show(args, repo, logger):
     found = False
     success = True
+    results = {}
     category, slug = args.category, args.slug
 
-    print("challenges:")
+    if not args.json:
+        print("challenges:")
+
     for cat, challenges in repo.scan(category):
-        print("{}+ {}".format(TAB, cat))
+
+        if not args.json:
+            print("{}+ {}".format(TAB, cat))
+
+        results[cat] = {}
 
         for challenge in challenges:
             if slug is None or slug == challenge.slug():
                 found = True
                 try:
-                    if not __print_chall(logger, challenge, args.no_color):
+                    if args.json:
+                        results[cat][challenge.slug()] = challenge.get_conf()
+                    elif not __print_chall(logger, challenge, args.no_color):
                         success = False
                 except Exception as e:
                     logger.error("configuration is invalid (missing key: "
@@ -78,4 +87,4 @@ def show(args, repo, logger):
     if not found:
         logger.warning("no challenge found matching given constraints.")
 
-    return success
+    return results if args.json else success

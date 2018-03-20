@@ -30,30 +30,49 @@ def status(args, repo, logger):
         out_sep = colored(out_sep, 'blue')
         err_sep = colored(err_sep, 'red')
 
+    success = True
+    results = []
+
     for cat, challenges in repo.scan(category):
         for challenge in challenges:
             if slug is None or slug == challenge.slug():
+
+                exception = None
+
                 try:
                     (code, stdout, stderr) = challenge.status(timeout)
                 except Exception as e:
-                    exception = e
+                    exception = str(e)
+                    success = False
                     code = -1
 
-                chall_description = "[{}] -> {}".format(challenge.category(),
-                                                        challenge.slug())
-                if not no_color:
-                    chall_description = colored(chall_description, 'blue')
+                if args.json:
+                    results.append({
+                        'slug': challenge.slug(),
+                        'category': challenge.category(),
+                        'code': code,
+                        'stdout': stdout,
+                        'stderr': stderr,
+                        'exception': exception
+                    })
+                else:
+                    chall_description = "[{}] -> {}".format(challenge.category(),
+                                                            challenge.slug())
+                    if not no_color:
+                        chall_description = colored(chall_description, 'blue')
 
-                chall_status = returncode2str(code, args.no_color)
+                    chall_status = returncode2str(code, args.no_color)
 
-                print(chall_sep)
-                print("{} {}".format(chall_description, chall_status))
+                    print(chall_sep)
+                    print("{} {}".format(chall_description, chall_status))
 
-                if code < 0:
-                    print(exc_sep)
-                    print(exception)
-                elif code > 0:
-                    print(out_sep)
-                    print(stdout.decode().strip())
-                    print(err_sep)
-                    print(stderr.decode().strip())
+                    if code < 0:
+                        print(exc_sep)
+                        print(exception)
+                    elif code > 0:
+                        print(out_sep)
+                        print(stdout.decode().strip())
+                        print(err_sep)
+                        print(stderr.decode().strip())
+
+    return results if args.json else success

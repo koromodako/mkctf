@@ -10,5 +10,6 @@
 #  FUNCTIONS
 # =============================================================================
 def create(args, repo, logger):
-    return repo.create_chall()
+    status = repo.create_chall(args.configuration)
+    return {'status': status} if args.json else status
 

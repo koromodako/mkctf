@@ -11,24 +11,26 @@
 # =============================================================================
 def configure(args, repo, logger):
     category, slug = args.category, args.slug
+    success = True
+
     if category is None and slug is None:
 
-        if repo.configure():
+        if repo.configure(args.configuration):
             logger.info("repo configured.")
-            return True
+        else:
+            logger.error("repo configuration failed.")
+            success = False
 
-        logger.error("repo configuration failed.")
-        return False
+    elif category is not None and slug is not None:
 
-    if category is not None and slug is not None:
-        if repo.configure_chall(category, slug):
+        if repo.configure_chall(category, slug, args.configuration):
             logger.info("challenge configured.")
-            return True
+        else:
+            logger.error("challenge configuration failed.")
+            success = False
+    else:
+        logger.error("use both --category and --chall-slug to configure a "
+                     "challenge.")
+        success = False
 
-        logger.error("challenge configuration failed.")
-        return False
-
-    logger.error("use both --category and --chall-slug to configure a "
-                 "challenge.")
-    return False
-
+    return {'status': success} if args.json else success

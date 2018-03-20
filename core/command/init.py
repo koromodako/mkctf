@@ -20,12 +20,18 @@
 ## @param      logger       The logger
 ##
 def init(args, repo, logger):
+    status = True
+
     if repo.get_conf() is None:
         repo.init()
         logger.info("mkctf repository created.")
-        repo.print_conf()
-        return True
 
-    logger.info("already a mkctf repository.")
-    return False
+        if not args.json:
+            repo.print_conf()
+
+    else:
+        logger.error("already a mkctf repository.")
+        status = False
+
+    return {'status': status, 'conf': repo.get_conf()} if args.json else status
 
