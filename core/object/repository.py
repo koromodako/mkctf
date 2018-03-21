@@ -38,129 +38,97 @@ class Repository(Configurable):
     ##
     ## @brief      { function_description }
     ##
-    ## @param      prev_conf  The repo conf
-    ##
-    def __make_repo_conf(self, prev_conf=None):
-        if prev_conf is None:
-            def_name = None
-            def_categories = None
-            def_pub_dirs = None
-            def_priv_dirs = None
-            def_txt_files = None
-            def_chall_file = None
-            def_build_file = None
-            def_deploy_file = None
-            def_status_file = None
-            def_flag_prefix = None
-            def_flag_suffix = None
+    def __make_repo_conf(self,
+                         previous_conf={},
+                         override_conf=None):
+        if override_conf:
+            conf = previous_conf
+            conf.update(override_conf)
         else:
-            def_name = prev_conf.get('name')
-            def_categories = prev_conf['categories']
-            def_pub_dirs = prev_conf['directories']['public']
-            def_priv_dirs = prev_conf['directories']['private']
-            def_txt_files = prev_conf['files']['txt']
-            def_chall_file = prev_conf['files']['config']['challenge']
-            def_build_file = prev_conf['files']['build']
-            def_deploy_file = prev_conf['files']['deploy']
-            def_status_file = prev_conf['files']['status']
-            def_flag_prefix = prev_conf['flag']['prefix']
-            def_flag_suffix = prev_conf['flag']['suffix']
+            name = previous_conf.get('name')
+            categories = previous_conf.get('categories')
+            pub_dirs = previous_conf.get('directories', {}).get('public')
+            priv_dirs = previous_conf.get('directories', {}).get('private')
+            txt_files = previous_conf.get('files', {}).get('txt')
+            chall_file = previous_conf.get('files', {}).get('config', {}).get('challenge')
+            build_file = previous_conf.get('files', {}).get('build')
+            deploy_file = previous_conf.get('files', {}).get('deploy')
+            status_file = previous_conf.get('files', {}).get('status')
+            flag_prefix = previous_conf.get('flag', {}).get('prefix')
+            flag_suffix = previous_conf.get('flag', {}).get('suffix')
 
+            name = self.cli.readline("enter repository name:", default=name)
+            categories = self.cli.choose_many("select categories:", categories, default=categories)
+            pub_dirs = self.cli.choose_many("select public directories:", pub_dirs, default=pub_dirs)
+            priv_dirs = self.cli.choose_many("select private directories:", priv_dirs, default=priv_dirs)
+            txt_files = self.cli.choose_many("select text files:", txt_files, default=txt_files)
+            chall_file = self.cli.readline("enter challenge file name:", default=chall_file)
+            build_file = self.cli.readline("enter build file name:", default=build_file)
+            deploy_file = self.cli.readline("enter deploy file name:", default=deploy_file)
+            status_file = self.cli.readline("enter status file name:", default=status_file)
+            flag_prefix = self.cli.readline("enter flag prefix:", default=flag_prefix)
+            flag_suffix = self.cli.readline("enter flag suffix:", default=flag_suffix)
 
-        name = self.cli.readline("enter repository name:",
-                                 default=def_name)
-        categories = self.cli.choose_many("select categories:",
-                                          def_categories,
-                                          default=def_categories)
-        pub_dirs = self.cli.choose_many("select public directories:",
-                                        def_pub_dirs,
-                                        default=def_pub_dirs)
-        priv_dirs = self.cli.choose_many("select private directories:",
-                                         def_priv_dirs,
-                                         default=def_priv_dirs)
-        txt_files = self.cli.choose_many("select text files:",
-                                         def_txt_files,
-                                         default=def_txt_files)
-        chall_file = self.cli.readline("enter challenge file name:",
-                                       default=def_chall_file)
-        build_file = self.cli.readline("enter build file name:",
-                                       default=def_build_file)
-        deploy_file = self.cli.readline("enter deploy file name:",
-                                        default=def_deploy_file)
-        status_file = self.cli.readline("enter status file name:",
-                                        default=def_status_file)
-        flag_prefix = self.cli.readline("enter flag prefix:",
-                                        default=def_flag_prefix)
-        flag_suffix = self.cli.readline("enter flag suffix:",
-                                        default=def_flag_suffix)
-
-        return {
-            'name': name,
-            'categories': categories,
-            'directories': {
-                'public': pub_dirs,
-                'private': priv_dirs
-            },
-            'files': {
-                'txt': txt_files,
-                'build': build_file,
-                'deploy': deploy_file,
-                'status': status_file,
-                'config': {
-                    'challenge': chall_file
+            conf = {
+                'name': name,
+                'categories': categories,
+                'directories': {
+                    'public': pub_dirs,
+                    'private': priv_dirs
+                },
+                'files': {
+                    'txt': txt_files,
+                    'build': build_file,
+                    'deploy': deploy_file,
+                    'status': status_file,
+                    'config': {
+                        'challenge': chall_file
+                    }
+                },
+                'flag': {
+                    'prefix': flag_prefix,
+                    'suffix': flag_suffix
                 }
-            },
-            'flag': {
-                'prefix': flag_prefix,
-                'suffix': flag_suffix
             }
-        }
+
+        return conf
     ##
     ## @brief      Makes a chall conf.
     ##
-    def __make_chall_conf(self, prev_conf=None):
+    def __make_chall_conf(self,
+                          previous_conf=None,
+                          override_conf=None):
         repo_conf = self.get_conf()
 
-        if prev_conf is None:
-            flag = Challenge.make_flag(repo_conf)
-            enabled = False
-            parameters = {}
-            def_name = None
-            def_static = None
-            def_points = None
-            def_category = None
-            def_standalone = None
+        if override_conf:
+            conf = previous_conf
+            conf.update(override_conf)
         else:
-            flag = prev_conf['flag']
-            enabled = prev_conf['enabled']
-            parameters = prev_conf['parameters']
-            def_name = prev_conf['name']
-            def_points = prev_conf['points']
-            def_category = prev_conf['category']
-            def_standalone = prev_conf['standalone']
+            flag = previous_conf.get('flag', Challenge.make_flag(repo_conf))
+            enabled = previous_conf.get('enabled', False)
+            parameters = previous_conf.get('parameters', {})
+            name = previous_conf.get('name')
+            points = previous_conf.get('points')
+            category = previous_conf.get('category')
+            standalone = previous_conf.get('standalone')
 
-        name = self.cli.readline("enter challenge name:",
-                                 default=def_name)
+            name = self.cli.readline("enter challenge name:", default=name)
+            points = self.cli.readline("enter number of points:", default=points, expect_digit=True)
+            category = self.cli.choose_one("select a category:", choices=repo_conf['categories'], default=category)
+            standalone = self.cli.confirm("is it a standalone challenge?", default=standalone)
 
-        points = self.cli.readline("enter number of points:",
-                                   default=def_points,
-                                   expect_digit=True)
-        category = self.cli.choose_one("select a category:",
-                                       choices=repo_conf['categories'],
-                                       default=def_category)
-        standalone = self.cli.confirm("is it a standalone challenge?",
-                                      default=def_standalone)
+            conf = {
+                'name': name,
+                'slug': slugify(name),
+                'flag': flag,
+                'points': points,
+                'enabled': enabled,
+                'category': category,
+                'parameters': parameters,
+                'standalone': standalone
+            }
 
-        return {
-            'name': name,
-            'slug': slugify(name),
-            'flag': flag,
-            'points': points,
-            'enabled': enabled,
-            'category': category,
-            'parameters': parameters,
-            'standalone': standalone
-        }
+        return conf
     ##
     ## @brief      { function_description }
     ##
@@ -223,7 +191,7 @@ class Repository(Configurable):
     ##
     ## @brief      { function_description }
     ##
-    def configure(self, configuration):
+    def configure(self, configuration=None):
         repo_conf = self.__make_repo_conf(previous_conf=self.get_conf(),
                                           override_conf=configuration)
         self.set_conf(repo_conf)
@@ -231,7 +199,7 @@ class Repository(Configurable):
     ##
     ## @brief      Creates a chall.
     ##
-    def create_chall(self, configuration):
+    def create_chall(self, configuration=None):
         repo_conf = self.get_conf()
         chall_conf = self.__make_chall_conf(override_conf=configuration)
         chall_conf_path = path.join(self.working_dir(),
@@ -252,7 +220,7 @@ class Repository(Configurable):
     ## @param      category  The category
     ## @param      slug      The slug
     ##
-    def configure_chall(self, category, slug, configuration):
+    def configure_chall(self, category, slug, configuration=None):
         chall = self.find_chall(category, slug)
         if chall is None:
             return False
