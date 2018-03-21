@@ -170,9 +170,12 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def perform(self, ns):
+        self.logger.info("mkctf starts...")
+        self.logger.debug("ns: {}".format(ns))
+
         if ns.command != 'init' and self.repo.get_conf() is None:
-            logger.fatal("mkctf repository must be initialized first. Run "
-                         "`mkctf init`.")
+            self.logger.fatal("mkctf repository must be initialized first. "
+                              "Run `mkctf init` first.")
 
         try:
             # -----------------------------------------------------------------
@@ -196,34 +199,33 @@ class MKCTFAPI:
     ##
     ## @brief      { function_description }
     ##
-    def init(self):
+    def __ns(self, func):
         ns = Namespace()
         ns.json = True
         ns.force = True
-        ns.command = 'init'
-        ns.func = init
+        ns.no_color = True
+        ns.command = func.__name__
+        ns.func = func
+        return ns
+    ##
+    ## @brief      { function_description }
+    ##
+    def init(self):
+        ns = self.__ns(init)
         # perform
         return self.perform(ns)
     ##
     ## @brief      { function_description }
     ##
     def show(self):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'show'
-        ns.func = show
+        ns = self.__ns(show)
         # perform
         return self.perform(ns)
     ##
     ## @brief      { function_description }
     ##
     def create(self, configuration):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'create'
-        ns.func = create
+        ns = self.__ns(create)
         # parameters
         ns.configuration = configuration
         # perform
@@ -232,11 +234,7 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def delete(self, category=None, slug=None):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'delete'
-        ns.func = delete
+        ns = self.__ns(delete)
         # parameters
         ns.category = category
         ns.slug = slug
@@ -246,11 +244,7 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def configure(self, configuration, category=None, slug=None):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'configure'
-        ns.func = enable
+        ns = self.__ns(enable)
         # parameters
         ns.configuration = configuration
         ns.category = category
@@ -261,11 +255,7 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def enable(self, category, slug):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'enable'
-        ns.func = enable
+        ns = self.__ns(enable)
         # parameters
         ns.category = category
         ns.slug = slug
@@ -275,11 +265,7 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def disable(self, category, slug):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'disable'
-        ns.func = disable
+        ns = self.__ns(disable)
         # parameters
         ns.category = category
         ns.slug = slug
@@ -291,11 +277,7 @@ class MKCTFAPI:
     def export(self, export_dir,
                category=None, slug=None,
                include_disabled=False):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'export'
-        ns.func = export
+        ns = self.__ns(export)
         # parameters
         ns.export_dir = export_dir
         ns.category = category
@@ -307,11 +289,7 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def renew_flag(self, category=None, slug=None, size=DEFAULT_SIZE):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'renew_flag'
-        ns.func = renew_flag
+        ns = self.__ns(renew_flag)
         # parameters
         ns.category = category
         ns.slug = slug
@@ -322,11 +300,7 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def build(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'build'
-        ns.func = build
+        ns = self.__ns(build)
         # parameters
         ns.category = category
         ns.slug = slug
@@ -337,11 +311,7 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def deploy(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'deploy'
-        ns.func = deploy
+        ns = self.__ns(deploy)
         # parameters
         ns.category = category
         ns.slug = slug
@@ -352,11 +322,7 @@ class MKCTFAPI:
     ## @brief      { function_description }
     ##
     def status(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.command = 'status'
-        ns.func = status
+        ns = self.__ns(status)
         # parameters
         ns.category = category
         ns.slug = slug
