@@ -8,7 +8,6 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from os import getcwd
 from pathlib import Path
 from argparse import ArgumentParser, Namespace
 from traceback import print_exc
@@ -35,15 +34,17 @@ DEFAULT_TIMEOUT = 4 # seconds
 # =============================================================================
 #  CLASSES
 # =============================================================================
-##
-## @brief      Class for mkctf API.
-##
 class MKCTFAPI:
-    ##
-    ## @brief      Parses commandline arguments
-    ##
+    """Provides access to all functionalities programmatically
+
+    """
     @staticmethod
     def parse_args():
+        """Parse command line arguments
+
+        Returns:
+            Namespace -- [description]
+        """
         p = ArgumentParser(add_help=True,
                            description="Manage CTF challenges repository.")
         p.add_argument('-q', '--quiet', action='store_true',
@@ -52,7 +53,7 @@ class MKCTFAPI:
                        help="output debug messages")
         p.add_argument('--no-color', action='store_true',
                        help="disable colored output")
-        p.add_argument('-r', '--repo-root', default=getcwd(),
+        p.add_argument('-r', '--repo-root', type=Path, default=Path.cwd(),
                        help="repository's root folder absolute path.")
         p.add_argument('-j', '--json', action='store_true',
                        help="json formatted output.")
@@ -74,8 +75,8 @@ class MKCTFAPI:
         create_p.set_defaults(func=create)
         # ---- delete
         delete_p = sps.add_parser('delete', help="deletes a challenge.")
-        delete_p.add_argument('-c', '--category', help="challenge's category.")
-        delete_p.add_argument('-s', '--slug', help="challenge's slug.")
+        delete_p.add_argument('category', help="challenge's category.")
+        delete_p.add_argument('slug', help="challenge's slug.")
         delete_p.set_defaults(func=delete)
         # ---- configure
         configure_p = sps.add_parser('configure', help="edits repository's config "
@@ -96,9 +97,10 @@ class MKCTFAPI:
         # ---- export
         export_p = sps.add_parser('export', help="exports enabled static "
                                                  "challenges.")
-        export_p.add_argument('export_dir', help="folder where archives must be "
-                                                 "written. If the folder does not "
-                                                 "exist it will be created.")
+        export_p.add_argument('export_dir', type=Path,
+                              help="folder where archives must be written. If "
+                                   "the folder does not exist it will be "
+                                   "created.")
         export_p.add_argument('-c', '--category', help="challenge's category.")
         export_p.add_argument('-s', '--slug', help="challenge's slug.")
         export_p.add_argument('--include-disabled', action='store_true',
@@ -143,12 +145,21 @@ class MKCTFAPI:
         args.configuration = None
 
         return args
-    ##
-    ## @brief      Constructs the object.
-    ##
+
     def __init__(self, repo_root,
                  debug, quiet, no_color,
                  out=None):
+        """Constructs a new instance
+
+        Arguments:
+            repo_root {Path} -- [description]
+            debug {bool} -- [description]
+            quiet {bool} -- [description]
+            no_color {bool} -- [description]
+
+        Keyword Arguments:
+            out {IOBase} -- [description] (default: {None})
+        """
 
         super(MKCTFAPI, self).__init__()
         self.logger = Logger(debug, quiet, no_color, out)
@@ -159,17 +170,23 @@ class MKCTFAPI:
         self.glob_conf_path = Path.home() / '.config/mkctf.yml'
         self.logger.debug('glob_conf_path: {}'.format(self.glob_conf_path))
 
-        self.glob_conf = load_config(str(self.glob_conf_path))
+        self.glob_conf = load_config(self.glob_conf_path)
         self.logger.debug('glob_conf: {}'.format(self.glob_conf))
 
-        self.repo_conf_path = str(self.repo_root / self.glob_conf['files']['config']['repository'])
+        self.repo_conf_path = self.repo_root / self.glob_conf['files']['config']['repository']
         self.logger.debug('repo_conf_path: {}'.format(self.repo_conf_path))
 
         self.repo = Repository(self.logger, self.repo_conf_path, self.glob_conf)
-    ##
-    ## @brief      { function_description }
-    ##
-    def perform(self, ns):
+
+    async def perform(self, ns):
+        """Performs a comand using given Namespace ns
+
+        Arguments:
+            ns {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
         self.logger.info("mkctf starts...")
         self.logger.debug("ns: {}".format(ns))
 
@@ -185,7 +202,7 @@ class MKCTFAPI:
             # else:
             #   result = True or False
             # -----------------------------------------------------------------
-            result = ns.func(ns, self.repo, self.logger)
+            result = await ns.func(ns, self.repo, self.logger)
         except Exception as e:
             print_exc()
             self.logger.fatal("Ouuuuupss.....:(")
@@ -196,10 +213,16 @@ class MKCTFAPI:
             self.logger.error("mkctf ended with errors.")
 
         return result
-    ##
-    ## @brief      { function_description }
-    ##
+
     def __ns(self, func):
+        """Creates a standard Namespace used by all functions of the API
+
+        Arguments:
+            func {function} -- [description]
+
+        Returns:
+            Namespace -- [description]
+        """
         ns = Namespace()
         ns.json = True
         ns.force = True
@@ -207,43 +230,72 @@ class MKCTFAPI:
         ns.command = func.__name__
         ns.func = func
         return ns
-    ##
-    ## @brief      { function_description }
-    ##
+
     def init(self):
+        """API wrapper for 'init' command
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(init)
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def show(self):
+        """API wrapper for 'show' command
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(show)
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def create(self, configuration):
+        """API wrapper for 'create' command
+
+        Arguments:
+            configuration {dict} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(create)
         # parameters
         ns.configuration = configuration
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def delete(self, category=None, slug=None):
+        """API wrapper for 'delete' command
+
+        Keyword Arguments:
+            category {str} -- [description] (default: {None})
+            slug {str} -- [description] (default: {None})
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(delete)
         # parameters
         ns.category = category
         ns.slug = slug
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def configure(self, configuration, category=None, slug=None):
+        """API wrapper for 'configure' command
+
+        Arguments:
+            configuration {dict} -- [description]
+
+        Keyword Arguments:
+            category {str} -- [description] (default: {None})
+            slug {str} -- [description] (default: {None})
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(enable)
         # parameters
         ns.configuration = configuration
@@ -251,32 +303,57 @@ class MKCTFAPI:
         ns.slug = slug
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def enable(self, category, slug):
+        """API wrapper for 'enable' command
+
+        Arguments:
+            category {str} -- [description]
+            slug {str} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(enable)
         # parameters
         ns.category = category
         ns.slug = slug
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def disable(self, category, slug):
+        """API wrapper for 'disable' command
+
+        Arguments:
+            category {str} -- [description]
+            slug {str} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(disable)
         # parameters
         ns.category = category
         ns.slug = slug
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def export(self, export_dir,
                category=None, slug=None,
                include_disabled=False):
+        """API wrapper for 'export' command
+
+        Arguments:
+            export_dir {Path} -- [description]
+
+        Keyword Arguments:
+            category {str} -- [description] (default: {None})
+            slug {str} -- [description] (default: {None})
+            include_disabled {bool} -- [description] (default: {False})
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(export)
         # parameters
         ns.export_dir = export_dir
@@ -285,10 +362,18 @@ class MKCTFAPI:
         ns.include_disabled = include_disabled
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def renew_flag(self, category=None, slug=None, size=DEFAULT_SIZE):
+        """API wrapper for 'renew_flag' command
+
+        Keyword Arguments:
+            category {str} -- [description] (default: {None})
+            slug {str} -- [description] (default: {None})
+            size {int} -- [description] (default: {DEFAULT_SIZE})
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(renew_flag)
         # parameters
         ns.category = category
@@ -296,10 +381,18 @@ class MKCTFAPI:
         ns.size = size
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def build(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
+        """API wrapper for 'build' command
+
+        Keyword Arguments:
+            category {str} -- [description] (default: {None})
+            slug {str} -- [description] (default: {None})
+            timeout {int} -- [description] (default: {DEFAULT_TIMEOUT})
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(build)
         # parameters
         ns.category = category
@@ -307,10 +400,18 @@ class MKCTFAPI:
         ns.timeout = timeout
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def deploy(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
+        """API wrapper for 'deploy' command
+
+        Keyword Arguments:
+            category {str} -- [description] (default: {None})
+            slug {str} -- [description] (default: {None})
+            timeout {int} -- [description] (default: {DEFAULT_TIMEOUT})
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(deploy)
         # parameters
         ns.category = category
@@ -318,10 +419,18 @@ class MKCTFAPI:
         ns.timeout = timeout
         # perform
         return self.perform(ns)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def status(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
+        """API wrapper for 'status' command
+
+        Keyword Arguments:
+            category {str} -- [description] (default: {None})
+            slug {str} -- [description] (default: {None})
+            timeout {int} -- [description] (default: {DEFAULT_TIMEOUT})
+
+        Returns:
+            [type] -- [description]
+        """
         ns = self.__ns(status)
         # parameters
         ns.category = category

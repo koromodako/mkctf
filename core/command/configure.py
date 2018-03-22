@@ -9,7 +9,15 @@
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def configure(args, repo, logger):
+
+async def configure(args, repo, logger):
+    """Configures mkctf repository or a specific challenge
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+    """
     category, slug = args.category, args.slug
     success = True
 

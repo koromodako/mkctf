@@ -15,39 +15,53 @@ from core.config import prog_prompt
 # =============================================================================
 # CLASSES
 # =============================================================================
-##
-## @brief      Class for cli.
-##
+
+
 class CLI(object):
-    ##
-    ## @brief      Constructs the object.
-    ##
-    ## @param      logger  The logger
-    ##
+    """Command line interaction utility
+
+    Provides useful methods to read user input.
+    """
     def __init__(self, logger):
+        """[summary]
+
+        [description]
+
+        Arguments:
+            logger {[type]} -- [description]
+        """
         super().__init__()
         self.logger = logger
         self.prog_prompt = prog_prompt('?').strip()
-    ##
-    ## @brief      { function_description }
-    ##
-    ## @param      prompt  The prompt
-    ##
+
     def prompt(self, prompt):
+        """[summary]
+
+        [description]
+
+        Arguments:
+            prompt {[type]} -- [description]
+        """
         return "{} {} ".format(self.prog_prompt, prompt.strip())
-    ##
-    ## @brief      Reads one line.
-    ##
-    ## @param      prompt        The prompt
-    ## @param      allow_empty   The allow empty
-    ## @param      default       The default
-    ## @param      expect_digit  The expect digit
-    ##
+
     def readline(self,
                  prompt,
                  allow_empty=False,
                  expect_digit=False,
                  default=None):
+        """Reads one line
+
+        Arguments:
+            prompt {str} -- [description]
+
+        Keyword Arguments:
+            allow_empty {bool} -- [description] (default: {False})
+            expect_digit {bool} -- [description] (default: {False})
+            default {str or None} -- [description] (default: {None})
+
+        Returns:
+            str -- [description]
+        """
         value = ''
 
         if not isinstance(prompt, str):
@@ -89,16 +103,22 @@ class CLI(object):
             value = int(value, 0)
 
         return value
-    ##
-    ## @brief      Reads multiple lines.
-    ##
-    ## @param      prompt        The prompt
-    ## @param      subprompt     The subprompt
-    ## @param      expect_digit  The expect digit
-    ##
-    ## @return     { description_of_the_return_value }
-    ##
+
     def readlines(self, prompt, subprompt, expect_digit=False):
+        """Reads multiple lines
+
+        Stops when the line contains a single dot ('.') character.
+
+        Arguments:
+            prompt {str} -- [description]
+            subprompt {str} -- [description]
+
+        Keyword Arguments:
+            expect_digit {bool} -- [description] (default: {False})
+
+        Returns:
+            str -- [description]
+        """
         lines = []
 
         print(self.prompt(prompt))
@@ -111,30 +131,41 @@ class CLI(object):
             lines.append(value)
 
         return lines
-    ##
-    ## @brief      Asks user for confirmation
-    ##
-    ## @param      question  The question
-    ##
-    ## @return     { description_of_the_return_value }
-    ##
+
     def confirm(self, question, default=False):
+        """Asks user for confirmation
+
+        Arguments:
+            question {str} -- [description]
+
+        Keyword Arguments:
+            default {bool} -- [description] (default: {False})
+        """
         default = 'true' if default else 'false'
         resp = self.readline(question.strip(),
                              default=default)
         return (resp.strip().lower() in ['true', 'y', 'yes', '1'])
-    ##
-    ## @brief      Choose one among choices and possibly a custom value
-    ##
-    ## @param      prompt        The prompt
-    ## @param      choices       The choices
-    ## @param      allow_custom  The allow custom
-    ##
+
     def choose_one(self,
                    prompt,
                    choices,
                    default=None,
                    allow_custom=False):
+        """Elect one element among a collection
+
+        You can also allow tht user to enter a custom value
+
+        Arguments:
+            prompt {str} -- [description]
+            choices {list(any)} -- [description]
+
+        Keyword Arguments:
+            default {any} -- [description] (default: {None})
+            allow_custom {bool} -- [description] (default: {False})
+
+        Returns:
+            any -- [description]
+        """
         selection = default
 
         if not isinstance(choices, list): # do not check number of elements
@@ -179,16 +210,7 @@ class CLI(object):
             selection = choices[choice]
 
         return selection
-    ##
-    ## @brief      { function_description }
-    ##
-    ## @param      prompt             The prompt
-    ## @param      choices            The choices
-    ## @param      allow_custom       The allow custom
-    ## @param      default_selection  The default selection
-    ## @param      min                The minimum
-    ## @param      max                The maximum
-    ##
+
     def choose_many(self,
                     prompt,
                     choices,
@@ -197,6 +219,22 @@ class CLI(object):
                     max_choices=None,
                     allow_custom=False,
                     allow_multiple=False):
+        """Elect many elements among a collection
+
+        Arguments:
+            prompt {str} -- [description]
+            choices {list(any)} -- [description]
+
+        Keyword Arguments:
+            default {any} -- [description] (default: {None})
+            min_choices {int(1,)} -- [description] (default: {None})
+            max_choices {int(min_choices,)} -- [description] (default: {None})
+            allow_custom {bool} -- [description] (default: {False})
+            allow_multiple {bool} -- [description] (default: {False})
+
+        Returns:
+            list(any) -- [description]
+        """
         if min_choices is not None:
             if min_choices < 1:
                 raise ValueError("min_choices argument must be strictly "

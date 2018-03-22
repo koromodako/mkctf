@@ -9,7 +9,15 @@
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def delete(args, repo, logger):
+
+async def delete(args, repo, logger):
+    """Deletes a challenge
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+    """
     category, slug = args.category, args.slug
     status = True
 

@@ -15,10 +15,17 @@ from core.formatting import dict2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-##
-## @brief      { function_description }
-##
 def __print_chall(logger, challenge, no_color):
+    """Prints a challenge
+
+    Arguments:
+        logger {Logger} -- [description]
+        challenge {Challenge} -- [description]
+        no_color {bool} -- [description]
+
+    Returns:
+        bool -- [description]
+    """
     conf = challenge.get_conf()
     if conf is None:
         logger.error("configuration missing. Run `mkctf configure "
@@ -46,16 +53,18 @@ def __print_chall(logger, challenge, no_color):
     print(text[1:])
 
     return True
-##
-## @brief      { function_description }
-##
-## @param      args    The arguments
-## @param      repo    The repo
-## @param      logger  The logger
-##
-## @return     { description_of_the_return_value }
-##
-def show(args, repo, logger):
+
+async def show(args, repo, logger):
+    """Shows a list of all challenges
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
     found = False
     success = True
     results = {}

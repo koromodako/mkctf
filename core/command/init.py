@@ -12,14 +12,14 @@
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-##
-## @brief      { function_description }
-##
-## @param      args         The arguments
-## @param      glob_conf    The global conf
-## @param      logger       The logger
-##
-def init(args, repo, logger):
+async def init(args, repo, logger):
+    """Initializes mkctf repository
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+    """
     status = True
 
     if repo.get_conf() is None:

@@ -13,15 +13,19 @@ from hashlib import sha256
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-##
-## @brief      Hashes file content reading the file block per blocks
-##
-## @return     Hash hex digest
-##
-def hash_file(file_path):
+
+def hash_file(filepath):
+    """Hashes given file content using SHA256
+
+    Arguments:
+        filepath {Path} -- File's path
+
+    Returns:
+        str -- SHA256 hexadecimal digest
+    """
     h = sha256()
 
-    with open(file_path, 'rb') as f:
+    with filepath.open('rb') as f:
 
         while True:
             data = f.read(4096)
