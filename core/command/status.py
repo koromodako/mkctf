@@ -14,7 +14,18 @@ from core.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def status(args, repo, logger):
+
+async def status(args, repo, logger):
+    """Determines the status of a challenge
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
     no_color, timeout = args.no_color, args.timeout
     category, slug = args.category, args.slug
 
@@ -40,7 +51,7 @@ def status(args, repo, logger):
                 exception = None
 
                 try:
-                    (code, stdout, stderr) = challenge.status(timeout)
+                    (code, stdout, stderr) = await challenge.status(timeout)
                 except Exception as e:
                     exception = str(e)
                     success = False

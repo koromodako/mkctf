@@ -9,6 +9,14 @@
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def enable(args, repo, logger):
+
+async def enable(args, repo, logger):
+    """Enables a challenge
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+    """
     status = repo.enable_chall(args.category, args.slug)
     return {'status': status} if args.json else status

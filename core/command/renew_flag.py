@@ -13,7 +13,18 @@ from termcolor import colored
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def renew_flag(args, repo, logger):
+
+async def renew_flag(args, repo, logger):
+    """Renews one or more challenge flags
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
     if not args.force and not repo.cli.confirm('do you really want to renew flags?'):
         return {'status': True} if args.json else True
 

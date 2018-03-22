@@ -14,35 +14,46 @@ from ruamel import yaml
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-##
-## @brief      Returns global program prompt
-##
+
 def prog_prompt(indicator):
+    """Returns global program prompt
+
+    Arguments:
+        indicator {str} -- [description]
+    """
     return "[mkctf]({})> ".format(indicator)
-##
-## @brief      Loads a configuration from a YAML file
-##
-def yaml_load(fpath):
-    with open(fpath, 'r') as f:
+
+def yaml_load(filepath):
+    """Loads content of a YAML file
+
+    Arguments:
+        filepath {Path} -- Configuration file's path
+
+    Returns:
+        dict -- YAML configuration as a dictionary
+    """
+    with filepath.open() as f:
         return yaml.safe_load(f)
-##
-## @brief      Dumps a configuration to a YAML file
-##
-## @param      fpath  The fpath
-## @param      conf   The conf
-##
-def yaml_dump(fpath, conf):
-    with open(fpath, 'w') as f:
+
+def yaml_dump(filepath, conf):
+    """Write a configuration to a YAML configuration file
+
+    Arguments:
+        filepath {Path} -- Configuration file's path to write to
+        conf {dict} -- Configuration values
+    """
+    with filepath.open('w') as f:
         f.write("""#
 # This file was generated using mkctf utility. Do not edit it manually unless
 # you know exactly what you're doing. #PEBCAK
 #
 """)
         yaml.safe_dump(conf, f, default_flow_style=False)
-##
-## @brief      Loads a configuration.
-##
-## @param      args  The arguments
-##
-def load_config(glob_conf_path):
-    return yaml_load(glob_conf_path)
+
+def load_config(conf_path):
+    """Wrapper to add an abstraction level above configuration format
+
+    Arguments:
+        conf_path {Path} -- cf. yaml_load
+    """
+    return yaml_load(conf_path)

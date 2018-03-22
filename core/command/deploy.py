@@ -14,7 +14,18 @@ from core.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def deploy(args, repo, logger):
+
+async def deploy(args, repo, logger):
+    """Deploys one or more challenges
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
     if not args.force and not repo.cli.confirm('do you really want to deploy?'):
         return {'status': True} if args.json else True
 
@@ -43,7 +54,7 @@ def deploy(args, repo, logger):
                 exception = None
 
                 try:
-                    (code, stdout, stderr) = challenge.deploy(timeout)
+                    (code, stdout, stderr) = await challenge.deploy(timeout)
                 except Exception as e:
                     exception = e
                     success = False

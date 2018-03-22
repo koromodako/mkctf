@@ -24,21 +24,33 @@ EXIT_CODE_MAP = {
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-##
-## @brief      Sets the tab size.
-##
-## @param      size  The size
-##
+
 def set_tab_size(size):
+    """Sets the tab size.
+
+    Tabs are converted to spaces, this functions sets the size of a tabulation
+    in spaces.
+
+    Arguments:
+        size {int} -- [description]
+    """
     global TAB
     if size > 0:
         TAB = ' ' * size
-##
-## @brief      { function_description }
-##
-## @param      dictionary  The dictionary
-##
+
 def dict2str(dictionary):
+    """Converts a dictionary recursively into human-readable nested lists
+
+    >>> d = {'a': 1, 'b': 2, 'c': { 4: ['a', 'b'] }}
+    >>> print(dict2str(d))
+    + a: 1
+    + b: 2
+    + c:
+        + 4: ['a', 'b']
+
+    Arguments:
+        dictionary {dict} -- [description]
+    """
     text = ""
     for key, value in dictionary.items():
         if isinstance(value, dict):
@@ -47,13 +59,16 @@ def dict2str(dictionary):
         else:
             text += "\n+ {}: {}".format(key, value)
     return text
-##
-## @brief      { function_description }
-##
-## @param      status  The status
-## @param      code    The code
-##
+
 def returncode2str(code, no_color):
+    """[summary]
+
+    [description]
+
+    Arguments:
+        code {int or None} -- [description]
+        no_color {bool} -- [description]
+    """
     attrs = ['bold']
     value = EXIT_CODE_MAP.get(code)
 

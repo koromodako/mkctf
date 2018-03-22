@@ -11,34 +11,40 @@
 #===============================================================================
 #  IMPORTS
 #===============================================================================
-import json
-import signal
+from json import dumps
 from mkctf import MKCTFAPI
+from signal import signal, SIGINT
+from asyncio import get_event_loop
+# =============================================================================
+#  GLOBAL
+# =============================================================================
+loop = get_event_loop()
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-##
-## @brief      SIGINT handler
-##
-## @param      args  The arguments
-##
+
 def sigint_handler(*args):
+    """Handles user interrupt signal
+
+    Arguments:
+        *args {tuple} -- [description]
+    """
     print("\nOuch... that's harsh you know... :/")
     exit(2)
-##
-## @brief      Entry point
-##
-def main():
-    signal.signal(signal.SIGINT, sigint_handler)
+
+async def main():
+    """Entry point
+    """
+    signal(SIGINT, sigint_handler)
 
     ns = MKCTFAPI.parse_args()
 
     api = MKCTFAPI(ns.repo_root, ns.debug, ns.quiet, ns.no_color)
 
-    success = api.perform(ns)
+    success = await api.perform(ns)
 
     if isinstance(success, dict):
-        print(json.dumps(success))
+        print(dumps(success))
         success = True
 
     exit(0 if success else 1)
@@ -46,4 +52,4 @@ def main():
 #  SCRIPT
 # =============================================================================
 if __name__ == '__main__':
-    main()
+    loop.run_until_complete(main())

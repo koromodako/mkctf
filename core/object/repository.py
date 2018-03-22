@@ -9,9 +9,8 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-import os
-import os.path as path
 from shutil import rmtree
+from pathlib import Path
 from slugify import slugify
 from core.cli import CLI
 from core.wrapper import lazy
@@ -20,27 +19,38 @@ from core.object.configurable import Configurable
 # =============================================================================
 #  CLASSES
 # =============================================================================
-##
-## @brief      Class for repository.
-##
+
 class Repository(Configurable):
-    ##
-    ## @brief      Constructs the object.
-    ##
-    ## @param      logger       The logger
-    ## @param      glob_conf    The glob conf
-    ## @param      working_dir  The working dir
-    ##
+    """[summary]
+
+    Extends:
+        Configurable
+    """
+
     def __init__(self, logger, conf_path, glob_conf):
+        """[summary]
+
+        Arguments:
+            logger {[type]} -- [description]
+            conf_path {[type]} -- [description]
+            glob_conf {[type]} -- [description]
+        """
         super().__init__(logger, conf_path)
         self.cli = CLI(logger)
         self.glob_conf = glob_conf
-    ##
-    ## @brief      { function_description }
-    ##
+
     def __make_repo_conf(self,
                          previous_conf={},
                          override_conf=None):
+        """[summary]
+
+        Keyword Arguments:
+            previous_conf {dict} -- [description] (default: {{}})
+            override_conf {dict or None} -- [description] (default: {None})
+
+        Returns:
+            dict -- [description]
+        """
         if override_conf:
             conf = previous_conf
             conf.update(override_conf)
@@ -92,12 +102,19 @@ class Repository(Configurable):
             }
 
         return conf
-    ##
-    ## @brief      Makes a chall conf.
-    ##
+
     def __make_chall_conf(self,
-                          previous_conf=None,
+                          previous_conf={},
                           override_conf=None):
+        """[summary]
+
+        Keyword Arguments:
+            previous_conf {dict} -- [description] (default: {None})
+            override_conf {dict} -- [description] (default: {None})
+
+        Returns:
+            dict -- [description]
+        """
         repo_conf = self.get_conf()
 
         if override_conf:
@@ -129,23 +146,34 @@ class Repository(Configurable):
             }
 
         return conf
-    ##
-    ## @brief      { function_description }
-    ##
+
     def init(self):
+        """[summary]
+
+        [description]
+
+        Returns:
+            bool -- [description]
+        """
         repo_conf = self.__make_repo_conf(self.glob_conf)
 
         for category in repo_conf['categories']:
-            dir_path = path.join(self.working_dir(), category)
-            if not path.isdir(dir_path):
-                os.makedirs(dir_path, exist_ok=True)
+            dir_path = self.working_dir().joinpath(category)
+            if not dir_path.is_dir():
+                dir_path.mkdir(parents=True, exist_ok=True)
 
         self.set_conf(repo_conf)
         return True
-    ##
-    ## @brief      { function_description }
-    ##
+
     def scan(self, category=None):
+        """Yields (category, challenges) tuples
+
+        Keyword Arguments:
+            category {[type]} -- [description] (default: {None})
+
+        Yields:
+            (str, list(Challenge))
+        """
         wd = self.working_dir()
         repo_conf = self.get_conf()
         keep = lambda e: e.is_dir() and not e.name.startswith('.')
@@ -153,8 +181,7 @@ class Repository(Configurable):
         for cat in self._scandirs(wd, keep):
             challenges = []
             for chall in self._scandirs(cat.path, keep):
-                chall_conf_path = path.join(chall.path,
-                                            repo_conf['files']['config']['challenge'])
+                chall_conf_path = Path(chall.path).joinpath(repo_conf['files']['config']['challenge'])
                 challenges.append(Challenge(self.logger,
                                             chall_conf_path,
                                             repo_conf))
@@ -168,44 +195,58 @@ class Repository(Configurable):
             if category == cat.name:
                 yield (cat.name, challenges)
                 break
-    ##
-    ## @brief      { function_description }
-    ##
-    ## @param      category  The category
-    ## @param      slug      The slug
-    ##
-    def find_chall(self, category, slug):
-        chall_path = path.join(self.working_dir(), category, slug)
 
-        if not path.isdir(chall_path):
+    def find_chall(self, category, slug):
+        """Finds challenge
+
+        Arguments:
+            category {str} -- [description]
+            slug {str} -- [description]
+
+        Returns:
+            Challenge -- [description]
+        """
+        chall_path = self.working_dir().joinpath(category, slug)
+
+        if not chall_path.is_dir():
             self.logger.warning("challenge not found: "
                                 "{}/{}".format(category, slug))
             return None
 
         repo_conf = self.get_conf()
 
-        chall_conf_path = path.join(chall_path,
-                                    repo_conf['files']['config']['challenge'])
+        chall_conf_path = chall_path.joinpath(repo_conf['files']['config']['challenge'])
 
         return Challenge(self.logger, chall_conf_path, repo_conf)
-    ##
-    ## @brief      { function_description }
-    ##
+
     def configure(self, configuration=None):
+        """Configures repository
+
+        Keyword Arguments:
+            configuration {dict or None} -- [description] (default: {None})
+
+        Returns:
+            bool -- [description]
+        """
         repo_conf = self.__make_repo_conf(previous_conf=self.get_conf(),
                                           override_conf=configuration)
         self.set_conf(repo_conf)
         return True
-    ##
-    ## @brief      Creates a chall.
-    ##
+
     def create_chall(self, configuration=None):
+        """Creates a challenge
+
+        Keyword Arguments:
+            configuration {dict} -- [description] (default: {None})
+
+        Returns:
+            bool -- [description]
+        """
         repo_conf = self.get_conf()
         chall_conf = self.__make_chall_conf(override_conf=configuration)
-        chall_conf_path = path.join(self.working_dir(),
-                                    chall_conf['category'],
-                                    chall_conf['slug'],
-                                    repo_conf['files']['config']['challenge'])
+        chall_conf_path = self.working_dir().joinpath(chall_conf['category'],
+                                                      chall_conf['slug'],
+                                                      repo_conf['files']['config']['challenge'])
 
         chall = Challenge(self.logger, chall_conf_path, repo_conf)
 
@@ -214,13 +255,20 @@ class Repository(Configurable):
 
         chall.set_conf(chall_conf)
         return True
-    ##
-    ## @brief      { function_description }
-    ##
-    ## @param      category  The category
-    ## @param      slug      The slug
-    ##
+
     def configure_chall(self, category, slug, configuration=None):
+        """Configures a challenge
+
+        Arguments:
+            category {str} -- [description]
+            slug {str} -- [description]
+
+        Keyword Arguments:
+            configuration {dict} -- [description] (default: {None})
+
+        Returns:
+            bool -- [description]
+        """
         chall = self.find_chall(category, slug)
         if chall is None:
             return False
@@ -230,13 +278,17 @@ class Repository(Configurable):
 
         chall.set_conf(new_chall_conf)
         return True
-    ##
-    ## @brief      { function_description }
-    ##
-    ## @param      category  The category
-    ## @param      slug      The slug
-    ##
+
     def delete_chall(self, category, slug):
+        """Deletes a challenge
+
+        Arguments:
+            category {str} -- [description]
+            slug {str} -- [description]
+
+        Returns:
+            bool -- [description]
+        """
         chall = self.find_chall(category, slug)
         if chall is None:
             return False
@@ -245,33 +297,39 @@ class Repository(Configurable):
                                 "{}/{}?".format(category, slug)):
             return False
 
-        rmtree(chall.working_dir())
+        rmtree(str(chall.working_dir()))
         return True
-    ##
-    ## @brief      Enables the chall.
-    ##
-    ## @param      category  The category
-    ## @param      slug      The slug
-    ##
+
     def enable_chall(self, category, slug):
+        """Enables a chalenge
+
+        Arguments:
+            category {str} -- [description]
+            slug {str} -- [description]
+
+        Returns:
+            bool -- [description]
+        """
         chall = self.find_chall(category, slug)
         if chall is None:
             return False
 
         chall.enable(True)
         return True
-    ##
-    ## @brief      Enables the chall.
-    ##
-    ## @param      category  The category
-    ## @param      slug      The slug
-    ##
+
     def disable_chall(self, category, slug):
+        """Disables a challenge
+
+        Arguments:
+            category {str} -- [description]
+            slug {str} -- [description]
+
+        Returns:
+            bool -- [description]
+        """
         chall = self.find_chall(category, slug)
         if chall is None:
             return False
 
         chall.enable(False)
         return True
-
-

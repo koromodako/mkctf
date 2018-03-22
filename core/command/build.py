@@ -14,7 +14,19 @@ from core.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def build(args, repo, logger):
+
+async def build(args, repo, logger):
+    """Builds one or more challenges
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
+
     if not args.force and not repo.cli.confirm('do you really want to build?'):
         return {'status': True} if args.json else True
 
@@ -43,7 +55,7 @@ def build(args, repo, logger):
                 exception = None
 
                 try:
-                    (code, stdout, stderr) = challenge.build(timeout)
+                    (code, stdout, stderr) = await challenge.build(timeout)
                 except Exception as e:
                     exception = e
                     success = False

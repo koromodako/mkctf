@@ -9,7 +9,15 @@
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def create(args, repo, logger):
+
+async def create(args, repo, logger):
+    """Creates a challenge
+
+    Arguments:
+        args {Namespace} -- [description]
+        repo {Repository} -- [description]
+        logger {Logger} -- [description]
+    """
     status = repo.create_chall(args.configuration)
     return {'status': status} if args.json else status
 
