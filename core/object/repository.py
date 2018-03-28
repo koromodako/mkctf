@@ -51,6 +51,9 @@ class Repository(Configurable):
         Returns:
             dict -- [description]
         """
+        if previous_conf is None:
+            previous_conf = {}
+
         if override_conf:
             conf = previous_conf
             conf.update(override_conf)
@@ -116,6 +119,9 @@ class Repository(Configurable):
             dict -- [description]
         """
         repo_conf = self.get_conf()
+
+        if previous_conf is None:
+            previous_conf = {}
 
         if override_conf:
             conf = previous_conf
