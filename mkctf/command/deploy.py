@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: build.py
+#     file: deploy.py
 #     date: 2018-03-02
 #   author: paul.dautry
 #  purpose:
@@ -10,13 +10,13 @@
 #  IMPORTS
 # =============================================================================
 from termcolor import colored
-from mkctf.core.formatting import returncode2str
+from mkctf.helper.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 
-async def build(args, repo, logger):
-    """Builds one or more challenges
+async def deploy(args, repo, logger):
+    """Deploys one or more challenges
 
     Arguments:
         args {Namespace} -- [description]
@@ -26,8 +26,7 @@ async def build(args, repo, logger):
     Returns:
         [type] -- [description]
     """
-
-    if not args.force and not repo.cli.confirm('do you really want to build?'):
+    if not args.force and not repo.cli.confirm('do you really want to deploy?'):
         return {'status': True} if args.json else True
 
     no_color, timeout = args.no_color, args.timeout
@@ -55,7 +54,7 @@ async def build(args, repo, logger):
                 exception = None
 
                 try:
-                    (code, stdout, stderr) = await challenge.build(timeout)
+                    (code, stdout, stderr) = await challenge.deploy(timeout)
                 except Exception as e:
                     exception = e
                     success = False

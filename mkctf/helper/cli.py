@@ -11,7 +11,7 @@ from shutil import which
 from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
-from mkctf.core.config import prog_prompt
+from mkctf.helper.config import prog_prompt
 # =============================================================================
 # CLASSES
 # =============================================================================

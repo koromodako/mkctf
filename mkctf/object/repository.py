@@ -12,10 +12,10 @@
 from shutil import rmtree
 from pathlib import Path
 from slugify import slugify
-from mkctf.core.cli import CLI
-from mkctf.core.wrapper import lazy
-from mkctf.core.object.challenge import Challenge
-from mkctf.core.object.configurable import Configurable
+from mkctf.helper.cli import CLI
+from mkctf.helper.wrapper import lazy
+from mkctf.object.challenge import Challenge
+from mkctf.object.configurable import Configurable
 # =============================================================================
 #  CLASSES
 # =============================================================================
