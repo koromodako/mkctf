@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: deploy.py
+#     file: status.py
 #     date: 2018-03-02
 #   author: paul.dautry
 #  purpose:
@@ -10,13 +10,13 @@
 #  IMPORTS
 # =============================================================================
 from termcolor import colored
-from mkctf.core.formatting import returncode2str
+from mkctf.helper.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 
-async def deploy(args, repo, logger):
-    """Deploys one or more challenges
+async def status(args, repo, logger):
+    """Determines the status of a challenge
 
     Arguments:
         args {Namespace} -- [description]
@@ -26,9 +26,6 @@ async def deploy(args, repo, logger):
     Returns:
         [type] -- [description]
     """
-    if not args.force and not repo.cli.confirm('do you really want to deploy?'):
-        return {'status': True} if args.json else True
-
     no_color, timeout = args.no_color, args.timeout
     category, slug = args.category, args.slug
 
@@ -54,9 +51,9 @@ async def deploy(args, repo, logger):
                 exception = None
 
                 try:
-                    (code, stdout, stderr) = await challenge.deploy(timeout)
+                    (code, stdout, stderr) = await challenge.status(timeout)
                 except Exception as e:
-                    exception = e
+                    exception = str(e)
                     success = False
                     code = -1
 

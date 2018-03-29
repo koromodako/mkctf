@@ -17,7 +17,10 @@ setup(
         'mkctf'
     ],
     package_dir={
-        'mkctf': 'mkctf'
+        'mkctf': 'mkctf',
+        'mkctf.helper': 'mkctf/helper',
+        'mkctf.object': 'mkctf/object',
+        'mkctf.command': 'mkctf/command'
     },
     # configuration files
     data_files=[

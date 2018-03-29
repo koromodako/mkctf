@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: status.py
+#     file: build.py
 #     date: 2018-03-02
 #   author: paul.dautry
 #  purpose:
@@ -10,13 +10,13 @@
 #  IMPORTS
 # =============================================================================
 from termcolor import colored
-from mkctf.core.formatting import returncode2str
+from mkctf.helper.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 
-async def status(args, repo, logger):
-    """Determines the status of a challenge
+async def build(args, repo, logger):
+    """Builds one or more challenges
 
     Arguments:
         args {Namespace} -- [description]
@@ -26,6 +26,10 @@ async def status(args, repo, logger):
     Returns:
         [type] -- [description]
     """
+
+    if not args.force and not repo.cli.confirm('do you really want to build?'):
+        return {'status': True} if args.json else True
+
     no_color, timeout = args.no_color, args.timeout
     category, slug = args.category, args.slug
 
@@ -51,9 +55,9 @@ async def status(args, repo, logger):
                 exception = None
 
                 try:
-                    (code, stdout, stderr) = await challenge.status(timeout)
+                    (code, stdout, stderr) = await challenge.build(timeout)
                 except Exception as e:
-                    exception = str(e)
+                    exception = e
                     success = False
                     code = -1
 

@@ -11,8 +11,8 @@
 # =============================================================================
 from os import scandir
 from pprint import pprint
-from mkctf.core.config import yaml_load, yaml_dump
-from mkctf.core.wrapper import lazy
+from mkctf.helper.config import yaml_load, yaml_dump
+from mkctf.helper.wrapper import lazy
 # =============================================================================
 #  CLASSES
 # =============================================================================
