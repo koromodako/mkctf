@@ -31,8 +31,11 @@ else
     git clone https://github.com/pdautry/mkctf
 fi
 
+print "entering ${REPO_DIR}"
+cd ${REPO_DIR}
+
 print "installing Python requirements"
-pip3 install -r ${REPO_DIR}/requirements.txt
+pip3 install -r requirements.txt
 
 print "running setup.py"
 python3 setup.py install --prefix ${INST_DIR}

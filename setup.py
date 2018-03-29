@@ -1,4 +1,8 @@
+from pathlib import Path
 from distutils.core import setup
+
+bin_path = Path.home().joinpath('bin')
+config_path = Path.home().joinpath('.config')
 
 setup(
     # main information
@@ -17,7 +21,7 @@ setup(
     },
     # configuration files
     data_files=[
-        ('~/.config', ['config/mkctf.yml']),
-        ('~/bin', ['script/mkctf-cli'])
+        (str(bin_path), ['script/mkctf-cli']),
+        (str(config_path), ['config/mkctf.yml'])
     ]
 )
