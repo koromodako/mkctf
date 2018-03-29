@@ -14,14 +14,11 @@ setup(
     url='https://github.com/pdautry/mkctf',
     # package files
     packages=[
-        'mkctf'
+        'mkctf',
+        'mkctf.helper',
+        'mkctf.object',
+        'mkctf.command'
     ],
-    package_dir={
-        'mkctf': 'mkctf',
-        'mkctf.helper': 'mkctf/helper',
-        'mkctf.object': 'mkctf/object',
-        'mkctf.command': 'mkctf/command'
-    },
     # configuration files
     data_files=[
         (str(bin_path), ['script/mkctf-cli']),
