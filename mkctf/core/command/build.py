@@ -10,7 +10,7 @@
 #  IMPORTS
 # =============================================================================
 from termcolor import colored
-from core.formatting import returncode2str
+from mkctf.core.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================

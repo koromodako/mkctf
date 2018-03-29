@@ -11,21 +11,21 @@
 from pathlib import Path
 from argparse import ArgumentParser, Namespace
 from traceback import print_exc
-from core.logger import Logger
-from core.config import load_config
-from core.command.init import init
-from core.command.show import show
-from core.command.build import build
-from core.command.deploy import deploy
-from core.command.status import status
-from core.command.create import create
-from core.command.delete import delete
-from core.command.enable import enable
-from core.command.export import export
-from core.command.disable import disable
-from core.command.configure import configure
-from core.command.renew_flag import renew_flag
-from core.object.repository import Repository
+from mkctf.core.logger import Logger
+from mkctf.core.config import load_config
+from mkctf.core.command.init import init
+from mkctf.core.command.show import show
+from mkctf.core.command.build import build
+from mkctf.core.command.deploy import deploy
+from mkctf.core.command.status import status
+from mkctf.core.command.create import create
+from mkctf.core.command.delete import delete
+from mkctf.core.command.enable import enable
+from mkctf.core.command.export import export
+from mkctf.core.command.disable import disable
+from mkctf.core.command.configure import configure
+from mkctf.core.command.renew_flag import renew_flag
+from mkctf.core.object.repository import Repository
 # =============================================================================
 #  CONFIGURATION
 # =============================================================================
