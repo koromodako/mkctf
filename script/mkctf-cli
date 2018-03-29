@@ -12,9 +12,9 @@
 #  IMPORTS
 #===============================================================================
 from json import dumps
-from mkctf import MKCTFAPI
 from signal import signal, SIGINT
 from asyncio import get_event_loop
+from mkctf.api import MKCTFAPI
 # =============================================================================
 #  GLOBAL
 # =============================================================================
