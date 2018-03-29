@@ -263,7 +263,13 @@ class MKCTFAPI:
         """API wrapper for 'create' command
 
         Arguments:
-            configuration {dict} -- [description]
+            category {str} -- [description]
+            name {str} -- [description]
+            flag {str} -- [description]
+            points {int} -- [description]
+            parameters {dict} -- [description]
+            enabled {bool} -- [description]
+            standalone {bool} -- [description]
 
         Returns:
             [type] -- [description]
