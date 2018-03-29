@@ -10,8 +10,8 @@
 #  IMPORTS
 # =============================================================================
 from termcolor import colored
-from core.formatting import TAB
-from core.formatting import dict2str
+from mkctf.core.formatting import TAB
+from mkctf.core.formatting import dict2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================

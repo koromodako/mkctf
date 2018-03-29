@@ -13,8 +13,8 @@ from os import urandom
 from stat import S_IRWXU
 from asyncio import create_subprocess_exec, wait_for, TimeoutError
 from subprocess import PIPE, CalledProcessError
-from core.wrapper import lazy
-from core.object.configurable import Configurable
+from mkctf.core.wrapper import lazy
+from mkctf.core.object.configurable import Configurable
 # =============================================================================
 #  CLASSES
 # =============================================================================
