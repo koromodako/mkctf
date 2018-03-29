@@ -9,6 +9,7 @@
 #  IMPORTS
 # =============================================================================
 from pathlib import Path
+from slugify import slugify
 from argparse import ArgumentParser, Namespace
 from traceback import print_exc
 from mkctf.helper.logger import Logger
@@ -251,7 +252,14 @@ class MKCTFAPI:
         # perform
         return self.perform(ns)
 
-    def create(self, configuration):
+    def create(self,
+               category,
+               name,
+               flag,
+               points,
+               parameters={},
+               enabled=False,
+               standalone=True):
         """API wrapper for 'create' command
 
         Arguments:
@@ -262,7 +270,16 @@ class MKCTFAPI:
         """
         ns = self.__ns(create)
         # parameters
-        ns.configuration = configuration
+        ns.configuration = {
+                'name': name,
+                'slug': slugify(name),
+                'flag': flag,
+                'points': points,
+                'enabled': enabled,
+                'category': category,
+                'parameters': parameters,
+                'standalone': standalone
+        }
         # perform
         return self.perform(ns)
 
