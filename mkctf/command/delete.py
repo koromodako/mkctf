@@ -1,31 +1,31 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: delete.py
-#     date: 2018-02-27
-#   author: paul.dautry
-#  purpose:
-#
-#
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+file: delete.py
+date: 2018-02-27
+author: paul.dautry
+purpose:
+
+'''
+# =============================================================================
+#  IMPORTS
+# =============================================================================
+from mkctf.helper.log import app_log
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-
-async def delete(args, repo, logger):
-    """Deletes a challenge
+async def delete(args, repo):
+    '''Deletes a challenge
 
     Arguments:
         args {Namespace} -- [description]
         repo {Repository} -- [description]
-        logger {Logger} -- [description]
-    """
+    '''
     category, slug = args.category, args.slug
     status = True
 
     if repo.delete_chall(category, slug):
-        logger.info("challenge {}/{} successfully deleted.".format(category,
-                                                                   slug))
+        app_log.info("challenge {}/{} successfully deleted.", category, slug)
     else:
-        logger.error("challenge {}/{} deletion failed.".format(category, slug))
+        app_log.error("challenge {}/{} deletion failed.", category, slug)
         status = False
 
     return {'status': status} if args.json else status

@@ -1,27 +1,30 @@
 from pathlib import Path
-from distutils.core import setup
+from setuptools import setup, find_packages
+from mkctf import __version__
 
-bin_path = Path.home().joinpath('bin')
-config_path = Path.home().joinpath('.config')
+HERE = Path(__file__).absolute().parent
+CONF_DIR = Path.home().joinpath('.config')
+
+def requirements():
+    with HERE.joinpath('requirements.txt').open() as reqs:
+        return list([req.strip() for req in reqs if req.strip()])
 
 setup(
     # main information
     name='mkctf',
-    version='0.1.0',
+    version=__version__,
     description='',
     author='Paul Dautry',
     author_email='paul.dautry@gmail.com',
     url='https://github.com/pdautry/mkctf',
     # package files
-    packages=[
-        'mkctf',
-        'mkctf.helper',
-        'mkctf.object',
-        'mkctf.command'
-    ],
+    packages=find_packages(str(HERE)),
+    install_requires=requirements(),
     # configuration files
-    data_files=[
-        (str(bin_path), ['script/mkctf-cli']),
-        (str(config_path), ['config/mkctf.yml'])
-    ]
+    entry_points={
+        'console_scripts': [
+            'mkctf-cli = mkctf.main:app',
+        ]
+    },
+    data_files=[(str(CONF_DIR), ['config/mkctf.yml'])]
 )

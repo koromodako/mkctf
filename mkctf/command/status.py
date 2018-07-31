@@ -1,11 +1,10 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: status.py
-#     date: 2018-03-02
-#   author: paul.dautry
-#  purpose:
-#
-#
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+file: status.py
+date: 2018-03-02
+author: paul.dautry
+purpose:
+
+'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
@@ -14,18 +13,16 @@ from mkctf.helper.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-
-async def status(args, repo, logger):
-    """Determines the status of a challenge
+async def status(args, repo):
+    '''Determines the status of a challenge
 
     Arguments:
         args {Namespace} -- [description]
         repo {Repository} -- [description]
-        logger {Logger} -- [description]
 
     Returns:
         [type] -- [description]
-    """
+    '''
     no_color, timeout = args.no_color, args.timeout
     category, slug = args.category, args.slug
 

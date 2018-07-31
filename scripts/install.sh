@@ -18,7 +18,6 @@ function check_cmd {
 
 print "check for mandatory commands"
 check_cmd git
-check_cmd pip3
 check_cmd python3
 
 if [[ -d "${REPO_DIR}" ]]; then
@@ -34,11 +33,11 @@ fi
 print "entering ${REPO_DIR}"
 cd ${REPO_DIR}
 
-print "installing Python requirements"
-pip3 install -r requirements.txt
+print "creating venv"
+python3 -m venv .venv
 
-print "running setup.py"
-python3 setup.py install --prefix ${INST_DIR}
+print "installing Python requirements"
+.venv/bin/pip install .
 
 print "going back to ${WD}"
 cd ${WD}
