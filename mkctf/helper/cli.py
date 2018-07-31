@@ -1,55 +1,46 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#    file: cli.py
-#    date: 2017-07-23
-#  author: paul.dautry
-# purpose:
-#    Utils CLI-related functions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+file: cli.py
+date: 2017-07-23
+author: paul.dautry
+purpose:
+    Utils CLI-related functions
+'''
+# =============================================================================
 # IMPORTS
 # =============================================================================
 from shutil import which
 from subprocess import call
 from subprocess import Popen
 from subprocess import PIPE
+from mkctf.helper.log import app_log
 from mkctf.helper.config import prog_prompt
 # =============================================================================
 # CLASSES
 # =============================================================================
-
-
-class CLI(object):
-    """Command line interaction utility
+class CLI:
+    '''Command line interaction utility
 
     Provides useful methods to read user input.
-    """
-    def __init__(self, logger):
-        """[summary]
+    '''
+    def __init__(self):
+        '''[summary]
 
         [description]
-
-        Arguments:
-            logger {[type]} -- [description]
-        """
-        super().__init__()
-        self.logger = logger
+        '''
         self.prog_prompt = prog_prompt('?').strip()
 
     def prompt(self, prompt):
-        """[summary]
+        '''[summary]
 
         [description]
 
         Arguments:
             prompt {[type]} -- [description]
-        """
+        '''
         return "{} {} ".format(self.prog_prompt, prompt.strip())
 
-    def readline(self,
-                 prompt,
-                 allow_empty=False,
-                 expect_digit=False,
-                 default=None):
-        """Reads one line
+    def readline(self, prompt, allow_empty=False, expect_digit=False, default=None):
+        '''Reads one line
 
         Arguments:
             prompt {str} -- [description]
@@ -61,7 +52,7 @@ class CLI(object):
 
         Returns:
             str -- [description]
-        """
+        '''
         value = ''
 
         if not isinstance(prompt, str):
@@ -86,7 +77,7 @@ class CLI(object):
             if len(value) > 0:
 
                 if expect_digit and not value.isdigit():
-                    self.logger.error("answer must be a digit.")
+                    app_log.error("answer must be a digit.")
                     continue
 
                 break
@@ -97,7 +88,7 @@ class CLI(object):
             if allow_empty:
                 return None
 
-            self.logger.error("empty answer is not allowed.")
+            app_log.error("empty answer is not allowed.")
 
         if expect_digit:
             value = int(value, 0)
@@ -105,7 +96,7 @@ class CLI(object):
         return value
 
     def readlines(self, prompt, subprompt, expect_digit=False):
-        """Reads multiple lines
+        '''Reads multiple lines
 
         Stops when the line contains a single dot ('.') character.
 
@@ -118,7 +109,7 @@ class CLI(object):
 
         Returns:
             str -- [description]
-        """
+        '''
         lines = []
 
         print(self.prompt(prompt))
@@ -133,25 +124,21 @@ class CLI(object):
         return lines
 
     def confirm(self, question, default=False):
-        """Asks user for confirmation
+        '''Asks user for confirmation
 
         Arguments:
             question {str} -- [description]
 
         Keyword Arguments:
             default {bool} -- [description] (default: {False})
-        """
+        '''
         default = 'true' if default else 'false'
         resp = self.readline(question.strip(),
                              default=default)
         return (resp.strip().lower() in ['true', 'y', 'yes', '1'])
 
-    def choose_one(self,
-                   prompt,
-                   choices,
-                   default=None,
-                   allow_custom=False):
-        """Elect one element among a collection
+    def choose_one(self, prompt, choices, default=None, allow_custom=False):
+        '''Elect one element among a collection
 
         You can also allow tht user to enter a custom value
 
@@ -165,7 +152,7 @@ class CLI(object):
 
         Returns:
             any -- [description]
-        """
+        '''
         selection = default
 
         if not isinstance(choices, list): # do not check number of elements
@@ -192,9 +179,7 @@ class CLI(object):
             print("\t{:02d}: custom value".format(k))
 
         while True:
-            choice = self.readline("enter a number: ",
-                                   allow_empty=has_default,
-                                   expect_digit=True)
+            choice = self.readline("enter a number: ", allow_empty=has_default, expect_digit=True)
 
             if choice is None:
                 return default
@@ -202,7 +187,7 @@ class CLI(object):
             if choice >= 0 or choice <= k:
                 break
 
-            self.logger.error("input must be in [0,{}]".format(k))
+            app_log.error("input must be in [0,{}]", k)
 
         if allow_custom and choice == k:
             selection = self.readline("enter custom value: ")
@@ -211,15 +196,13 @@ class CLI(object):
 
         return selection
 
-    def choose_many(self,
-                    prompt,
-                    choices,
+    def choose_many(self, prompt, choices,
                     default=None,
                     min_choices=None,
                     max_choices=None,
                     allow_custom=False,
                     allow_multiple=False):
-        """Elect many elements among a collection
+        '''Elect many elements among a collection
 
         Arguments:
             prompt {str} -- [description]
@@ -234,7 +217,7 @@ class CLI(object):
 
         Returns:
             list(any) -- [description]
-        """
+        '''
         if min_choices is not None:
             if min_choices < 1:
                 raise ValueError("min_choices argument must be strictly "

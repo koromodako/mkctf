@@ -1,36 +1,32 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: show.py
-#     date: 2018-02-27
-#   author: paul.dautry
-#  purpose:
-#
-#
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+file: show.py
+date: 2018-02-27
+author: paul.dautry
+purpose:
+
+'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
 from termcolor import colored
-from mkctf.helper.formatting import TAB
-from mkctf.helper.formatting import dict2str
+from mkctf.helper.log import app_log
+from mkctf.helper.formatting import TAB, dict2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def __print_chall(logger, challenge, no_color):
-    """Prints a challenge
+def __print_chall(challenge, no_color):
+    '''Prints a challenge
 
     Arguments:
-        logger {Logger} -- [description]
         challenge {Challenge} -- [description]
         no_color {bool} -- [description]
 
     Returns:
         bool -- [description]
-    """
+    '''
     conf = challenge.get_conf()
     if conf is None:
-        logger.error("configuration missing. Run `mkctf configure "
-                     "-c {} -s {}`".format(challenge.category(),
-                                           challenge.slug()))
+        app_log.error("configuration missing. Run `mkctf configure -c {} -s {}`", challenge.category(), challenge.slug())
         return False
 
     static = ' [STANDALONE]' if conf['standalone'] else ''
@@ -54,17 +50,16 @@ def __print_chall(logger, challenge, no_color):
 
     return True
 
-async def show(args, repo, logger):
-    """Shows a list of all challenges
+async def show(args, repo):
+    '''Shows a list of all challenges
 
     Arguments:
         args {Namespace} -- [description]
         repo {Repository} -- [description]
-        logger {Logger} -- [description]
 
     Returns:
         [type] -- [description]
-    """
+    '''
     found = False
     success = True
     results = {}
@@ -86,14 +81,14 @@ async def show(args, repo, logger):
                 try:
                     if args.json:
                         results[cat][challenge.slug()] = challenge.get_conf()
-                    elif not __print_chall(logger, challenge, args.no_color):
+                    elif not __print_chall(challenge, args.no_color):
                         success = False
                 except Exception as e:
-                    logger.error("configuration is invalid (missing key: "
+                    app_log.error("configuration is invalid (missing key: "
                                  "{}).".format(e))
                     success = False
 
     if not found:
-        logger.warning("no challenge found matching given constraints.")
+        app_log.warning("no challenge found matching given constraints.")
 
     return results if args.json else success

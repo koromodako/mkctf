@@ -1,10 +1,10 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: api.py
-#     date: 2018-03-20
-#   author: paul.dautry
-#  purpose:
-#
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+file: api.py
+date: 2018-03-20
+author: paul.dautry
+purpose:
+
+'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
@@ -12,7 +12,7 @@ from pathlib import Path
 from slugify import slugify
 from argparse import ArgumentParser, Namespace
 from traceback import print_exc
-from mkctf.helper.logger import Logger
+from mkctf.helper.log import app_log
 from mkctf.helper.config import load_config
 from mkctf.command.init import init
 from mkctf.command.show import show
@@ -36,16 +36,15 @@ DEFAULT_TIMEOUT = 4 # seconds
 #  CLASSES
 # =============================================================================
 class MKCTFAPI:
-    """Provides access to all functionalities programmatically
-
-    """
+    '''Provides access to all functionalities programmatically
+    '''
     @staticmethod
     def parse_args():
-        """Parse command line arguments
+        '''Parse command line arguments
 
         Returns:
             Namespace -- [description]
-        """
+        '''
         p = ArgumentParser(add_help=True,
                            description="Manage CTF challenges repository.")
         p.add_argument('-q', '--quiet', action='store_true',
@@ -147,10 +146,8 @@ class MKCTFAPI:
 
         return args
 
-    def __init__(self, repo_root,
-                 debug, quiet, no_color,
-                 out=None):
-        """Constructs a new instance
+    def __init__(self, repo_root, out=None):
+        '''Constructs a new instance
 
         Arguments:
             repo_root {Path} -- [description]
@@ -160,40 +157,35 @@ class MKCTFAPI:
 
         Keyword Arguments:
             out {IOBase} -- [description] (default: {None})
-        """
-
-        super(MKCTFAPI, self).__init__()
-        self.logger = Logger(debug, quiet, no_color, out)
-
+        '''
         self.repo_root = Path(repo_root)
-        self.logger.debug('repo_root: {}'.format(self.repo_root))
+        app_log.debug('repo_root: {}', self.repo_root)
 
         self.glob_conf_path = Path.home() / '.config/mkctf.yml'
-        self.logger.debug('glob_conf_path: {}'.format(self.glob_conf_path))
+        app_log.debug('glob_conf_path: {}', self.glob_conf_path)
 
         self.glob_conf = load_config(self.glob_conf_path)
-        self.logger.debug('glob_conf: {}'.format(self.glob_conf))
+        app_log.debug('glob_conf: {}', self.glob_conf)
 
         self.repo_conf_path = self.repo_root / self.glob_conf['files']['config']['repository']
-        self.logger.debug('repo_conf_path: {}'.format(self.repo_conf_path))
+        app_log.debug('repo_conf_path: {}', self.repo_conf_path)
 
-        self.repo = Repository(self.logger, self.repo_conf_path, self.glob_conf)
+        self.repo = Repository(self.repo_conf_path, self.glob_conf)
 
     async def perform(self, ns):
-        """Performs a comand using given Namespace ns
+        '''Performs a comand using given Namespace ns
 
         Arguments:
             ns {[type]} -- [description]
 
         Returns:
             [type] -- [description]
-        """
-        self.logger.info("mkctf starts...")
-        self.logger.debug("ns: {}".format(ns))
+        '''
+        app_log.info("mkctf starts...")
+        app_log.debug("ns: {}", ns)
 
         if ns.command != 'init' and self.repo.get_conf() is None:
-            self.logger.fatal("mkctf repository must be initialized first. "
-                              "Run `mkctf init` first.")
+            app_log.critical("mkctf repository must be initialized first. Run `mkctf init` first.")
 
         try:
             # -----------------------------------------------------------------
@@ -203,27 +195,27 @@ class MKCTFAPI:
             # else:
             #   result = True or False
             # -----------------------------------------------------------------
-            result = await ns.func(ns, self.repo, self.logger)
+            result = await ns.func(ns, self.repo)
         except Exception as e:
             print_exc()
-            self.logger.fatal("Ouuuuupss.....:(")
+            app_log.critical("Ouuuuupss.....:(")
 
         if result:
-            self.logger.info("mkctf ended successfully." )
+            app_log.info("mkctf ended successfully." )
         else:
-            self.logger.error("mkctf ended with errors.")
+            app_log.error("mkctf ended with errors.")
 
         return result
 
     def __ns(self, func):
-        """Creates a standard Namespace used by all functions of the API
+        '''Creates a standard Namespace used by all functions of the API
 
         Arguments:
             func {function} -- [description]
 
         Returns:
             Namespace -- [description]
-        """
+        '''
         ns = Namespace()
         ns.json = True
         ns.force = True
@@ -233,21 +225,21 @@ class MKCTFAPI:
         return ns
 
     def init(self):
-        """API wrapper for 'init' command
+        '''API wrapper for 'init' command
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(init)
         # perform
         return self.perform(ns)
 
     def show(self):
-        """API wrapper for 'show' command
+        '''API wrapper for 'show' command
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(show)
         # perform
         return self.perform(ns)
@@ -260,7 +252,7 @@ class MKCTFAPI:
                parameters={},
                enabled=False,
                standalone=True):
-        """API wrapper for 'create' command
+        '''API wrapper for 'create' command
 
         Arguments:
             category {str} -- [description]
@@ -273,7 +265,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(create)
         # parameters
         ns.configuration = {
@@ -290,7 +282,7 @@ class MKCTFAPI:
         return self.perform(ns)
 
     def delete(self, category=None, slug=None):
-        """API wrapper for 'delete' command
+        '''API wrapper for 'delete' command
 
         Keyword Arguments:
             category {str} -- [description] (default: {None})
@@ -298,7 +290,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(delete)
         # parameters
         ns.category = category
@@ -307,7 +299,7 @@ class MKCTFAPI:
         return self.perform(ns)
 
     def configure(self, configuration, category=None, slug=None):
-        """API wrapper for 'configure' command
+        '''API wrapper for 'configure' command
 
         Arguments:
             configuration {dict} -- [description]
@@ -318,7 +310,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(enable)
         # parameters
         ns.configuration = configuration
@@ -328,7 +320,7 @@ class MKCTFAPI:
         return self.perform(ns)
 
     def enable(self, category, slug):
-        """API wrapper for 'enable' command
+        '''API wrapper for 'enable' command
 
         Arguments:
             category {str} -- [description]
@@ -336,7 +328,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(enable)
         # parameters
         ns.category = category
@@ -345,7 +337,7 @@ class MKCTFAPI:
         return self.perform(ns)
 
     def disable(self, category, slug):
-        """API wrapper for 'disable' command
+        '''API wrapper for 'disable' command
 
         Arguments:
             category {str} -- [description]
@@ -353,7 +345,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(disable)
         # parameters
         ns.category = category
@@ -364,7 +356,7 @@ class MKCTFAPI:
     def export(self, export_dir,
                category=None, slug=None,
                include_disabled=False):
-        """API wrapper for 'export' command
+        '''API wrapper for 'export' command
 
         Arguments:
             export_dir {Path} -- [description]
@@ -376,7 +368,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(export)
         # parameters
         ns.export_dir = export_dir
@@ -387,7 +379,7 @@ class MKCTFAPI:
         return self.perform(ns)
 
     def renew_flag(self, category=None, slug=None, size=DEFAULT_SIZE):
-        """API wrapper for 'renew_flag' command
+        '''API wrapper for 'renew_flag' command
 
         Keyword Arguments:
             category {str} -- [description] (default: {None})
@@ -396,7 +388,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(renew_flag)
         # parameters
         ns.category = category
@@ -406,7 +398,7 @@ class MKCTFAPI:
         return self.perform(ns)
 
     def build(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
-        """API wrapper for 'build' command
+        '''API wrapper for 'build' command
 
         Keyword Arguments:
             category {str} -- [description] (default: {None})
@@ -415,7 +407,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(build)
         # parameters
         ns.category = category
@@ -425,7 +417,7 @@ class MKCTFAPI:
         return self.perform(ns)
 
     def deploy(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
-        """API wrapper for 'deploy' command
+        '''API wrapper for 'deploy' command
 
         Keyword Arguments:
             category {str} -- [description] (default: {None})
@@ -434,7 +426,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(deploy)
         # parameters
         ns.category = category
@@ -444,7 +436,7 @@ class MKCTFAPI:
         return self.perform(ns)
 
     def status(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
-        """API wrapper for 'status' command
+        '''API wrapper for 'status' command
 
         Keyword Arguments:
             category {str} -- [description] (default: {None})
@@ -453,7 +445,7 @@ class MKCTFAPI:
 
         Returns:
             [type] -- [description]
-        """
+        '''
         ns = self.__ns(status)
         # parameters
         ns.category = category

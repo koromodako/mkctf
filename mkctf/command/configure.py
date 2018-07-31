@@ -1,43 +1,44 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: configure.py
-#     date: 2018-02-27
-#   author: paul.dautry
-#  purpose:
-#
-#
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+file: configure.py
+date: 2018-02-27
+author: paul.dautry
+purpose:
+
+'''
+# =============================================================================
+#  IMPORTS
+# =============================================================================
+from mkctf.helper.log import app_log
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-
-async def configure(args, repo, logger):
-    """Configures mkctf repository or a specific challenge
+async def configure(args, repo):
+    '''Configures mkctf repository or a specific challenge
 
     Arguments:
         args {Namespace} -- [description]
         repo {Repository} -- [description]
-        logger {Logger} -- [description]
-    """
+    '''
     category, slug = args.category, args.slug
     success = True
 
     if category is None and slug is None:
 
         if repo.configure(args.configuration):
-            logger.info("repo configured.")
+            app_log.info("repo configured.")
         else:
-            logger.error("repo configuration failed.")
+            app_log.error("repo configuration failed.")
             success = False
 
     elif category is not None and slug is not None:
 
         if repo.configure_chall(category, slug, args.configuration):
-            logger.info("challenge configured.")
+            app_log.info("challenge configured.")
         else:
-            logger.error("challenge configuration failed.")
+            app_log.error("challenge configuration failed.")
             success = False
     else:
-        logger.error("use both --category and --chall-slug to configure a "
+        app_log.error("use both --category and --chall-slug to configure a "
                      "challenge.")
         success = False
 

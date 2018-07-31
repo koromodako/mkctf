@@ -1,31 +1,29 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: build.py
-#     date: 2018-03-02
-#   author: paul.dautry
-#  purpose:
-#
-#
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+file: build.py
+date: 2018-03-02
+author: paul.dautry
+purpose:
+
+'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
 from termcolor import colored
+from mkctf.helper.log import app_log
 from mkctf.helper.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-
-async def build(args, repo, logger):
-    """Builds one or more challenges
+async def build(args, repo):
+    '''Builds one or more challenges
 
     Arguments:
         args {Namespace} -- [description]
         repo {Repository} -- [description]
-        logger {Logger} -- [description]
 
     Returns:
         [type] -- [description]
-    """
+    '''
 
     if not args.force and not repo.cli.confirm('do you really want to build?'):
         return {'status': True} if args.json else True

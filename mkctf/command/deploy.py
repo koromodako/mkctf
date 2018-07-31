@@ -1,11 +1,10 @@
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: deploy.py
-#     date: 2018-03-02
-#   author: paul.dautry
-#  purpose:
-#
-#
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+file: deploy.py
+date: 2018-03-02
+author: paul.dautry
+purpose:
+
+'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
@@ -14,18 +13,16 @@ from mkctf.helper.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-
-async def deploy(args, repo, logger):
-    """Deploys one or more challenges
+async def deploy(args, repo):
+    '''Deploys one or more challenges
 
     Arguments:
         args {Namespace} -- [description]
         repo {Repository} -- [description]
-        logger {Logger} -- [description]
 
     Returns:
         [type] -- [description]
-    """
+    '''
     if not args.force and not repo.cli.confirm('do you really want to deploy?'):
         return {'status': True} if args.json else True
 
