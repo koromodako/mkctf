@@ -14,10 +14,6 @@ from mkctf.helper.log import app_log
 # =============================================================================
 async def init(args, repo):
     '''Initializes mkctf repository
-
-    Arguments:
-        args {Namespace} -- [description]
-        repo {Repository} -- [description]
     '''
     status = True
 

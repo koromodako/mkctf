@@ -18,35 +18,27 @@ def __export_chall(export_dir, include_disabled, chall):
     '''Exports one challenge
 
     Creates an archive containing all of the challenge "exportable" files.
-
-    Arguments:
-        export_dir {Path} -- [description]
-        include_disabled {bool} -- [description]
-        chall {Challenge} -- [description]
-
-    Returns:
-        bool -- True if function succeeded
     '''
-    if not chall.is_static():
-        app_log.warning("challenge ignored (not static): {}/{}.", chall.category(), chall.slug())
+    if not chall.is_standalone:
+        app_log.warning(f"challenge ignored (not standalone): {chall.slug}.")
         return False
 
-    if not include_disabled and not chall.enabled():
-        app_log.warning("challenge ignored (disabled): {}/{}.", chall.category(), chall.slug())
+    if not include_disabled and not chall.enabled:
+        app_log.warning(f"challenge ignored (disabled): {chall.slug}.")
         return False
 
-    app_log.info("exporting {}/{}...", chall.category(), chall.slug())
+    app_log.info(f"exporting {chall.slug}...")
 
-    archive_name = '{}.{}.tgz'.format(chall.category(), chall.slug())
+    archive_name = f'{chall.slug}.tgz'
     archive_path = export_dir.joinpath(archive_name)
     with tarfile.open(str(archive_path), 'w:gz') as arch:
         for entry in chall.exportable():
             arch.add(entry.path, arcname=entry.name)
 
-    checksum_name = '{}.sha256'.format(archive_name)
+    checksum_name = f'{archive_name}.sha256'
     checksum_path = export_dir.joinpath(checksum_name)
-    checksum_path.write_text('{}  {}\n'.format(hash_file(archive_path),
-                                               archive_name))
+    archive_hash = hash_file(archive_path)
+    checksum_path.write_text(f'{archive_hash}  {archive_name}\n')
 
     app_log.info("done.")
     return True
@@ -55,35 +47,25 @@ async def export(args, repo):
     '''Exports one or more challenges
 
     Creates one archive per challenge in a given directory
-
-    Arguments:
-        args {Namespace} -- [description]
-        repo {Repository} -- [description]
     '''
     export_dir = args.export_dir.resolve()
-    category, slug = args.category, args.slug
+    tags, slug = args.tags, args.slug
     include_disabled = args.include_disabled
 
     status = True
+    export_dir.mkdir(parents=True, exist_ok=True)
 
-    if category is None and slug is not None:
-        app_log.error("you must specify --category if you use --chall-slug.")
-        status = False
-    else:
-        export_dir.mkdir(parents=True, exist_ok=True)
+    if slug is not None:
+        chall = repo.find_chall(slug)
 
-        if slug is not None:
-            chall = repo.find_chall(category, slug)
-
-            if chall is None:
-                app_log.error("challenge not found: {}/{}", chall.category(), chall.slug())
-                status = False
-            else:
-                status = __export_chall(export_dir, include_disabled, chall)
+        if chall is None:
+            app_log.error(f"challenge not found: {chall.slug}")
+            status = False
         else:
-            for category, challenges in repo.scan(category):
-                for chall in challenges:
-                    if not __export_chall(export_dir, include_disabled, chall):
-                        status = False
+            status = __export_chall(export_dir, include_disabled, chall)
+    else:
+        for chall in repo.scan(tags):
+            if not __export_chall(export_dir, include_disabled, chall):
+                status = False
 
     return {'status': status} if args.json else status

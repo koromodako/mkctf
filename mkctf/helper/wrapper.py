@@ -21,12 +21,12 @@ def lazy():
     Decorators:
         wraps
     '''
-    def wrapper(f):
-        @wraps(f)
+    def wrapper(method):
+        @wraps(method)
         def wrapped(self, *args, **kwds):
-            member = '__{}'.format(f.__name__)
+            member = f'__{method.__name__}'
             if not hasattr(self, member):
-                setattr(self, member, f(self, *args, **kwds))
+                setattr(self, member, method(self, *args, **kwds))
 
             return getattr(self, member)
 

@@ -13,51 +13,30 @@ from stat import S_IRWXU
 from asyncio import create_subprocess_exec, wait_for, TimeoutError
 from subprocess import PIPE, CalledProcessError
 from mkctf.helper.log import app_log
-from mkctf.helper.wrapper import lazy
 from mkctf.object.configurable import Configurable
 # =============================================================================
 #  CLASSES
 # =============================================================================
 class Challenge(Configurable):
     '''[summary]
-
-    [description]
-
-    Extends:
-        Configurable
     '''
     @staticmethod
     def make_flag(repo_conf, size=32):
         '''Makes a flag
-
-        Arguments:
-            repo_conf {dict} -- [description]
-
-        Keyword Arguments:
-            size {number} -- [description] (default: {32})
         '''
-        return "{}{}{}".format(repo_conf['flag']['prefix'],
-                               urandom(size).hex(),
-                               repo_conf['flag']['suffix'])
+        prefix = repo_conf['flag']['prefix']
+        content = urandom(size).hex()
+        suffix = repo_conf['flag']['suffix']
+        return f"{prefix}{content}{suffix}"
 
     def __init__(self, chall_conf_path, repo_conf):
         '''Constructs a new instance
-
-        Arguments:
-            chall_conf_path {[type]} -- [description]
-            repo_conf {[type]} -- [description]
         '''
         super().__init__(chall_conf_path)
         self.repo_conf = repo_conf
 
     def __create_dir(self, directory):
         '''Creates a directory
-
-        Arguments:
-            directory {Path or str} -- [description]
-
-        Returns:
-            bool -- [description]
         '''
         dir_path = self.working_dir().joinpath(directory)
 
@@ -70,15 +49,6 @@ class Challenge(Configurable):
 
     def __create_file(self, filename, executable=False):
         '''Creates a file
-
-        Arguments:
-            filename {Path or str} -- [description]
-
-        Keyword Arguments:
-            executable {bool} -- [description] (default: {False})
-
-        Returns:
-            bool -- [description]
         '''
         filepath = self.working_dir().joinpath(filename)
 
@@ -103,8 +73,10 @@ class Challenge(Configurable):
         return False
 
     async def __run(self, script, timeout):
+        '''Runs a script as an asynchronous subprocess
+        '''
         if not script.startswith('/'):
-            script = './{}'.format(script)
+            script = f'./{script}'
 
         proc = await create_subprocess_exec(script,
                                             stdout=PIPE,
@@ -115,60 +87,39 @@ class Challenge(Configurable):
             stdout, stderr = await wait_for(proc.communicate(), timeout=timeout)
         except TimeoutError as e:
             proc.terminate()
-            return (None, e.stdout, e.stderr)
+            return (None, None, None)
         except CalledProcessError as e:
             proc.terminate()
             return (e.returncode, e.stdout, e.stderr)
 
         return (proc.returncode, stdout, stderr)
 
-    @lazy()
-    def category(self):
-        '''Gets challenge's category
-
-        Decorators:
-            lazy
-
-        Returns:
-            [type] -- [description]
-        '''
-        return self.working_dir().parent.name
-
-    @lazy()
+    @property
     def slug(self):
         '''Gets challenge's slug
-
-        Decorators:
-            lazy
-
-        Returns:
-            [type] -- [description]
         '''
         return self.working_dir().name
 
+    @property
+    def tags(self):
+        '''Gets challenge's category
+        '''
+        return self.get_conf('tags')
+
+    @property
     def is_standalone(self):
         '''Determines if challenge is static
-
-        Returns:
-            bool -- True if static, False otherwise
         '''
         return self.get_conf('standalone')
 
+    @property
     def enabled(self):
         '''Determines if challenge is enabled
-
-        Returns:
-            bool -- True if enabled, False otherwise
         '''
         return self.get_conf('enabled')
 
     def enable(self, enabled=True):
         '''Enables or disables the challenge
-
-        [description]
-
-        Keyword Arguments:
-            enabled {bool} -- [description] (default: {True})
         '''
         conf = self.get_conf()
         conf['enabled'] = enabled
@@ -176,12 +127,6 @@ class Challenge(Configurable):
 
     def renew_flag(self, size=32):
         '''Renews challenge's flag
-
-        Arguments:
-            size {int} -- number of random bytes
-
-        Returns:
-            str -- new flag
         '''
         conf = self.get_conf()
         conf['flag'] = Challenge.make_flag(self.repo_conf, size)
@@ -190,9 +135,6 @@ class Challenge(Configurable):
 
     def create(self):
         '''Creates challenge files
-
-        Returns:
-            bool -- [description]
         '''
         self.working_dir().mkdir(parents=True, exist_ok=True)
 
@@ -201,13 +143,11 @@ class Challenge(Configurable):
 
         for directory in directories:
             if not self.__create_dir(directory):
-                app_log.warning("directory exists already: "
-                                    "{}".format(directory))
+                app_log.warning(f"directory exists already: {directory}")
 
         for file in self.repo_conf['files']['txt']:
             if not self.__create_file(file):
-                app_log.warning("file exists already: "
-                                    "{}".format(file))
+                app_log.warning(f"file exists already: {file}")
 
         bin_files = [
             self.repo_conf['files']['build'],
@@ -217,16 +157,12 @@ class Challenge(Configurable):
 
         for file in bin_files:
             if not self.__create_file(file, executable=True):
-                app_log.warning("file exists already: "
-                                    "{}".format(file))
+                app_log.warning(f"file exists already: {file}")
 
         return True
 
     def exportable(self):
         '''Yields files contained in public folders
-
-        Yields:
-            [type] -- [description]
         '''
         wd = self.working_dir()
         for directory in self.repo_conf['directories']['public']:
@@ -236,36 +172,16 @@ class Challenge(Configurable):
 
     async def build(self, timeout=4):
         '''Builds the challenge
-
-        Keyword Arguments:
-            timeout {int} -- subprocess timeout (seconds) (default: {4})
-
-        Returns:
-            [type] -- [description]
         '''
         return await self.__run(self.repo_conf['files']['build'], timeout)
 
     async def deploy(self, timeout=4):
         '''Deploys the challenge
-
-        Keyword Arguments:
-            timeout {int} -- subprocess timeout (seconds) (default: {4})
-
-        Returns:
-            [type] -- [description]
         '''
         return await self.__run(self.repo_conf['files']['deploy'], timeout)
 
     async def status(self, timeout=4):
-        '''[summary]
-
-        [description]
-
-        Keyword Arguments:
-            timeout {int} -- subprocess timeout (seconds) (default: {4})
-
-        Returns:
-            [type] -- [description]
+        '''Queries the status of a deployed challenge
         '''
         return await self.__run(self.repo_conf['files']['status'], timeout)
 

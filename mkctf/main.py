@@ -15,27 +15,16 @@ from sys import stderr
 from json import dumps
 from signal import SIGINT
 from asyncio import get_event_loop
-from mkctf import __version__
+from mkctf import __banner__
 from mkctf.api import MKCTFAPI
 from mkctf.helper.log import app_log, enable_debug, disable_color, disable_logging
-# =============================================================================
-#  GLOBALS
-# =============================================================================
-BANNER = r"""
-           _     ____ _____ _____
- _ __ ___ | | __/ ___|_   _|  ___|
-| '_ ` _ \| |/ / |     | | | |_
-| | | | | |   <| |___  | | |  _|
-|_| |_| |_|_|\_\\____| |_| |_|    v{}
-
-""".format(__version__)
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 def sigint_handler():
     '''Handles user interrupt signal
     '''
-    app_log.warning("\nOuch... that's harsh you know... :/")
+    app_log.warning("\nOuch... you just killed me... (x_x)")
     loop = get_event_loop()
     loop.stop()
     loop.close()
@@ -43,7 +32,7 @@ def sigint_handler():
 async def main():
     '''Main function
     '''
-    stderr.write(BANNER)
+    stderr.write(__banner__)
     ns = MKCTFAPI.parse_args()
 
     ns.debug, ns.quiet, ns.no_color

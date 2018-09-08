@@ -11,6 +11,10 @@ You can find challenges and CTF framework [here](https://github.com/HugoDelval/i
 
 This project was updated for INS'hAck 2018 event.
 
+## Minimal requirements
+
+ + Python v3.6.5+
+
 ## Getting started
 
 ```
@@ -109,7 +113,7 @@ Scripts like `build`, `deploy` and `status` are expected to behave according to
 the following rules:
 
 1. a _script_ **cannot take mandatory arguments**.
-2. a _script_ **execution time must be lesser than a timeout** which defaults to 4 seconds. `--timeout` option enable you to override this value.
+2. a _script_ **execution time must be lesser than a timeout** which defaults to 60 seconds. `--timeout` option enable you to override this value.
 3. a _script_ **return code** will be interpreted according to the following table:
 
 | **exit code** | **status** | **description** |

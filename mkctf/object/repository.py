@@ -24,10 +24,6 @@ class Repository(Configurable):
     '''
     def __init__(self, conf_path, glob_conf):
         '''[summary]
-
-        Arguments:
-            conf_path {[type]} -- [description]
-            glob_conf {[type]} -- [description]
         '''
         super().__init__(conf_path)
         self.cli = CLI()
@@ -37,13 +33,6 @@ class Repository(Configurable):
                          previous_conf={},
                          override_conf=None):
         '''[summary]
-
-        Keyword Arguments:
-            previous_conf {dict} -- [description] (default: {{}})
-            override_conf {dict or None} -- [description] (default: {None})
-
-        Returns:
-            dict -- [description]
         '''
         if previous_conf is None:
             previous_conf = {}
@@ -53,7 +42,7 @@ class Repository(Configurable):
             conf.update(override_conf)
         else:
             name = previous_conf.get('name')
-            categories = previous_conf.get('categories')
+            tags = previous_conf.get('tags')
             pub_dirs = previous_conf.get('directories', {}).get('public')
             priv_dirs = previous_conf.get('directories', {}).get('private')
             txt_files = previous_conf.get('files', {}).get('txt')
@@ -65,7 +54,7 @@ class Repository(Configurable):
             flag_suffix = previous_conf.get('flag', {}).get('suffix')
 
             name = self.cli.readline("enter repository name:", default=name)
-            categories = self.cli.choose_many("select categories:", categories, default=categories)
+            tags = self.cli.choose_many("select tags:", tags, default=tags)
             pub_dirs = self.cli.choose_many("select public directories:", pub_dirs, default=pub_dirs)
             priv_dirs = self.cli.choose_many("select private directories:", priv_dirs, default=priv_dirs)
             txt_files = self.cli.choose_many("select text files:", txt_files, default=txt_files)
@@ -78,7 +67,7 @@ class Repository(Configurable):
 
             conf = {
                 'name': name,
-                'categories': categories,
+                'tags': tags,
                 'directories': {
                     'public': pub_dirs,
                     'private': priv_dirs
@@ -104,13 +93,6 @@ class Repository(Configurable):
                           previous_conf={},
                           override_conf=None):
         '''[summary]
-
-        Keyword Arguments:
-            previous_conf {dict} -- [description] (default: {None})
-            override_conf {dict} -- [description] (default: {None})
-
-        Returns:
-            dict -- [description]
         '''
         repo_conf = self.get_conf()
 
@@ -125,22 +107,22 @@ class Repository(Configurable):
             enabled = previous_conf.get('enabled', False)
             parameters = previous_conf.get('parameters', {})
             name = previous_conf.get('name')
+            tags = previous_conf.get('tags')
             points = previous_conf.get('points')
-            category = previous_conf.get('category')
             standalone = previous_conf.get('standalone')
 
             name = self.cli.readline("enter challenge name:", default=name)
+            tags = self.cli.choose_many("select one or more tags:", repo_conf['tags'], default=tags)
             points = self.cli.readline("enter number of points:", default=points, expect_digit=True)
-            category = self.cli.choose_one("select a category:", choices=repo_conf['categories'], default=category)
             standalone = self.cli.confirm("is it a standalone challenge?", default=standalone)
 
             conf = {
                 'name': name,
+                'tags': tags,
                 'slug': slugify(name),
                 'flag': flag,
                 'points': points,
                 'enabled': enabled,
-                'category': category,
                 'parameters': parameters,
                 'standalone': standalone
             }
@@ -149,66 +131,40 @@ class Repository(Configurable):
 
     def init(self):
         '''[summary]
-
-        [description]
-
-        Returns:
-            bool -- [description]
         '''
         repo_conf = self.__make_repo_conf(self.glob_conf)
-
-        for category in repo_conf['categories']:
-            dir_path = self.working_dir().joinpath(category)
-            if not dir_path.is_dir():
-                dir_path.mkdir(parents=True, exist_ok=True)
-
         self.set_conf(repo_conf)
         return True
 
-    def scan(self, category=None):
-        '''Yields (category, challenges) tuples
+    def scan(self, tags=[]):
+        '''Returns a list of Challenges containing at least one tag in tags
 
-        Keyword Arguments:
-            category {[type]} -- [description] (default: {None})
-
-        Yields:
-            (str, list(Challenge))
+           Notes:
+            An empty list of tags means all tags
         '''
         wd = self.working_dir()
+        tags = set(tags)
         repo_conf = self.get_conf()
-        keep = lambda e: e.is_dir() and not e.name.startswith('.')
+        keep = lambda entry: entry.is_dir() and not entry.name.startswith('.')
 
-        for cat in self._scandirs(wd, keep):
-            challenges = []
-            for chall in self._scandirs(cat.path, keep):
-                chall_conf_path = Path(chall.path).joinpath(repo_conf['files']['config']['challenge'])
-                challenges.append(Challenge(chall_conf_path, repo_conf))
+        challenges = []
+        for chall_dirent in self._scandirs(wd, keep):
 
-            challenges = sorted(challenges, key=lambda e: e.slug())
+            chall_conf_path = Path(chall_dirent.path).joinpath(repo_conf['files']['config']['challenge'])
+            chall = Challenge(chall_conf_path, repo_conf)
 
-            if category is None:
-                yield (cat.name, challenges)
-                continue
+            if not tags or tags.intersection(chall.tags):
+                challenges.append(chall)
 
-            if category == cat.name:
-                yield (cat.name, challenges)
-                break
+        return sorted(challenges, key=lambda e: e.slug)
 
-    def find_chall(self, category, slug):
+    def find_chall(self, slug):
         '''Finds challenge
-
-        Arguments:
-            category {str} -- [description]
-            slug {str} -- [description]
-
-        Returns:
-            Challenge -- [description]
         '''
-        chall_path = self.working_dir().joinpath(category, slug)
+        chall_path = self.working_dir().joinpath(slug)
 
         if not chall_path.is_dir():
-            app_log.warning("challenge not found: "
-                                "{}/{}".format(category, slug))
+            app_log.warning(f"challenge not found: {slug}")
             return None
 
         repo_conf = self.get_conf()
@@ -219,12 +175,6 @@ class Repository(Configurable):
 
     def configure(self, configuration=None):
         '''Configures repository
-
-        Keyword Arguments:
-            configuration {dict or None} -- [description] (default: {None})
-
-        Returns:
-            bool -- [description]
         '''
         repo_conf = self.__make_repo_conf(previous_conf=self.get_conf(),
                                           override_conf=configuration)
@@ -233,17 +183,10 @@ class Repository(Configurable):
 
     def create_chall(self, configuration=None):
         '''Creates a challenge
-
-        Keyword Arguments:
-            configuration {dict} -- [description] (default: {None})
-
-        Returns:
-            bool -- [description]
         '''
         repo_conf = self.get_conf()
         chall_conf = self.__make_chall_conf(override_conf=configuration)
-        chall_conf_path = self.working_dir().joinpath(chall_conf['category'],
-                                                      chall_conf['slug'],
+        chall_conf_path = self.working_dir().joinpath(chall_conf['slug'],
                                                       repo_conf['files']['config']['challenge'])
 
         chall = Challenge(chall_conf_path, repo_conf)
@@ -254,20 +197,10 @@ class Repository(Configurable):
         chall.set_conf(chall_conf)
         return True
 
-    def configure_chall(self, category, slug, configuration=None):
+    def configure_chall(self, slug, configuration=None):
         '''Configures a challenge
-
-        Arguments:
-            category {str} -- [description]
-            slug {str} -- [description]
-
-        Keyword Arguments:
-            configuration {dict} -- [description] (default: {None})
-
-        Returns:
-            bool -- [description]
         '''
-        chall = self.find_chall(category, slug)
+        chall = self.find_chall(slug)
         if chall is None:
             return False
 
@@ -277,55 +210,33 @@ class Repository(Configurable):
         chall.set_conf(new_chall_conf)
         return True
 
-    def delete_chall(self, category, slug):
+    def delete_chall(self, slug):
         '''Deletes a challenge
-
-        Arguments:
-            category {str} -- [description]
-            slug {str} -- [description]
-
-        Returns:
-            bool -- [description]
         '''
-        chall = self.find_chall(category, slug)
+        chall = self.find_chall(slug)
         if chall is None:
             return False
 
-        if not self.cli.confirm("do you really want to remove "
-                                "{}/{}?".format(category, slug)):
+        if not self.cli.confirm(f"do you really want to remove {slug}?"):
             return False
 
         rmtree(str(chall.working_dir()))
         return True
 
-    def enable_chall(self, category, slug):
+    def enable_chall(self, slug):
         '''Enables a chalenge
-
-        Arguments:
-            category {str} -- [description]
-            slug {str} -- [description]
-
-        Returns:
-            bool -- [description]
         '''
-        chall = self.find_chall(category, slug)
+        chall = self.find_chall(slug)
         if chall is None:
             return False
 
         chall.enable(True)
         return True
 
-    def disable_chall(self, category, slug):
+    def disable_chall(self, slug):
         '''Disables a challenge
-
-        Arguments:
-            category {str} -- [description]
-            slug {str} -- [description]
-
-        Returns:
-            bool -- [description]
         '''
-        chall = self.find_chall(category, slug)
+        chall = self.find_chall(slug)
         if chall is None:
             return False
 

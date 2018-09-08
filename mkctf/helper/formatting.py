@@ -52,10 +52,10 @@ def dict2str(dictionary):
     text = ""
     for key, value in dictionary.items():
         if isinstance(value, dict):
-            text += "\n+ {}:".format(key)
-            text += dict2str(value).replace("\n", "\n{}".format(TAB))
+            text += f"\n+ {key}:"
+            text += dict2str(value).replace("\n", f"\n{TAB}")
         else:
-            text += "\n+ {}: {}".format(key, value)
+            text += f"\n+ {key}: {value}"
     return text
 
 def returncode2str(code, no_color):
@@ -73,10 +73,10 @@ def returncode2str(code, no_color):
     if value is None:
         value = ['FAILURE', 'red']
 
-    status = '[{}]'.format(value[0])
+    status = f'[{value[0]}]'
 
     if code is not None:
-        status += '(code={})'.format(code)
+        status += f'(code={code})'
 
     if not no_color:
         status = colored(status, value[1], attrs=attrs)
