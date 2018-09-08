@@ -24,34 +24,17 @@ class CLI:
     '''
     def __init__(self):
         '''[summary]
-
-        [description]
         '''
         self.prog_prompt = prog_prompt('?').strip()
 
     def prompt(self, prompt):
         '''[summary]
-
-        [description]
-
-        Arguments:
-            prompt {[type]} -- [description]
         '''
-        return "{} {} ".format(self.prog_prompt, prompt.strip())
+        prompt = prompt.strip()
+        return f"{self.prog_prompt} {prompt} "
 
     def readline(self, prompt, allow_empty=False, expect_digit=False, default=None):
         '''Reads one line
-
-        Arguments:
-            prompt {str} -- [description]
-
-        Keyword Arguments:
-            allow_empty {bool} -- [description] (default: {False})
-            expect_digit {bool} -- [description] (default: {False})
-            default {str or None} -- [description] (default: {None})
-
-        Returns:
-            str -- [description]
         '''
         value = ''
 
@@ -67,7 +50,8 @@ class CLI:
             elif not isinstance(default, str):
                 raise ValueError("default argument must be an string.")
 
-            prompt = "{} [default={}] ".format(prompt.strip(), default)
+            prompt = prompt.strip()
+            prompt = f"{prompt} [default={default}] "
 
         full_prompt = self.prompt(prompt)
 
@@ -99,16 +83,6 @@ class CLI:
         '''Reads multiple lines
 
         Stops when the line contains a single dot ('.') character.
-
-        Arguments:
-            prompt {str} -- [description]
-            subprompt {str} -- [description]
-
-        Keyword Arguments:
-            expect_digit {bool} -- [description] (default: {False})
-
-        Returns:
-            str -- [description]
         '''
         lines = []
 
@@ -125,12 +99,6 @@ class CLI:
 
     def confirm(self, question, default=False):
         '''Asks user for confirmation
-
-        Arguments:
-            question {str} -- [description]
-
-        Keyword Arguments:
-            default {bool} -- [description] (default: {False})
         '''
         default = 'true' if default else 'false'
         resp = self.readline(question.strip(),
@@ -141,17 +109,6 @@ class CLI:
         '''Elect one element among a collection
 
         You can also allow tht user to enter a custom value
-
-        Arguments:
-            prompt {str} -- [description]
-            choices {list(any)} -- [description]
-
-        Keyword Arguments:
-            default {any} -- [description] (default: {None})
-            allow_custom {bool} -- [description] (default: {False})
-
-        Returns:
-            any -- [description]
         '''
         selection = default
 
@@ -172,11 +129,11 @@ class CLI:
             if choice == default:
                 default_str = ' [default]'
 
-            print("\t{:02d}: {}{}".format(k, choices[k], default_str))
+            print(f"\t{k:02d}: {choices[k]}{default_str}")
             k += 1
 
         if allow_custom:
-            print("\t{:02d}: custom value".format(k))
+            print(f"\t{k:02d}: custom value")
 
         while True:
             choice = self.readline("enter a number: ", allow_empty=has_default, expect_digit=True)
@@ -187,7 +144,7 @@ class CLI:
             if choice >= 0 or choice <= k:
                 break
 
-            app_log.error("input must be in [0,{}]", k)
+            app_log.error(f"input must be in [0,{k}]")
 
         if allow_custom and choice == k:
             selection = self.readline("enter custom value: ")
@@ -226,8 +183,7 @@ class CLI:
             min_choices = 1
 
         if max_choices is not None and max_choices < min_choices:
-            raise ValueError("max_choices argument must be greater than {} if "
-                             "not None.".format(min_choices))
+            raise ValueError(f"max_choices argument must be greater than {min_choices} if not None.")
 
         if default is not None:
             if not isinstance(default, list):
@@ -243,7 +199,7 @@ class CLI:
         print(self.prompt(prompt))
 
         if default is not None:
-            print("default selection: {}".format(default))
+            print(f"default selection: {default}")
             if self.confirm("do you want the default selection?"):
                 return default
 
@@ -251,7 +207,7 @@ class CLI:
         selection = []
         remaining = choices[::]
         while True:
-            print("current selection: {}".format(selection))
+            print(f"current selection: {selection}")
             choice = self.choose_one(prompt, remaining, None, allow_custom)
             selection.append(choice)
             count += 1
@@ -261,8 +217,7 @@ class CLI:
 
             if count >= min_choices:
                 if max_choices is not None and count == max_choices:
-                    if self.confirm("maximum selection size reached, do you "
-                                    "want to reset?"):
+                    if self.confirm("maximum selection size reached, do you want to reset?"):
                         count = 0
                         selection = []
                         remaining = choices[::]

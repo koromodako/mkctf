@@ -14,19 +14,12 @@ from termcolor import colored
 # =============================================================================
 async def renew_flag(args, repo):
     '''Renews one or more challenge flags
-
-    Arguments:
-        args {Namespace} -- [description]
-        repo {Repository} -- [description]
-
-    Returns:
-        [type] -- [description]
     '''
     if not args.force and not repo.cli.confirm('do you really want to renew flags?'):
         return {'status': True} if args.json else True
 
     no_color = args.no_color
-    category, slug = args.category, args.slug
+    tags, slug = args.tags, args.slug
 
     chall_sep = '=' * 80
     if not no_color:
@@ -34,24 +27,22 @@ async def renew_flag(args, repo):
 
     results = []
 
-    for cat, challenges in repo.scan(category):
-        for challenge in challenges:
-            if slug is None or slug == challenge.slug():
-                new_flag = challenge.renew_flag(args.size)
+    for challenge in repo.scan(tags):
+        if slug is None or slug == challenge.slug:
+            new_flag = challenge.renew_flag(args.size)
 
-                if args.json:
-                    results.append({
-                        'slug': challenge.slug(),
-                        'category': challenge.category(),
-                        'flag': new_flag
-                    })
-                else:
-                    chall_desc = "[{}] -> {}".format(challenge.category(),
-                                                     challenge.slug())
-                    if not no_color:
-                        chall_desc = colored(chall_desc, 'blue')
+            if args.json:
+                results.append({
+                    'slug': challenge.slug,
+                    'tags': challenge.tags,
+                    'flag': new_flag
+                })
+            else:
+                chall_desc = f"{challenge.slug}{challenge.tags}"
+                if not no_color:
+                    chall_desc = colored(chall_desc, 'blue')
 
-                    print(chall_sep)
-                    print("{} => {}".format(chall_desc, new_flag))
+                print(chall_sep)
+                print(f"{chall_desc} => {new_flag}")
 
     return results if args.json else True

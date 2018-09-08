@@ -31,7 +31,7 @@ from mkctf.object.repository import Repository
 #  CONFIGURATION
 # =============================================================================
 DEFAULT_SIZE = 32
-DEFAULT_TIMEOUT = 4 # seconds
+DEFAULT_TIMEOUT = 60 # seconds
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -41,9 +41,6 @@ class MKCTFAPI:
     @staticmethod
     def parse_args():
         '''Parse command line arguments
-
-        Returns:
-            Namespace -- [description]
         '''
         p = ArgumentParser(add_help=True,
                            description="Manage CTF challenges repository.")
@@ -67,7 +64,7 @@ class MKCTFAPI:
         init_p.set_defaults(func=init)
         # ---- show
         show_p = sps.add_parser('show', help="shows challenges.")
-        show_p.add_argument('-c', '--category', help="challenge's category.")
+        show_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
         show_p.add_argument('-s', '--slug', help="challenge's slug.")
         show_p.set_defaults(func=show)
         # ---- create
@@ -75,23 +72,19 @@ class MKCTFAPI:
         create_p.set_defaults(func=create)
         # ---- delete
         delete_p = sps.add_parser('delete', help="deletes a challenge.")
-        delete_p.add_argument('category', help="challenge's category.")
         delete_p.add_argument('slug', help="challenge's slug.")
         delete_p.set_defaults(func=delete)
         # ---- configure
         configure_p = sps.add_parser('configure', help="edits repository's config "
                                                        "or challenge's config.")
-        configure_p.add_argument('-c', '--category', help="challenge's category.")
         configure_p.add_argument('-s', '--slug', help="challenge's slug.")
         configure_p.set_defaults(func=configure)
         # ---- enable
         enable_p = sps.add_parser('enable', help="enables a challenge.")
-        enable_p.add_argument('category', help="challenge's category.")
         enable_p.add_argument('slug', help="challenge's slug.")
         enable_p.set_defaults(func=enable)
         # ---- disable
         disable_p = sps.add_parser('disable', help="disables a challenge.")
-        disable_p.add_argument('category', help="challenge's category.")
         disable_p.add_argument('slug', help="challenge's slug.")
         disable_p.set_defaults(func=disable)
         # ---- export
@@ -101,7 +94,7 @@ class MKCTFAPI:
                               help="folder where archives must be written. If "
                                    "the folder does not exist it will be "
                                    "created.")
-        export_p.add_argument('-c', '--category', help="challenge's category.")
+        export_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
         export_p.add_argument('-s', '--slug', help="challenge's slug.")
         export_p.add_argument('--include-disabled', action='store_true',
                               help="export disabled challenges too.")
@@ -110,7 +103,7 @@ class MKCTFAPI:
         renew_flag_p = sps.add_parser('renew-flag',
                                        help="renews flags. You might want to "
                                             "build and deploy/export after that.")
-        renew_flag_p.add_argument('-c', '--category', help="challenge's category.")
+        renew_flag_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
         renew_flag_p.add_argument('-s', '--slug', help="challenge's slug.")
         renew_flag_p.add_argument('--size', type=int, default=DEFAULT_SIZE,
                                   help="flag's random string size (in bytes).")
@@ -119,24 +112,24 @@ class MKCTFAPI:
         build_p = sps.add_parser('build',
                                  help="builds challenges. After building "
                                       "challenges you might want to deploy/export.")
-        build_p.add_argument('-c', '--category', help="challenge's category.")
+        build_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
         build_p.add_argument('-s', '--slug', help="challenge's slug.")
-        build_p.add_argument('-t', '--timeout', type=int, default=DEFAULT_TIMEOUT,
+        build_p.add_argument('--timeout', type=int, default=DEFAULT_TIMEOUT,
                              help="override default timeout for subprocesses.")
         build_p.set_defaults(func=build)
         # ---- deploy
         deploy_p = sps.add_parser('deploy', help="deploy challenges.")
-        deploy_p.add_argument('-c', '--category', help="challenge's category.")
+        deploy_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
         deploy_p.add_argument('-s', '--slug', help="challenge's slug.")
-        deploy_p.add_argument('-t', '--timeout', type=int, default=DEFAULT_TIMEOUT,
+        deploy_p.add_argument('--timeout', type=int, default=DEFAULT_TIMEOUT,
                               help="override default timeout for subprocesses.")
         deploy_p.set_defaults(func=deploy)
         # ---- status
         status_p = sps.add_parser('status', help="check deployed challenge's "
                                                  "status using exploit/exploit.")
-        status_p.add_argument('-c', '--category', help="challenge's category.")
+        status_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
         status_p.add_argument('-s', '--slug', help="challenge's slug.")
-        status_p.add_argument('-t', '--timeout', type=int, default=DEFAULT_TIMEOUT,
+        status_p.add_argument('--timeout', type=int, default=DEFAULT_TIMEOUT,
                               help="override default timeout for subprocesses.")
         status_p.set_defaults(func=status)
 
@@ -148,41 +141,26 @@ class MKCTFAPI:
 
     def __init__(self, repo_root, out=None):
         '''Constructs a new instance
-
-        Arguments:
-            repo_root {Path} -- [description]
-            debug {bool} -- [description]
-            quiet {bool} -- [description]
-            no_color {bool} -- [description]
-
-        Keyword Arguments:
-            out {IOBase} -- [description] (default: {None})
         '''
         self.repo_root = Path(repo_root)
-        app_log.debug('repo_root: {}', self.repo_root)
+        app_log.debug(f"repo_root: {self.repo_root}")
 
-        self.glob_conf_path = Path.home() / '.config/mkctf.yml'
-        app_log.debug('glob_conf_path: {}', self.glob_conf_path)
+        self.glob_conf_path = Path.home().joinpath('.config', 'mkctf.yml')
+        app_log.debug(f"glob_conf_path: {self.glob_conf_path}")
 
         self.glob_conf = load_config(self.glob_conf_path)
-        app_log.debug('glob_conf: {}', self.glob_conf)
+        app_log.debug(f"glob_conf: {self.glob_conf}")
 
         self.repo_conf_path = self.repo_root / self.glob_conf['files']['config']['repository']
-        app_log.debug('repo_conf_path: {}', self.repo_conf_path)
+        app_log.debug(f"repo_conf_path: {self.repo_conf_path}")
 
         self.repo = Repository(self.repo_conf_path, self.glob_conf)
 
     async def perform(self, ns):
         '''Performs a comand using given Namespace ns
-
-        Arguments:
-            ns {[type]} -- [description]
-
-        Returns:
-            [type] -- [description]
         '''
         app_log.info("mkctf starts...")
-        app_log.debug("ns: {}", ns)
+        app_log.debug(f"ns: {ns}")
 
         if ns.command != 'init' and self.repo.get_conf() is None:
             app_log.critical("mkctf repository must be initialized first. Run `mkctf init` first.")
@@ -198,7 +176,7 @@ class MKCTFAPI:
             result = await ns.func(ns, self.repo)
         except Exception as e:
             print_exc()
-            app_log.critical("Ouuuuupss.....:(")
+            app_log.critical("Unhandled error... (-_-')")
 
         if result:
             app_log.info("mkctf ended successfully." )
@@ -209,12 +187,6 @@ class MKCTFAPI:
 
     def __ns(self, func):
         '''Creates a standard Namespace used by all functions of the API
-
-        Arguments:
-            func {function} -- [description]
-
-        Returns:
-            Namespace -- [description]
         '''
         ns = Namespace()
         ns.json = True
@@ -226,9 +198,6 @@ class MKCTFAPI:
 
     def init(self):
         '''API wrapper for 'init' command
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(init)
         # perform
@@ -236,16 +205,13 @@ class MKCTFAPI:
 
     def show(self):
         '''API wrapper for 'show' command
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(show)
         # perform
         return self.perform(ns)
 
     def create(self,
-               category,
+               tags,
                name,
                flag,
                points,
@@ -253,202 +219,110 @@ class MKCTFAPI:
                enabled=False,
                standalone=True):
         '''API wrapper for 'create' command
-
-        Arguments:
-            category {str} -- [description]
-            name {str} -- [description]
-            flag {str} -- [description]
-            points {int} -- [description]
-            parameters {dict} -- [description]
-            enabled {bool} -- [description]
-            standalone {bool} -- [description]
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(create)
         # parameters
         ns.configuration = {
                 'name': name,
+                'tags': tags,
                 'slug': slugify(name),
                 'flag': flag,
                 'points': points,
                 'enabled': enabled,
-                'category': category,
                 'parameters': parameters,
                 'standalone': standalone
         }
         # perform
         return self.perform(ns)
 
-    def delete(self, category=None, slug=None):
+    def delete(self, slug=None):
         '''API wrapper for 'delete' command
-
-        Keyword Arguments:
-            category {str} -- [description] (default: {None})
-            slug {str} -- [description] (default: {None})
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(delete)
         # parameters
-        ns.category = category
         ns.slug = slug
         # perform
         return self.perform(ns)
 
-    def configure(self, configuration, category=None, slug=None):
+    def configure(self, configuration, slug=None):
         '''API wrapper for 'configure' command
-
-        Arguments:
-            configuration {dict} -- [description]
-
-        Keyword Arguments:
-            category {str} -- [description] (default: {None})
-            slug {str} -- [description] (default: {None})
-
-        Returns:
-            [type] -- [description]
         '''
-        ns = self.__ns(enable)
+        ns = self.__ns(configure)
         # parameters
         ns.configuration = configuration
-        ns.category = category
         ns.slug = slug
         # perform
         return self.perform(ns)
 
-    def enable(self, category, slug):
+    def enable(self, slug):
         '''API wrapper for 'enable' command
-
-        Arguments:
-            category {str} -- [description]
-            slug {str} -- [description]
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(enable)
         # parameters
-        ns.category = category
         ns.slug = slug
         # perform
         return self.perform(ns)
 
-    def disable(self, category, slug):
+    def disable(self, slug):
         '''API wrapper for 'disable' command
-
-        Arguments:
-            category {str} -- [description]
-            slug {str} -- [description]
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(disable)
         # parameters
-        ns.category = category
         ns.slug = slug
         # perform
         return self.perform(ns)
 
-    def export(self, export_dir,
-               category=None, slug=None,
-               include_disabled=False):
+    def export(self, export_dir, tags=[], slug=None, include_disabled=False):
         '''API wrapper for 'export' command
-
-        Arguments:
-            export_dir {Path} -- [description]
-
-        Keyword Arguments:
-            category {str} -- [description] (default: {None})
-            slug {str} -- [description] (default: {None})
-            include_disabled {bool} -- [description] (default: {False})
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(export)
         # parameters
         ns.export_dir = export_dir
-        ns.category = category
+        ns.tags = tags
         ns.slug = slug
         ns.include_disabled = include_disabled
         # perform
         return self.perform(ns)
 
-    def renew_flag(self, category=None, slug=None, size=DEFAULT_SIZE):
+    def renew_flag(self, tags=[], slug=None, size=DEFAULT_SIZE):
         '''API wrapper for 'renew_flag' command
-
-        Keyword Arguments:
-            category {str} -- [description] (default: {None})
-            slug {str} -- [description] (default: {None})
-            size {int} -- [description] (default: {DEFAULT_SIZE})
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(renew_flag)
         # parameters
-        ns.category = category
+        ns.tags = tags
         ns.slug = slug
         ns.size = size
         # perform
         return self.perform(ns)
 
-    def build(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
+    def build(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
         '''API wrapper for 'build' command
-
-        Keyword Arguments:
-            category {str} -- [description] (default: {None})
-            slug {str} -- [description] (default: {None})
-            timeout {int} -- [description] (default: {DEFAULT_TIMEOUT})
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(build)
         # parameters
-        ns.category = category
+        ns.tags = tags
         ns.slug = slug
         ns.timeout = timeout
         # perform
         return self.perform(ns)
 
-    def deploy(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
+    def deploy(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
         '''API wrapper for 'deploy' command
-
-        Keyword Arguments:
-            category {str} -- [description] (default: {None})
-            slug {str} -- [description] (default: {None})
-            timeout {int} -- [description] (default: {DEFAULT_TIMEOUT})
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(deploy)
         # parameters
-        ns.category = category
+        ns.tags = tags
         ns.slug = slug
         ns.timeout = timeout
         # perform
         return self.perform(ns)
 
-    def status(self, category=None, slug=None, timeout=DEFAULT_TIMEOUT):
+    def status(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
         '''API wrapper for 'status' command
-
-        Keyword Arguments:
-            category {str} -- [description] (default: {None})
-            slug {str} -- [description] (default: {None})
-            timeout {int} -- [description] (default: {DEFAULT_TIMEOUT})
-
-        Returns:
-            [type] -- [description]
         '''
         ns = self.__ns(status)
         # parameters
-        ns.category = category
+        ns.tags = tags
         ns.slug = slug
         ns.timeout = timeout
         # perform

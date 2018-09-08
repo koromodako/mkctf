@@ -5,15 +5,17 @@ author: paul.dautry
 purpose:
 
 '''
+#===============================================================================
+#  IMPORTS
+#===============================================================================
+from mkctf.helper.log import app_log
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 async def disable(args, repo):
     '''Disables a challenge
-
-    Arguments:
-        args {Namespace} -- [description]
-        repo {Repository} -- [description]
     '''
-    status = repo.disable_chall(args.category, args.slug)
+    status = repo.disable_chall(args.slug)
+    if status:
+        app_log.info(f"{args.slug} disabled.")
     return {'status': status} if args.json else status

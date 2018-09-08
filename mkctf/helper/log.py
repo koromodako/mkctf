@@ -8,7 +8,7 @@ purpose:
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from logging import getLogger, Formatter, LoggerAdapter, StreamHandler, DEBUG, INFO
+from logging import getLogger, Formatter, StreamHandler, DEBUG, INFO
 from mkctf.helper.win import WINDOWS
 if not WINDOWS:
     from termcolor import colored
@@ -42,26 +42,15 @@ class ColoredFormatter(Formatter):
         if not self._no_color:
             os = colored(os, ColoredFormatter.COLORS[record.levelname])
         return os
-
-class Python3FormatAdapater(LoggerAdapter):
-    '''[summary]
-    '''
-    def log(self, lvl, msg, *args, **kwargs):
-        '''[summary]
-        '''
-        if self.isEnabledFor(lvl):
-            msg, kwargs = self.process(msg, kwargs)
-            super().log(lvl, msg.format(*args, **kwargs))
 # =============================================================================
 #  GLOBALS
 # =============================================================================
 _fmtr = ColoredFormatter('[mkctf](%(levelname)s)> %(message)s')
 _hdlr = StreamHandler()
 _hdlr.setFormatter(_fmtr)
-_logger = getLogger('mkctf')
-_logger.setLevel(INFO)
-_logger.addHandler(_hdlr)
-app_log = Python3FormatAdapater(_logger, None)
+app_log = getLogger('mkctf')
+app_log.setLevel(INFO)
+app_log.addHandler(_hdlr)
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -73,9 +62,9 @@ def disable_color():
 def enable_debug(debug=True):
     '''[summary]
     '''
-    _logger.setLevel(DEBUG if debug else INFO)
+    app_log.setLevel(DEBUG if debug else INFO)
 
 def disable_logging():
     '''[summary]
     '''
-    _logger.removeHandler(hdlr)
+    app_log.removeHandler(hdlr)

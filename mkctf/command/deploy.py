@@ -27,7 +27,7 @@ async def deploy(args, repo):
         return {'status': True} if args.json else True
 
     no_color, timeout = args.no_color, args.timeout
-    category, slug = args.category, args.slug
+    tags, slug = args.tags, args.slug
 
     chall_sep = '=' * 80
     sep = '-' * 35
@@ -44,46 +44,44 @@ async def deploy(args, repo):
     success = True
     results = []
 
-    for cat, challenges in repo.scan(category):
-        for challenge in challenges:
-            if slug is None or slug == challenge.slug():
+    for challenge in repo.scan(tags):
+        if slug is None or slug == challenge.slug:
 
-                exception = None
+            exception = None
 
-                try:
-                    (code, stdout, stderr) = await challenge.deploy(timeout)
-                except Exception as e:
-                    exception = e
-                    success = False
-                    code = -1
+            try:
+                (code, stdout, stderr) = await challenge.deploy(timeout)
+            except Exception as e:
+                exception = e
+                success = False
+                code = -1
 
-                if args.json:
-                    results.append({
-                        'slug': challenge.slug(),
-                        'category': challenge.category(),
-                        'code': code,
-                        'stdout': stdout,
-                        'stderr': stderr,
-                        'exception': exception
-                    })
-                else:
-                    chall_description = "[{}] -> {}".format(challenge.category(),
-                                                            challenge.slug())
-                    if not no_color:
-                        chall_description = colored(chall_description, 'blue')
+            if args.json:
+                results.append({
+                    'slug': challenge.slug,
+                    'tags': challenge.tags,
+                    'code': code,
+                    'stdout': stdout,
+                    'stderr': stderr,
+                    'exception': exception
+                })
+            else:
+                chall_description = f"{challenge.slug}{challenge.tags}"
+                if not no_color:
+                    chall_description = colored(chall_description, 'blue')
 
-                    chall_status = returncode2str(code, args.no_color)
+                chall_status = returncode2str(code, args.no_color)
 
-                    print(chall_sep)
-                    print("{} {}".format(chall_description, chall_status))
+                print(chall_sep)
+                print(f"{chall_description} {chall_status}")
 
-                    if code < 0:
-                        print(exc_sep)
-                        print(exception)
-                    elif code > 0:
-                        print(out_sep)
-                        print(stdout.decode().strip())
-                        print(err_sep)
-                        print(stderr.decode().strip())
+                if code < 0:
+                    print(exc_sep)
+                    print(exception)
+                elif code > 0:
+                    print(out_sep)
+                    print(stdout.decode().strip())
+                    print(err_sep)
+                    print(stderr.decode().strip())
 
     return results if args.json else success

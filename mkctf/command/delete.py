@@ -14,18 +14,14 @@ from mkctf.helper.log import app_log
 # =============================================================================
 async def delete(args, repo):
     '''Deletes a challenge
-
-    Arguments:
-        args {Namespace} -- [description]
-        repo {Repository} -- [description]
     '''
-    category, slug = args.category, args.slug
+    slug = args.slug
     status = True
 
-    if repo.delete_chall(category, slug):
-        app_log.info("challenge {}/{} successfully deleted.", category, slug)
+    if repo.delete_chall(slug):
+        app_log.info(f"challenge {slug} successfully deleted.")
     else:
-        app_log.error("challenge {}/{} deletion failed.", category, slug)
+        app_log.error(f"challenge {slug} deletion failed.")
         status = False
 
     return {'status': status} if args.json else status
