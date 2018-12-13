@@ -11,9 +11,9 @@ You can find challenges and writeups of the past editions of INS'hAck [here](htt
 
 This project was updated for INS'hAck 2018 event.
 
-Version [1](https://github.com/pdautry/mkctf/releases/tag/1.0.0) was used until INS'hAck 2019.
+Version [1](https://github.com/koromodako/mkctf/releases/tag/1.0.0) was used until INS'hAck 2019.
 
-INS'hAck 2019 will be using version [2+](https://github.com/pdautry/mkctf/releases/tag/2.0.0) or above.
+INS'hAck 2019 will be using version [2+](https://github.com/koromodako/mkctf/releases/tag/2.0.0) or above.
 
 ## Minimal requirements
 
@@ -22,7 +22,7 @@ INS'hAck 2019 will be using version [2+](https://github.com/pdautry/mkctf/releas
 ## Getting started
 
 ```pdautry/mkctf/releases/tag/1.0.0
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/pdautry/mkctf/master/scripts/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/koromodako/mkctf/master/scripts/install.sh)"
 ```
 
 You might need to add `~/bin` to your `$PATH` (most of the time you just reload `.profile`)
