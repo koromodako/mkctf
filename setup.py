@@ -25,6 +25,5 @@ setup(
         'console_scripts': [
             'mkctf-cli = mkctf.main:app',
         ]
-    },
-    data_files=[(str(CONF_DIR), ['config/mkctf.yml'])]
+    }
 )
