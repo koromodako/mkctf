@@ -1,7 +1,7 @@
 '''
 file: wrapper.py
 date: 2018-03-01
-author: paul.dautry
+author: koromodako
 purpose:
 
 '''

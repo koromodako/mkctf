@@ -21,7 +21,7 @@ INS'hAck 2019 will be using version [2+](https://github.com/koromodako/mkctf/rel
 
 ## Getting started
 
-```pdautry/mkctf/releases/tag/1.0.0
+```koromodako/mkctf/releases/tag/1.0.0
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/koromodako/mkctf/master/scripts/install.sh)"
 ```
 

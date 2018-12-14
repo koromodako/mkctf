@@ -27,7 +27,7 @@ if [[ -d "${REPO_DIR}" ]]; then
 else
     print "cloning repository"
     cd /tmp
-    git clone https://github.com/pdautry/mkctf
+    git clone https://github.com/koromodako/mkctf
 fi
 
 print "entering ${REPO_DIR}"

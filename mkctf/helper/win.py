@@ -1,7 +1,7 @@
 '''
 file: win.py
 date: 2018-07-31
-author: paul.dautry
+author: koromodako
 purpose:
 
 '''

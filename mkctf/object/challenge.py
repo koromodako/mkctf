@@ -1,7 +1,7 @@
 '''
 file: challenge.py
 date: 2018-02-27
-author: paul.dautry
+author: koromodako
 purpose:
 
 '''

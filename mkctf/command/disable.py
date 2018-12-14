@@ -1,7 +1,7 @@
 '''
 file: disable.py
 date: 2018-03-02
-author: paul.dautry
+author: koromodako
 purpose:
 
 '''

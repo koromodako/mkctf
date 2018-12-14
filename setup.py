@@ -15,8 +15,8 @@ setup(
     version=__version__,
     description='',
     author='Paul Dautry',
-    author_email='paul.dautry@gmail.com',
-    url='https://github.com/pdautry/mkctf',
+    author_email='koromodako@gmail.com',
+    url='https://github.com/koromodako/mkctf',
     # package files
     packages=find_packages(str(HERE)),
     install_requires=requirements(),

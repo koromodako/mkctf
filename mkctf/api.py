@@ -1,7 +1,7 @@
 '''
 file: api.py
 date: 2018-03-20
-author: paul.dautry
+author: koromodako
 purpose:
 
 '''

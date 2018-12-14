@@ -1,7 +1,7 @@
 '''
 file: cli.py
 date: 2017-07-23
-author: paul.dautry
+author: koromodako
 purpose:
     Utils CLI-related functions
 '''

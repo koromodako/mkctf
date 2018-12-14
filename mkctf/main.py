@@ -3,7 +3,7 @@
 '''
 file:    main.py
 date:    2018-07-31
-author:  paul dautry
+author:  koromodako
 purpose:
       This is a framework designed to create challenges and maintain them.
       Entry point script.
