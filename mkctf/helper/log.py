@@ -67,4 +67,4 @@ def enable_debug(debug=True):
 def disable_logging():
     '''[summary]
     '''
-    app_log.removeHandler(hdlr)
+    app_log.removeHandler(_hdlr)
