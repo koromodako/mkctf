@@ -8,37 +8,29 @@ purpose:
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from termcolor import colored
+import mkctf.helper.cli as cli
 from mkctf.helper.log import app_log
-from mkctf.helper.formatting import returncode2str
+from mkctf.helper.formatting import HSEP, format_text, format_rcode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-async def build(args, repo):
+async def build(api, args):
     '''Builds one or more challenges
     '''
-    if not args.force and not repo.cli.confirm('do you really want to build?'):
-        return {'status': True} if args.json else True
+    if not args.yes and not cli.confirm('do you really want to build?'):
+        return False
 
-    no_color, timeout = args.no_color, args.timeout
+    timeout = args.timeout
     tags, slug = args.tags, args.slug
 
-    chall_sep = '=' * 80
     sep = '-' * 35
-    exc_sep = '{sep} [EXCEPT] {sep}'.format(sep=sep)
-    out_sep = '{sep} [STDOUT] {sep}'.format(sep=sep)
-    err_sep = '{sep} [STDERR] {sep}'.format(sep=sep)
-
-    if not no_color:
-        chall_sep = colored(chall_sep, 'blue', attrs=['bold'])
-        exc_sep = colored(exc_sep, 'magenta')
-        out_sep = colored(out_sep, 'blue')
-        err_sep = colored(err_sep, 'red')
+    chall_sep = format_text(HSEP, 'blue', attrs=['bold'])
+    exc_sep = format_text(f'{sep} [EXCEPT] {sep}', 'magenta')
+    out_sep = format_text(f'{sep} [STDOUT] {sep}', 'blue')
+    err_sep = format_text(f'{sep} [STDERR] {sep}', 'red')
 
     success = True
-    results = []
-
-    for challenge in repo.scan(tags):
+    async for challenge in api.build(tags):
         if slug is None or slug == challenge.slug:
 
             exception = None

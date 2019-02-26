@@ -11,7 +11,7 @@ purpose:
 from shutil import rmtree
 from pathlib import Path
 from slugify import slugify
-from mkctf.helper.cli import CLI
+import mkctf.helper.cli as cli
 from mkctf.helper.log import app_log
 from mkctf.helper.wrapper import lazy
 from mkctf.object.challenge import Challenge
@@ -26,7 +26,6 @@ class Repository(Configurable):
         '''[summary]
         '''
         super().__init__(conf_path)
-        self.cli = CLI()
         self.glob_conf = glob_conf
 
     def __make_repo_conf(self,
@@ -53,17 +52,17 @@ class Repository(Configurable):
             flag_prefix = previous_conf.get('flag', {}).get('prefix')
             flag_suffix = previous_conf.get('flag', {}).get('suffix')
 
-            name = self.cli.readline("enter repository name:", default=name)
-            tags = self.cli.choose_many("select tags:", tags, default=tags)
-            pub_dirs = self.cli.choose_many("select public directories:", pub_dirs, default=pub_dirs)
-            priv_dirs = self.cli.choose_many("select private directories:", priv_dirs, default=priv_dirs)
-            txt_files = self.cli.choose_many("select text files:", txt_files, default=txt_files)
-            chall_file = self.cli.readline("enter challenge file name:", default=chall_file)
-            build_file = self.cli.readline("enter build file name:", default=build_file)
-            deploy_file = self.cli.readline("enter deploy file name:", default=deploy_file)
-            status_file = self.cli.readline("enter status file name:", default=status_file)
-            flag_prefix = self.cli.readline("enter flag prefix:", default=flag_prefix)
-            flag_suffix = self.cli.readline("enter flag suffix:", default=flag_suffix)
+            name = cli.readline("enter repository name:", default=name)
+            tags = cli.choose_many("select tags:", tags, default=tags)
+            pub_dirs = cli.choose_many("select public directories:", pub_dirs, default=pub_dirs)
+            priv_dirs = cli.choose_many("select private directories:", priv_dirs, default=priv_dirs)
+            txt_files = cli.choose_many("select text files:", txt_files, default=txt_files)
+            chall_file = cli.readline("enter challenge file name:", default=chall_file)
+            build_file = cli.readline("enter build file name:", default=build_file)
+            deploy_file = cli.readline("enter deploy file name:", default=deploy_file)
+            status_file = cli.readline("enter status file name:", default=status_file)
+            flag_prefix = cli.readline("enter flag prefix:", default=flag_prefix)
+            flag_suffix = cli.readline("enter flag suffix:", default=flag_suffix)
 
             conf = {
                 'name': name,
@@ -111,10 +110,10 @@ class Repository(Configurable):
             points = previous_conf.get('points')
             standalone = previous_conf.get('standalone')
 
-            name = self.cli.readline("enter challenge name:", default=name)
-            tags = self.cli.choose_many("select one or more tags:", repo_conf['tags'], default=tags)
-            points = self.cli.readline("enter number of points:", default=points, expect_digit=True)
-            standalone = self.cli.confirm("is it a standalone challenge?", default=standalone)
+            name = cli.readline("enter challenge name:", default=name)
+            tags = cli.choose_many("select one or more tags:", repo_conf['tags'], default=tags)
+            points = cli.readline("enter number of points:", default=points, expect_digit=True)
+            standalone = cli.confirm("is it a standalone challenge?", default=standalone)
 
             conf = {
                 'name': name,
@@ -217,7 +216,7 @@ class Repository(Configurable):
         if chall is None:
             return False
 
-        if not self.cli.confirm(f"do you really want to remove {slug}?"):
+        if not cli.confirm(f"do you really want to remove {slug}?"):
             return False
 
         rmtree(str(chall.working_dir()))

@@ -38,109 +38,8 @@ DEFAULT_TIMEOUT = 60 # seconds
 class MKCTFAPI:
     '''Provides access to all functionalities programmatically
     '''
-    @staticmethod
-    def parse_args():
-        '''Parse command line arguments
-        '''
-        p = ArgumentParser(add_help=True,
-                           description="Manage CTF challenges repository.")
-        p.add_argument('-q', '--quiet', action='store_true',
-                       help="decrease program verbosity")
-        p.add_argument('-d', '--debug', action='store_true',
-                       help="output debug messages")
-        p.add_argument('--no-color', action='store_true',
-                       help="disable colored output")
-        p.add_argument('-r', '--repo-root', type=Path, default=Path.cwd(),
-                       help="repository's root folder absolute path.")
-        p.add_argument('-j', '--json', action='store_true',
-                       help="json formatted output.")
-        p.add_argument('-f', '--force', action='store_true',
-                       help="do not ask for confirmation.")
-        # -- add subparsers
-        sps = p.add_subparsers(dest='command', metavar='COMMAND')
-        sps.required = True
-        # ---- init
-        init_p = sps.add_parser('init', help="initializes mkctf repository.")
-        init_p.set_defaults(func=init)
-        # ---- show
-        show_p = sps.add_parser('show', help="shows challenges.")
-        show_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
-        show_p.add_argument('-s', '--slug', help="challenge's slug.")
-        show_p.set_defaults(func=show)
-        # ---- create
-        create_p = sps.add_parser('create', help="creates a challenge.")
-        create_p.set_defaults(func=create)
-        # ---- delete
-        delete_p = sps.add_parser('delete', help="deletes a challenge.")
-        delete_p.add_argument('slug', help="challenge's slug.")
-        delete_p.set_defaults(func=delete)
-        # ---- configure
-        configure_p = sps.add_parser('configure', help="edits repository's config "
-                                                       "or challenge's config.")
-        configure_p.add_argument('-s', '--slug', help="challenge's slug.")
-        configure_p.set_defaults(func=configure)
-        # ---- enable
-        enable_p = sps.add_parser('enable', help="enables a challenge.")
-        enable_p.add_argument('slug', help="challenge's slug.")
-        enable_p.set_defaults(func=enable)
-        # ---- disable
-        disable_p = sps.add_parser('disable', help="disables a challenge.")
-        disable_p.add_argument('slug', help="challenge's slug.")
-        disable_p.set_defaults(func=disable)
-        # ---- export
-        export_p = sps.add_parser('export', help="exports enabled static "
-                                                 "challenges.")
-        export_p.add_argument('export_dir', type=Path,
-                              help="folder where archives must be written. If "
-                                   "the folder does not exist it will be "
-                                   "created.")
-        export_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
-        export_p.add_argument('-s', '--slug', help="challenge's slug.")
-        export_p.add_argument('--include-disabled', action='store_true',
-                              help="export disabled challenges too.")
-        export_p.set_defaults(func=export)
-        # ---- renew-flag
-        renew_flag_p = sps.add_parser('renew-flag',
-                                       help="renews flags. You might want to "
-                                            "build and deploy/export after that.")
-        renew_flag_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
-        renew_flag_p.add_argument('-s', '--slug', help="challenge's slug.")
-        renew_flag_p.add_argument('--size', type=int, default=DEFAULT_SIZE,
-                                  help="flag's random string size (in bytes).")
-        renew_flag_p.set_defaults(func=renew_flag)
-        # ---- build
-        build_p = sps.add_parser('build',
-                                 help="builds challenges. After building "
-                                      "challenges you might want to deploy/export.")
-        build_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
-        build_p.add_argument('-s', '--slug', help="challenge's slug.")
-        build_p.add_argument('--timeout', type=int, default=DEFAULT_TIMEOUT,
-                             help="override default timeout for subprocesses.")
-        build_p.set_defaults(func=build)
-        # ---- deploy
-        deploy_p = sps.add_parser('deploy', help="deploy challenges.")
-        deploy_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
-        deploy_p.add_argument('-s', '--slug', help="challenge's slug.")
-        deploy_p.add_argument('--timeout', type=int, default=DEFAULT_TIMEOUT,
-                              help="override default timeout for subprocesses.")
-        deploy_p.set_defaults(func=deploy)
-        # ---- status
-        status_p = sps.add_parser('status', help="check deployed challenge's "
-                                                 "status using exploit/exploit.")
-        status_p.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
-        status_p.add_argument('-s', '--slug', help="challenge's slug.")
-        status_p.add_argument('--timeout', type=int, default=DEFAULT_TIMEOUT,
-                              help="override default timeout for subprocesses.")
-        status_p.set_defaults(func=status)
-
-        args = p.parse_args()
-
-        args.configuration = None
-
-        return args
-
-    def __init__(self, repo_root, out=None):
-        '''Constructs a new instance
+    def __init__(self, repo_root):
+        '''Coargstructs a new iargstance
         '''
         self.repo_root = Path(repo_root)
         app_log.debug(f"repo_root: {self.repo_root}")
@@ -156,174 +55,195 @@ class MKCTFAPI:
 
         self.repo = Repository(self.repo_conf_path, self.glob_conf)
 
-    async def perform(self, ns):
-        '''Performs a comand using given Namespace ns
+    def __assert_valid_repo(self):
+        '''Checks if repository is valid
         '''
-        app_log.info("mkctf starts...")
-        app_log.debug(f"ns: {ns}")
-
-        if ns.command != 'init' and self.repo.get_conf() is None:
+        if not self.repo.get_conf():
             app_log.critical("mkctf repository must be initialized first. Run `mkctf init` first.")
-
-        try:
-            # -----------------------------------------------------------------
-            # 'result' content depending on json argument value:
-            # if ns.json:
-            #   result = dict or None
-            # else:
-            #   result = True or False
-            # -----------------------------------------------------------------
-            result = await ns.func(ns, self.repo)
-        except Exception as e:
-            print_exc()
-            app_log.critical("Unhandled error... (-_-')")
-
-        if result:
-            app_log.info("mkctf ended successfully." )
-        else:
-            app_log.error("mkctf ended with errors.")
-
-        return result
-
-    def __ns(self, func):
-        '''Creates a standard Namespace used by all functions of the API
-        '''
-        ns = Namespace()
-        ns.json = True
-        ns.force = True
-        ns.no_color = True
-        ns.command = func.__name__
-        ns.func = func
-        return ns
+            raise RuntimeError("Uninitialized repository.")
 
     def init(self):
         '''API wrapper for 'init' command
         '''
-        ns = self.__ns(init)
-        # perform
-        return self.perform(ns)
+        conf = self.repo.get_conf()
+        if conf is None:
+            self.repo.init()
+            app_log.info("mkctf repository created.")
+            status = True
+        else:
+            app_log.error("already a mkctf repository.")
+            status = False
+        return {'status': status, 'conf': conf}
 
-    def show(self):
+    def list(self):
         '''API wrapper for 'show' command
         '''
-        ns = self.__ns(show)
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        results = {}
+        for challenge in self.repo.scan(tags):
+            if slug is None or slug == challenge.slug:
+                results[challenge.slug] = challenge.get_conf()
+        return results
 
-    def create(self,
-               tags,
-               name,
-               flag,
-               points,
-               parameters={},
-               enabled=False,
-               standalone=True):
+    def create(self, tags, name, flag, points, parameters={}, enabled=False, standalone=True):
         '''API wrapper for 'create' command
         '''
-        ns = self.__ns(create)
-        # parameters
-        ns.configuration = {
-                'name': name,
-                'tags': tags,
-                'slug': slugify(name),
-                'flag': flag,
-                'points': points,
-                'enabled': enabled,
-                'parameters': parameters,
-                'standalone': standalone
-        }
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        created = self.repo.create_chall({
+            'name': name,
+            'tags': tags,
+            'slug': slugify(name),
+            'flag': flag,
+            'points': points,
+            'enabled': enabled,
+            'parameters': parameters,
+            'standalone': standalone
+        })
+        return {'created': created}
 
     def delete(self, slug=None):
         '''API wrapper for 'delete' command
         '''
-        ns = self.__ns(delete)
-        # parameters
-        ns.slug = slug
-        # perform
-        return self.perform(ns)
+        if self.repo.delete_chall(slug):
+            app_log.info(f"challenge {slug} successfully deleted.")
+            deleted = True
+        else:
+            app_log.error(f"challenge {slug} deletion failed.")
+            deleted = False
+        return {'deleted': deleted}
 
     def configure(self, configuration, slug=None):
         '''API wrapper for 'configure' command
         '''
-        ns = self.__ns(configure)
-        # parameters
-        ns.configuration = configuration
-        ns.slug = slug
-        # perform
-        return self.perform(ns)
+        configured = False
+        if slug is None:
+            # configure repo
+            if repo.configure(args.configuration):
+                app_log.info("repo configured.")
+                configured = True
+            else:
+                app_log.error("repo configuration failed.")
+        else:
+            # configure a challenge
+            if repo.configure_chall(slug, args.configuration):
+                app_log.info("challenge configured.")
+                configured = True
+            else:
+                app_log.error("challenge configuration failed.")
+        return {'configured': configured}
 
     def enable(self, slug):
         '''API wrapper for 'enable' command
         '''
-        ns = self.__ns(enable)
-        # parameters
-        ns.slug = slug
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        enabled = self.repo.enable_chall(slug)
+        return {'enabled': enabled}
 
     def disable(self, slug):
         '''API wrapper for 'disable' command
         '''
-        ns = self.__ns(disable)
-        # parameters
-        ns.slug = slug
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        disabled = self.repo.disable_chall(args.slug)
+        return {'disabled': disabled}
+
+    def __export_chall(self, export_dir, include_disabled, challenge):
+        '''Exports one challenge
+
+        Creates an archive containing all of the challenge "exportable" files.
+        '''
+        if not challenge.is_standalone:
+            app_log.warning(f"challenge ignored (not standalone): {challenge.slug}.")
+            return False
+        if not include_disabled and not challenge.enabled:
+            app_log.warning(f"challenge ignored (disabled): {challenge.slug}.")
+            return False
+        app_log.info(f"exporting {challenge.slug}...")
+        archive_name = f'{challenge.slug}.tgz'
+        archive_path = export_dir.joinpath(archive_name)
+        with tarfile.open(str(archive_path), 'w:gz') as arch:
+            for entry in challenge.exportable():
+                arch.add(entry.path, arcname=entry.name)
+        checksum_name = f'{archive_name}.sha256'
+        checksum_path = export_dir.joinpath(checksum_name)
+        archive_hash = hash_file(archive_path)
+        checksum_path.write_text(f'{archive_hash}  {archive_name}\n')
+        app_log.info("done.")
+        return {
+            'archive_path': archive_path,
+            'checksum_path': checksum_path
+        }
 
     def export(self, export_dir, tags=[], slug=None, include_disabled=False):
         '''API wrapper for 'export' command
         '''
-        ns = self.__ns(export)
-        # parameters
-        ns.export_dir = export_dir
-        ns.tags = tags
-        ns.slug = slug
-        ns.include_disabled = include_disabled
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        results = []
+        export_dir.mkdir(parents=True, exist_ok=True)
+        if slug:
+            challenge = self.repo.find_chall(slug)
+            if not challenge:
+                app_log.error(f"challenge not found: {challenge.slug}")
+                return False
+            results.append(self.__export_chall(export_dir, include_disabled, challenge))
+        else:
+            for challenge in self.repo.scan(tags):
+                results.append(self.__export_chall(export_dir, include_disabled, challenge))
+        return results
 
-    def renew_flag(self, tags=[], slug=None, size=DEFAULT_SIZE):
-        '''API wrapper for 'renew_flag' command
+    def renew_flag(self, tags, slug, size):
+        '''Renews one or more challenge flags
         '''
-        ns = self.__ns(renew_flag)
-        # parameters
-        ns.tags = tags
-        ns.slug = slug
-        ns.size = size
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        for challenge in self.repo.scan(tags):
+            if slug is None or slug == challenge.slug:
+                new_flag = challenge.renew_flag(size)
+                yield {
+                    'slug': challenge.slug,
+                    'tags': challenge.tags,
+                    'flag': new_flag
+                }
 
-    def build(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
+    async def __run(self, coro):
+        try:
+            (code, stdout, stderr) = await coro
+            exception = None
+        except Exception as exc:
+            code = -1
+            stdout = b''
+            stderr = b''
+            exception = str(exc)
+        return {
+            'slug': challenge.slug,
+            'tags': challenge.tags,
+            'code': code,
+            'stdout': stdout,
+            'stderr': stderr,
+            'exception': exception
+        }
+
+    async def build(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
         '''API wrapper for 'build' command
         '''
-        ns = self.__ns(build)
-        # parameters
-        ns.tags = tags
-        ns.slug = slug
-        ns.timeout = timeout
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        for challenge in self.repo.scan(tags):
+            if slug is None or slug == challenge.slug:
+                result = await self.__run(challenge.build(timeout))
+                yield result
 
-    def deploy(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
+    async def deploy(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
         '''API wrapper for 'deploy' command
         '''
-        ns = self.__ns(deploy)
-        # parameters
-        ns.tags = tags
-        ns.slug = slug
-        ns.timeout = timeout
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        for challenge in self.repo.scan(tags):
+            if slug is None or slug == challenge.slug:
+                result = await self.__run(challenge.deploy(timeout))
+                yield result
 
-    def status(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
+    async def status(self, tags=[], slug=None, timeout=DEFAULT_TIMEOUT):
         '''API wrapper for 'status' command
         '''
-        ns = self.__ns(status)
-        # parameters
-        ns.tags = tags
-        ns.slug = slug
-        ns.timeout = timeout
-        # perform
-        return self.perform(ns)
+        self.__assert_valid_repo()
+        for challenge in self.repo.scan(tags):
+            if slug is None or slug == challenge.slug:
+                result = await self.__run(challenge.status(timeout))
+                yield result

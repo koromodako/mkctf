@@ -10,7 +10,7 @@ purpose:
 # =============================================================================
 from termcolor import colored
 from mkctf.helper.log import app_log
-from mkctf.helper.formatting import TAB, dict2str
+from mkctf.helper.formatting import TAB, format_dict2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -33,7 +33,7 @@ def __print_chall(challenge, no_color):
     del conf['standalone']
     del conf['slug']
 
-    text = dict2str(conf).replace("\n", f"\n{TAB}{TAB}{TAB}")
+    text = format_dict2str(conf).replace("\n", f"\n{TAB}{TAB}{TAB}")
 
     print(chall_entry)
     print(text[1:])

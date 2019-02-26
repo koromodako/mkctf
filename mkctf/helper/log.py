@@ -9,9 +9,7 @@ purpose:
 #  IMPORTS
 # =============================================================================
 from logging import getLogger, Formatter, StreamHandler, DEBUG, INFO
-from mkctf.helper.win import WINDOWS
-if not WINDOWS:
-    from termcolor import colored
+from mkctf.helper.formatting import format_text
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -30,18 +28,12 @@ class ColoredFormatter(Formatter):
         '''[summary]
         '''
         super().__init__(fmt, datefmt, style)
-        self._no_color = WINDOWS
-
-    def disable_color(self):
-        self._no_color = False
 
     def format(self, record):
         '''[summary]
         '''
         os = super().format(record)
-        if not self._no_color:
-            os = colored(os, ColoredFormatter.COLORS[record.levelname])
-        return os
+        return format_text(os, ColoredFormatter.COLORS[record.levelname])
 # =============================================================================
 #  GLOBALS
 # =============================================================================
@@ -54,11 +46,6 @@ app_log.addHandler(_hdlr)
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def disable_color():
-    '''[summary]
-    '''
-    _fmtr.disable_color()
-
 def enable_debug(debug=True):
     '''[summary]
     '''

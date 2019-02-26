@@ -1,5 +1,5 @@
 '''
-file: disable.py
+file: enable.py
 date: 2018-03-02
 author: koromodako
 purpose:
@@ -8,14 +8,14 @@ purpose:
 #===============================================================================
 #  IMPORTS
 #===============================================================================
-from mkctf.helper.log import app_log
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-async def disable(args, repo):
-    '''Disables a challenge
+async def enable(api, args):
+    '''Enables a challenge
     '''
-    status = repo.disable_chall(args.slug)
-    if status:
-        app_log.info(f"{args.slug} disabled.")
-    return {'status': status} if args.json else status
+    status = api.enable(args.slug)
+    enabled = status['enabled']
+    if enabled:
+        print(f"{args.slug}: enabled")
+    return enabled

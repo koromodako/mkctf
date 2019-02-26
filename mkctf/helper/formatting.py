@@ -8,11 +8,15 @@ purpose:
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from termcolor import colored
+from mkctf.helper.win import WINDOWS
+if not WINDOWS:
+    from termcolor import colored
 # =============================================================================
 #  GLOBALS
 # =============================================================================
 TAB = ' ' * 4
+HSEP = '-' * 80
+COLORIZE = not WINDOWS
 EXIT_CODE_MAP = {
     None: ['TIMED-OUT', 'magenta'],
     0: ['SUCCESS', 'green'],
@@ -23,7 +27,18 @@ EXIT_CODE_MAP = {
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def set_tab_size(size):
+def format_disable_colors():
+    global COLORIZE
+    COLORIZE = False
+
+def format_text(text, color, attrs=None):
+    if not attrs:
+        attrs = []
+    if COLORIZE:
+        return colored(text, color, attrs=attrs)
+    return text
+
+def format_set_tab_size(size):
     '''Sets the tab size.
 
     Tabs are converted to spaces, this functions sets the size of a tabulation
@@ -36,7 +51,7 @@ def set_tab_size(size):
     if size > 0:
         TAB = ' ' * size
 
-def dict2str(dictionary):
+def format_dict2str(dictionary):
     '''Converts a dictionary recursively into human-readable nested lists
 
     >>> d = {'a': 1, 'b': 2, 'c': { 4: ['a', 'b'] }}
@@ -53,12 +68,12 @@ def dict2str(dictionary):
     for key, value in dictionary.items():
         if isinstance(value, dict):
             text += f"\n+ {key}:"
-            text += dict2str(value).replace("\n", f"\n{TAB}")
+            text += format_dict2str(value).replace("\n", f"\n{TAB}")
         else:
             text += f"\n+ {key}: {value}"
     return text
 
-def returncode2str(code, no_color):
+def format_rcode2str(code, no_color):
     '''[summary]
 
     [description]
@@ -79,6 +94,6 @@ def returncode2str(code, no_color):
         status += f'(code={code})'
 
     if not no_color:
-        status = colored(status, value[1], attrs=attrs)
+        status = format_text(status, value[1], attrs)
 
     return status

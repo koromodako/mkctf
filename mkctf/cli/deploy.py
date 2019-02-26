@@ -8,7 +8,8 @@ purpose:
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from termcolor import colored
+
+import mkctf.helper.cli as cli
 from mkctf.helper.formatting import returncode2str
 # =============================================================================
 #  FUNCTIONS
@@ -23,7 +24,7 @@ async def deploy(args, repo):
     Returns:
         [type] -- [description]
     '''
-    if not args.force and not repo.cli.confirm('do you really want to deploy?'):
+    if not args.yes and not cli.confirm('do you really want to deploy?'):
         return {'status': True} if args.json else True
 
     no_color, timeout = args.no_color, args.timeout
