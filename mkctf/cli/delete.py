@@ -1,27 +1,13 @@
-'''
-file: delete.py
-date: 2018-02-27
-author: koromodako
-purpose:
-
-'''
-# =============================================================================
-#  IMPORTS
-# =============================================================================
-from mkctf.helper.log import app_log
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-async def delete(args, repo):
+async def delete(api, args):
     '''Deletes a challenge
     '''
-    slug = args.slug
-    status = True
+    result = api.delete(args.slug)
+    return result['deleted']
 
-    if repo.delete_chall(slug):
-        app_log.info(f"challenge {slug} successfully deleted.")
-    else:
-        app_log.error(f"challenge {slug} deletion failed.")
-        status = False
-
-    return {'status': status} if args.json else status
+def setup_delete(subparsers):
+    parser = subparsers.add_parser('delete', help="delete a challenge.")
+    parser.add_argument('slug', help="challenge's slug.")
+    parser.set_defaults(func=delete)

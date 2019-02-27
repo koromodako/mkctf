@@ -1,10 +1,3 @@
-'''
-file: formatting.py
-date: 2018-03-02
-author: koromodako
-purpose:
-
-'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
@@ -27,9 +20,9 @@ EXIT_CODE_MAP = {
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def format_disable_colors():
+def format_enable_colors(enable):
     global COLORIZE
-    COLORIZE = False
+    COLORIZE = enable
 
 def format_text(text, color, attrs=None):
     if not attrs:
@@ -73,7 +66,7 @@ def format_dict2str(dictionary):
             text += f"\n+ {key}: {value}"
     return text
 
-def format_rcode2str(code, no_color):
+def format_rcode2str(code):
     '''[summary]
 
     [description]
@@ -84,16 +77,9 @@ def format_rcode2str(code, no_color):
     '''
     attrs = ['bold']
     value = EXIT_CODE_MAP.get(code)
-
     if value is None:
         value = ['FAILURE', 'red']
-
     status = f'[{value[0]}]'
-
     if code is not None:
         status += f'(code={code})'
-
-    if not no_color:
-        status = format_text(status, value[1], attrs)
-
-    return status
+    return format_text(status, value[1], attrs)

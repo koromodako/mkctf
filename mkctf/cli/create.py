@@ -1,16 +1,12 @@
-'''
-file: create.py
-date: 2018-02-27
-author: koromodako
-purpose:
-
-'''
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-async def create(args, repo):
+async def create(api, args):
     '''Creates a challenge
     '''
-    status = repo.create_chall(args.configuration)
-    return {'status': status} if args.json else status
+    result = api.create(args.configuration)
+    return result['created']
 
+def setup_create(subparsers):
+    parser = subparsers.add_parser('create', help="create a challenge.")
+    parser.set_defaults(func=create)

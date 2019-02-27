@@ -1,10 +1,3 @@
-'''
-file: hashing.py
-date: 2018-03-02
-author: koromodako
-purpose:
-
-'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
@@ -22,13 +15,10 @@ def hash_file(filepath):
         str -- SHA256 hexadecimal digest
     '''
     h = sha256()
-
     with filepath.open('rb') as f:
-
         while True:
             data = f.read(4096)
             if not data:
                 break
             h.update(data)
-
     return h.hexdigest()

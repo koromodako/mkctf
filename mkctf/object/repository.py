@@ -1,10 +1,3 @@
-'''
-file: repository.py
-date: 2018-02-28
-author: koromodako
-purpose:
-
-'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
@@ -28,14 +21,11 @@ class Repository(Configurable):
         super().__init__(conf_path)
         self.glob_conf = glob_conf
 
-    def __make_repo_conf(self,
-                         previous_conf={},
-                         override_conf=None):
+    def __make_repo_conf(self, previous_conf={}, override_conf=None):
         '''[summary]
         '''
         if previous_conf is None:
             previous_conf = {}
-
         if override_conf:
             conf = previous_conf
             conf.update(override_conf)
@@ -51,7 +41,6 @@ class Repository(Configurable):
             status_file = previous_conf.get('files', {}).get('status')
             flag_prefix = previous_conf.get('flag', {}).get('prefix')
             flag_suffix = previous_conf.get('flag', {}).get('suffix')
-
             name = cli.readline("enter repository name:", default=name)
             tags = cli.choose_many("select tags:", tags, default=tags)
             pub_dirs = cli.choose_many("select public directories:", pub_dirs, default=pub_dirs)
@@ -63,7 +52,6 @@ class Repository(Configurable):
             status_file = cli.readline("enter status file name:", default=status_file)
             flag_prefix = cli.readline("enter flag prefix:", default=flag_prefix)
             flag_suffix = cli.readline("enter flag suffix:", default=flag_suffix)
-
             conf = {
                 'name': name,
                 'tags': tags,
@@ -85,19 +73,14 @@ class Repository(Configurable):
                     'suffix': flag_suffix
                 }
             }
-
         return conf
 
-    def __make_chall_conf(self,
-                          previous_conf={},
-                          override_conf=None):
+    def __make_chall_conf(self, previous_conf={}, override_conf=None):
         '''[summary]
         '''
         repo_conf = self.get_conf()
-
         if previous_conf is None:
             previous_conf = {}
-
         if override_conf:
             conf = previous_conf
             conf.update(override_conf)
@@ -109,12 +92,10 @@ class Repository(Configurable):
             tags = previous_conf.get('tags')
             points = previous_conf.get('points')
             standalone = previous_conf.get('standalone')
-
             name = cli.readline("enter challenge name:", default=name)
             tags = cli.choose_many("select one or more tags:", repo_conf['tags'], default=tags)
             points = cli.readline("enter number of points:", default=points, expect_digit=True)
             standalone = cli.confirm("is it a standalone challenge?", default=standalone)
-
             conf = {
                 'name': name,
                 'tags': tags,
@@ -125,7 +106,6 @@ class Repository(Configurable):
                 'parameters': parameters,
                 'standalone': standalone
             }
-
         return conf
 
     def init(self):
@@ -145,16 +125,12 @@ class Repository(Configurable):
         tags = set(tags)
         repo_conf = self.get_conf()
         keep = lambda entry: entry.is_dir() and not entry.name.startswith('.')
-
         challenges = []
         for chall_dirent in self._scandirs(wd, keep):
-
             chall_conf_path = Path(chall_dirent.path).joinpath(repo_conf['files']['config']['challenge'])
             chall = Challenge(chall_conf_path, repo_conf)
-
             if not tags or tags.intersection(chall.tags):
                 challenges.append(chall)
-
         return sorted(challenges, key=lambda e: e.slug)
 
     def find_chall(self, slug):
@@ -165,18 +141,14 @@ class Repository(Configurable):
         if not chall_path.is_dir():
             app_log.warning(f"challenge not found: {slug}")
             return None
-
         repo_conf = self.get_conf()
-
         chall_conf_path = chall_path.joinpath(repo_conf['files']['config']['challenge'])
-
         return Challenge(chall_conf_path, repo_conf)
 
     def configure(self, configuration=None):
         '''Configures repository
         '''
-        repo_conf = self.__make_repo_conf(previous_conf=self.get_conf(),
-                                          override_conf=configuration)
+        repo_conf = self.__make_repo_conf(self.get_conf(), override_conf=configuration)
         self.set_conf(repo_conf)
         return True
 
@@ -187,12 +159,9 @@ class Repository(Configurable):
         chall_conf = self.__make_chall_conf(override_conf=configuration)
         chall_conf_path = self.working_dir().joinpath(chall_conf['slug'],
                                                       repo_conf['files']['config']['challenge'])
-
         chall = Challenge(chall_conf_path, repo_conf)
-
         if not chall.create():
             return False
-
         chall.set_conf(chall_conf)
         return True
 
@@ -202,10 +171,7 @@ class Repository(Configurable):
         chall = self.find_chall(slug)
         if chall is None:
             return False
-
-        new_chall_conf = self.__make_chall_conf(previous_conf=chall.get_conf(),
-                                                override_conf=configuration)
-
+        new_chall_conf = self.__make_chall_conf(chall.get_conf(), override_conf=configuration)
         chall.set_conf(new_chall_conf)
         return True
 
@@ -215,10 +181,9 @@ class Repository(Configurable):
         chall = self.find_chall(slug)
         if chall is None:
             return False
-
         if not cli.confirm(f"do you really want to remove {slug}?"):
+            app_log.warning("operation cancelled by user.")
             return False
-
         rmtree(str(chall.working_dir()))
         return True
 
@@ -228,7 +193,6 @@ class Repository(Configurable):
         chall = self.find_chall(slug)
         if chall is None:
             return False
-
         chall.enable(True)
         return True
 
@@ -238,6 +202,5 @@ class Repository(Configurable):
         chall = self.find_chall(slug)
         if chall is None:
             return False
-
         chall.enable(False)
         return True

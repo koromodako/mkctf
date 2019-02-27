@@ -1,24 +1,16 @@
-'''
-file: config.py
-date: 2018-02-27
-author: koromodako
-purpose:
-
-'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from ruamel import yaml
+from ruamel.yaml import YAML
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def yaml_load(filepath):
+def config_load(filepath):
     '''Loads content of a YAML file
     '''
-    with filepath.open() as fp:
-        return yaml.safe_load(fp)
+    return YAML(typ='safe').load(filepath)
 
-def yaml_dump(filepath, conf):
+def config_dump(filepath, conf):
     '''Write a configuration to a YAML configuration file
     '''
     with filepath.open('w') as fp:
@@ -27,9 +19,6 @@ def yaml_dump(filepath, conf):
                  "# Do not edit it manually unless you know exactly what you're doing.\n"
                  "# Keep #PEBCAK in mind.\n"
                  "#\n")
-        yaml.safe_dump(conf, fp, default_flow_style=False)
-
-def load_config(conf_path):
-    '''Wrapper to add an abstraction level above configuration format
-    '''
-    return yaml_load(conf_path)
+        yaml=YAML(typ='safe')
+        yaml.default_flow_style = False
+        yaml.dump(conf, fp)

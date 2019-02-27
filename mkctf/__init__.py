@@ -1,9 +1,3 @@
-'''mkCTF package
-
-Variables:
-    __version__ {str} -- Package version
-    __version_info__ {tuple} -- Package version
-'''
 __major__ = 2
 __minor__ = 1
 __patch__ = 1

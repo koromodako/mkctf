@@ -1,13 +1,3 @@
-'''
-file: enable.py
-date: 2018-03-02
-author: koromodako
-purpose:
-
-'''
-#===============================================================================
-#  IMPORTS
-#===============================================================================
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -19,3 +9,8 @@ async def enable(api, args):
     if enabled:
         print(f"{args.slug}: enabled")
     return enabled
+
+def setup_enable(subparsers):
+    parser = subparsers.add_parser('enable', help="enable a challenge.")
+    parser.add_argument('slug', help="challenge's slug.")
+    parser.set_defaults(func=enable)

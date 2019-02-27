@@ -1,17 +1,10 @@
-'''
-file: configurable.py
-date: 2018-03-02
-author: koromodako
-purpose:
-
-'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
 from os import scandir
 from pprint import pprint
 from mkctf.helper.log import app_log
-from mkctf.helper.config import yaml_load, yaml_dump
+from mkctf.helper.config import config_load, config_dump
 from mkctf.helper.wrapper import lazy
 # =============================================================================
 #  CLASSES
@@ -33,9 +26,7 @@ class Configurable(object):
             if keep is not None and not keep(de):
                 continue
             dirs.append(de)
-
         return dirs
-
 
     @lazy()
     def working_dir(self):
@@ -53,37 +44,29 @@ class Configurable(object):
         '''
         if isinstance(key, str):
             key = [key]
-
         if not self.conf_path.is_file():
             app_log.warning(f"file not found: {self.conf_path}")
             return None
-
-        conf = yaml_load(self.conf_path)
-
+        conf = config_load(self.conf_path)
         if len(key) == 0:
             return conf
-
         value = conf
         while len(key) > 0:
             keyp = key[0]
             key = key[1:]
-
             value = value.get(keyp)
-
             if value is None:
                 app_log.warning(f"missing key: {keyp}")
                 return None
-
             if len(key) > 0 and not isinstance(value, dict):
                 app_log.warning(f"missing key: {key[0]}")
                 return None
-
         return value
 
     def set_conf(self, conf):
         '''Sets the conf
         '''
-        yaml_dump(self.conf_path, conf)
+        config_dump(self.conf_path, conf)
 
     def print_conf(self):
         '''Prints configuration

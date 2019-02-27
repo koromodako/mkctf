@@ -8,69 +8,44 @@ purpose:
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from termcolor import colored
-from mkctf.helper.formatting import returncode2str
+import mkctf.helper.cli as cli
+from mkctf.api import MKCTFAPI
+from mkctf.helper.log import app_log
+from mkctf.helper.formatting import HSEP, format_text, format_rcode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 async def status(args, repo):
-    '''Determines the status of a challenge
+    '''Determines the status of at least one challenge
     '''
-    no_color, timeout = args.no_color, args.timeout
-    tags, slug = args.tags, args.slug
-
-    chall_sep = '=' * 80
-    sep = '-' * 35
-    exc_sep = '{sep} [EXCEPT] {sep}'.format(sep=sep)
-    out_sep = '{sep} [STDOUT] {sep}'.format(sep=sep)
-    err_sep = '{sep} [STDERR] {sep}'.format(sep=sep)
-
-    if not no_color:
-        chall_sep = colored(chall_sep, 'blue', attrs=['bold'])
-        exc_sep = colored(exc_sep, 'magenta')
-        out_sep = colored(out_sep, 'blue')
-        err_sep = colored(err_sep, 'red')
-
+    if not args.yes and not cli.confirm('do you really want to check status?'):
+        app_log.warning("operation cancelled by user.")
+        return False
+    err_sep = format_text(f'{HSEP[:35]} [STDERR] {HSEP[:35]}', 'red')
+    out_sep = format_text(f'{HSEP[:35]} [STDOUT] {HSEP[:35]}', 'blue')
+    exc_sep = format_text(f'{HSEP[:35]} [EXCEPT] {HSEP[:35]}', 'magenta')
+    chall_sep = format_text(HSEP, 'blue', attrs=['bold'])
     success = True
-    results = []
+    async for build_result in api.status(tags):
+        rcode = build_result['rcode']
+        chall_desc = format_text(f"{build_result['slug']}", 'blue')
+        chall_status = format_rcode2str(rcode)
+        print(chall_sep)
+        print(f"{chall_description} {chall_status}")
+        if rcode < 0:
+            success = False
+            print(exc_sep)
+            print(build_result['exception'])
+        elif rcode > 0:
+            print(out_sep)
+            print(build_result['stdout'].decode().strip())
+            print(err_sep)
+            print(build_result['stderr'].decode().strip())
+    return success
 
-    for challenge in repo.scan(tags):
-        if slug is None or slug == challenge.slug:
-
-            exception = None
-            try:
-                (code, stdout, stderr) = await challenge.status(timeout)
-            except Exception as e:
-                exception = str(e)
-                success = False
-                code = -1
-
-            if args.json:
-                results.append({
-                    'slug': challenge.slug,
-                    'tags': challenge.tags,
-                    'code': code,
-                    'stdout': stdout,
-                    'stderr': stderr,
-                    'exception': exception
-                })
-            else:
-                chall_description = f"{challenge.slug}{challenge.tags}"
-                if not no_color:
-                    chall_description = colored(chall_description, 'blue')
-
-                chall_status = returncode2str(code, args.no_color)
-
-                print(chall_sep)
-                print(f"{chall_description} {chall_status}")
-
-                if code < 0:
-                    print(exc_sep)
-                    print(exception)
-                elif code > 0:
-                    print(out_sep)
-                    print(stdout.decode().strip())
-                    print(err_sep)
-                    print(stderr.decode().strip())
-
-    return results if args.json else success
+def setup_build(subparsers):
+    parser = subparsers.add_parser('status', help="check deployed challenge's status using exploit/exploit.")
+    parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
+    parser.add_argument('--slug', '-s', help="challenge's slug.")
+    parser.add_argument('--timeout', type=int, default=MKCTFAPI.DEFAULT_TIMEOUT, help="override default timeout for subprocesses.")
+    parser.set_defaults(func=status)

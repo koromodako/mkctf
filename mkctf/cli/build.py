@@ -1,73 +1,44 @@
-'''
-file: build.py
-date: 2018-03-02
-author: koromodako
-purpose:
-
-'''
 # =============================================================================
 #  IMPORTS
 # =============================================================================
 import mkctf.helper.cli as cli
+from mkctf.api import MKCTFAPI
 from mkctf.helper.log import app_log
 from mkctf.helper.formatting import HSEP, format_text, format_rcode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 async def build(api, args):
-    '''Builds one or more challenges
+    '''Builds at least one challenge
     '''
     if not args.yes and not cli.confirm('do you really want to build?'):
+        app_log.warning("operation cancelled by user.")
         return False
-
-    timeout = args.timeout
-    tags, slug = args.tags, args.slug
-
-    sep = '-' * 35
+    err_sep = format_text(f'{HSEP[:35]} [STDERR] {HSEP[:35]}', 'red')
+    out_sep = format_text(f'{HSEP[:35]} [STDOUT] {HSEP[:35]}', 'blue')
+    exc_sep = format_text(f'{HSEP[:35]} [EXCEPT] {HSEP[:35]}', 'magenta')
     chall_sep = format_text(HSEP, 'blue', attrs=['bold'])
-    exc_sep = format_text(f'{sep} [EXCEPT] {sep}', 'magenta')
-    out_sep = format_text(f'{sep} [STDOUT] {sep}', 'blue')
-    err_sep = format_text(f'{sep} [STDERR] {sep}', 'red')
-
     success = True
-    async for challenge in api.build(tags):
-        if slug is None or slug == challenge.slug:
+    async for build_result in api.build(tags):
+        rcode = build_result['rcode']
+        chall_desc = format_text(f"{build_result['slug']}", 'blue')
+        chall_status = format_rcode2str(rcode)
+        print(chall_sep)
+        print(f"{chall_description} {chall_status}")
+        if rcode < 0:
+            success = False
+            print(exc_sep)
+            print(build_result['exception'])
+        elif rcode > 0:
+            print(out_sep)
+            print(build_result['stdout'].decode().strip())
+            print(err_sep)
+            print(build_result['stderr'].decode().strip())
+    return success
 
-            exception = None
-
-            try:
-                (code, stdout, stderr) = await challenge.build(timeout)
-            except Exception as e:
-                exception = e
-                success = False
-                code = -1
-
-            if args.json:
-                results.append({
-                    'slug': challenge.slug,
-                    'tags': challenge.tags,
-                    'code': code,
-                    'stdout': stdout,
-                    'stderr': stderr,
-                    'exception': exception
-                })
-            else:
-                chall_description = f"{challenge.slug}{challenge.tags}"
-                if not no_color:
-                    chall_description = colored(chall_description, 'blue')
-
-                chall_status = returncode2str(code, args.no_color)
-
-                print(chall_sep)
-                print(f"{chall_description} {chall_status}")
-
-                if code < 0:
-                    print(exc_sep)
-                    print(exception)
-                elif code > 0:
-                    print(out_sep)
-                    print(stdout.decode().strip())
-                    print(err_sep)
-                    print(stderr.decode().strip())
-
-    return results if args.json else success
+def setup_build(subparsers):
+    parser = subparsers.add_parser('build', help="build challenges. After building challenges you might want to deploy/export.")
+    parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
+    parser.add_argument('--slug', '-s', help="challenge's slug.")
+    parser.add_argument('--timeout', type=int, default=MKCTFAPI.DEFAULT_TIMEOUT, help="override default timeout for subprocesses.")
+    parser.set_defaults(func=build)

@@ -23,7 +23,8 @@ setup(
     # configuration files
     entry_points={
         'console_scripts': [
-            'mkctf-cli = mkctf.main:app',
+            'mkctf-cli = mkctf.mkctf_cli:app',
+            'mkctf-serve = mkctf.mkctf_serve:app',
         ]
     }
 )
