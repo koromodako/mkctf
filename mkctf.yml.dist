@@ -1,5 +1,5 @@
 #
-# Categories to be created for each CTF
+# Default categories to be created for each CTF
 #
 tags:
     - bugbounty
@@ -11,7 +11,7 @@ tags:
     - re
     - web
 #
-# Directories to be created for each challenge
+# Default directories to be created for each challenge
 #
 directories:
     public:
@@ -21,7 +21,7 @@ directories:
         - exploit
         - src
 #
-# Files to be created for each challenge
+# Default files to be created for each challenge
 #
 files:
     txt:
@@ -35,7 +35,7 @@ files:
         challenge: .mkctf.yml
         repository: .repo.mkctf.yml
 #
-# Flag information
+# Default flag information
 #
 flag:
     prefix: 'INSA{'

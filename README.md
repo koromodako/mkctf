@@ -13,15 +13,15 @@ This project was updated for INS'hAck 2018 event.
 
 Version [1](https://github.com/koromodako/mkctf/releases/tag/1.0.0) was used until INS'hAck 2019.
 
-INS'hAck 2019 will be using version [2+](https://github.com/koromodako/mkctf/releases/tag/2.0.0) or above.
+INS'hAck 2019 will be using version [3+](https://github.com/koromodako/mkctf/releases/tag/3.0.0) or above.
 
 ## Minimal requirements
 
- + Python v3.6.5+
+ + `Python 3.6.7+`
 
 ## Getting started
 
-```koromodako/mkctf/releases/tag/1.0.0
+```
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/koromodako/mkctf/master/scripts/install.sh)"
 ```
 
@@ -32,17 +32,19 @@ Then lets say you want to create a CTF for INS'hAck 2019:
 ```
 mkdir inshack-2019
 cd inshack-2019
-mkctf init
+mkctf-cli init
 ```
 
 Follow the instructions.
 
-You need help: `mkctf -h`
+You need help: `mkctf-cli -h`
 
 ## What you need to understand
 
-`mkctf` helps you manipulate two CTF concepts described bellow. These objects
+`mkctf-cli` helps you manipulate two CTF concepts described bellow. These objects
 rely on YAML configuration files.
+
+`mkctf-serve` starts a web server exposing an API which _will be documented here soon_.
 
 ### Repository
 
@@ -129,6 +131,6 @@ Scripts like `build`, `deploy` and `status` are expected to behave according to 
 
 The special status `TIMED-OUT` may occur if your script took too long to execute as explained in `2.`.
 
-If the **exit code differs from 0** both _stdout_ and _stderr_ will be printed out. 
+If the **exit code differs from 0** both _stdout_ and _stderr_ will be printed out.
 
 You can use this behavior to print meaningful instructions/exceptions within these _scripts_ (particularly interesting if your script returns a code `3 (MANUAL)`).
