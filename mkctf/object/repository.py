@@ -21,26 +21,26 @@ class Repository(Configurable):
         super().__init__(conf_path)
         self.glob_conf = glob_conf
 
-    def __make_repo_conf(self, previous_conf={}, override_conf=None):
+    def __make_repo_conf(self, previous={}, override=None):
         '''[summary]
         '''
-        if previous_conf is None:
-            previous_conf = {}
-        if override_conf:
-            conf = previous_conf
-            conf.update(override_conf)
+        if previous is None:
+            previous = {}
+        if override:
+            conf = previous
+            conf.update(override)
         else:
-            name = previous_conf.get('name')
-            tags = previous_conf.get('tags')
-            pub_dirs = previous_conf.get('directories', {}).get('public')
-            priv_dirs = previous_conf.get('directories', {}).get('private')
-            txt_files = previous_conf.get('files', {}).get('txt')
-            chall_file = previous_conf.get('files', {}).get('config', {}).get('challenge')
-            build_file = previous_conf.get('files', {}).get('build')
-            deploy_file = previous_conf.get('files', {}).get('deploy')
-            status_file = previous_conf.get('files', {}).get('status')
-            flag_prefix = previous_conf.get('flag', {}).get('prefix')
-            flag_suffix = previous_conf.get('flag', {}).get('suffix')
+            name = previous.get('name')
+            tags = previous.get('tags')
+            pub_dirs = previous.get('directories', {}).get('public')
+            priv_dirs = previous.get('directories', {}).get('private')
+            txt_files = previous.get('files', {}).get('txt')
+            chall_file = previous.get('files', {}).get('config', {}).get('challenge')
+            build_file = previous.get('files', {}).get('build')
+            deploy_file = previous.get('files', {}).get('deploy')
+            status_file = previous.get('files', {}).get('status')
+            flag_prefix = previous.get('flag', {}).get('prefix')
+            flag_suffix = previous.get('flag', {}).get('suffix')
             name = cli.readline("enter repository name:", default=name)
             tags = cli.choose_many("select tags:", tags, default=tags)
             pub_dirs = cli.choose_many("select public directories:", pub_dirs, default=pub_dirs)
@@ -75,23 +75,23 @@ class Repository(Configurable):
             }
         return conf
 
-    def __make_chall_conf(self, previous_conf={}, override_conf=None):
+    def __make_chall_conf(self, previous={}, override=None):
         '''[summary]
         '''
         repo_conf = self.get_conf()
-        if previous_conf is None:
-            previous_conf = {}
-        if override_conf:
-            conf = previous_conf
-            conf.update(override_conf)
+        if previous is None:
+            previous = {}
+        if override:
+            conf = previous
+            conf.update(override)
         else:
-            flag = previous_conf.get('flag', Challenge.make_flag(repo_conf))
-            enabled = previous_conf.get('enabled', False)
-            parameters = previous_conf.get('parameters', {})
-            name = previous_conf.get('name')
-            tags = previous_conf.get('tags')
-            points = previous_conf.get('points')
-            standalone = previous_conf.get('standalone')
+            flag = previous.get('flag', Challenge.make_flag(repo_conf))
+            enabled = previous.get('enabled', False)
+            parameters = previous.get('parameters', {})
+            name = previous.get('name')
+            tags = previous.get('tags')
+            points = previous.get('points')
+            standalone = previous.get('standalone')
             name = cli.readline("enter challenge name:", default=name)
             tags = cli.choose_many("select one or more tags:", repo_conf['tags'], default=tags)
             points = cli.readline("enter number of points:", default=points, expect_digit=True)
@@ -148,7 +148,7 @@ class Repository(Configurable):
     def configure(self, configuration=None):
         '''Configures repository
         '''
-        repo_conf = self.__make_repo_conf(self.get_conf(), override_conf=configuration)
+        repo_conf = self.__make_repo_conf(self.get_conf(), override=configuration)
         self.set_conf(repo_conf)
         return True
 
@@ -156,7 +156,10 @@ class Repository(Configurable):
         '''Creates a challenge
         '''
         repo_conf = self.get_conf()
-        chall_conf = self.__make_chall_conf(override_conf=configuration)
+        chall_conf = self.__make_chall_conf(override=configuration)
+        if not chall_conf['slug']:
+            app_log.warning("aborted challenge creation, slug is empty.")
+            return False
         chall_conf_path = self.working_dir().joinpath(chall_conf['slug'],
                                                       repo_conf['files']['config']['challenge'])
         chall = Challenge(chall_conf_path, repo_conf)
@@ -171,7 +174,7 @@ class Repository(Configurable):
         chall = self.find_chall(slug)
         if chall is None:
             return False
-        new_chall_conf = self.__make_chall_conf(chall.get_conf(), override_conf=configuration)
+        new_chall_conf = self.__make_chall_conf(chall.get_conf(), override=configuration)
         chall.set_conf(new_chall_conf)
         return True
 

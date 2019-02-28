@@ -15,7 +15,7 @@ from mkctf.helper.formatting import HSEP, format_text, format_rcode2str
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-async def status(args, repo):
+async def status(api, args):
     '''Determines the status of at least one challenge
     '''
     if not args.yes and not cli.confirm('do you really want to check status?'):
@@ -26,12 +26,12 @@ async def status(args, repo):
     exc_sep = format_text(f'{HSEP[:35]} [EXCEPT] {HSEP[:35]}', 'magenta')
     chall_sep = format_text(HSEP, 'blue', attrs=['bold'])
     success = True
-    async for build_result in api.status(tags):
+    async for build_result in api.status(args.tags, args.slug, args.timeout):
         rcode = build_result['rcode']
         chall_desc = format_text(f"{build_result['slug']}", 'blue')
         chall_status = format_rcode2str(rcode)
         print(chall_sep)
-        print(f"{chall_description} {chall_status}")
+        print(f"{chall_desc} {chall_status}")
         if rcode < 0:
             success = False
             print(exc_sep)
@@ -43,7 +43,7 @@ async def status(args, repo):
             print(build_result['stderr'].decode().strip())
     return success
 
-def setup_build(subparsers):
+def setup_status(subparsers):
     parser = subparsers.add_parser('status', help="check deployed challenge's status using exploit/exploit.")
     parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
     parser.add_argument('--slug', '-s', help="challenge's slug.")

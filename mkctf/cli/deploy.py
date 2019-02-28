@@ -19,12 +19,12 @@ async def deploy(api, args):
     exc_sep = format_text(f'{HSEP[:35]} [EXCEPT] {HSEP[:35]}', 'magenta')
     chall_sep = format_text(HSEP, 'blue', attrs=['bold'])
     success = True
-    async for build_result in api.deploy(tags):
+    async for build_result in api.deploy(args.tags, args.slug, args.timeout):
         rcode = build_result['rcode']
         chall_desc = format_text(f"{build_result['slug']}", 'blue')
         chall_status = format_rcode2str(rcode)
         print(chall_sep)
-        print(f"{chall_description} {chall_status}")
+        print(f"{chall_desc} {chall_status}")
         if rcode < 0:
             success = False
             print(exc_sep)

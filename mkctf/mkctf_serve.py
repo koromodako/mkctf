@@ -3,7 +3,14 @@
 #===============================================================================
 #  IMPORTS
 #===============================================================================
+from pathlib import Path
+from argparse import ArgumentParser
+from aiohttp import web
+from mkctf import __banner__
+from mkctf.api import MKCTFAPI
+from mkctf.helper.log import app_log, log_enable_debug
 from mkctf.web_handler import MKCTFWebHandler
+from mkctf.helper.formatting import format_enable_colors
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -31,8 +38,9 @@ def main():
     handler = MKCTFWebHandler(api)
     app = web.Application()
     app.add_routes([
-        web.get(r'/{slug:[a-z0-9\-]+}/status'),
-        web.post(r'/{slug:[a-z0-9\-]+}/check-flag'),
+        web.get(r'/challenges', handler.enum_challenges),
+        web.get(r'/{slug:[a-z0-9\-]+}/status', handler.challenge_status),
+        web.post(r'/{slug:[a-z0-9\-]+}/check-flag', handler.check_challenge_flag),
     ])
     web.run_app(app)
 

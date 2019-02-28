@@ -24,7 +24,7 @@ from mkctf.cli import (
     setup_renew_flag
 )
 from mkctf.helper.log import app_log, log_enable_debug
-from mkctf.helper.formatting import format_disable_colors
+from mkctf.helper.formatting import format_enable_colors
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -75,7 +75,7 @@ async def main():
     app_log.debug(args)
     api = MKCTFAPI(args.repo_root)
     try:
-        rcode = 0 if args.func(api, args) else 1
+        rcode = 0 if await args.func(api, args) else 1
     except:
         app_log.exception("Ouch... unhandled exception... (>_<)")
         rcode = 2

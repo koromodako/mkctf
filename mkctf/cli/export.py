@@ -1,8 +1,9 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-import tarfile
+from pathlib import Path
 from mkctf.helper.log import app_log
+from mkctf.helper.formatting import TAB, HSEP, format_text
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -13,12 +14,8 @@ async def export(api, args):
     '''
     found = False
     export_dir = args.export_dir.resolve()
-    for exported in api.export(export_dir, args.tags, args.slug, args.include_disabled):
-        found = True
-        print(f"{format_text(exported['slug'], 'blue')} exported to:")
-        print(f"{TAB}archive: {exported['archive_path']}")
-        print(f"{TAB}checksum: {exported['checksum_path']}")
-    return found
+    exported = [None for _ in api.export(export_dir, args.tags, args.slug, args.include_disabled)]
+    return exported
 
 def setup_export(subparsers):
     parser = subparsers.add_parser('export', help="export enabled static challenges.")

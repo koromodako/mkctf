@@ -9,7 +9,7 @@ PROG_PROMPT = f"[mkctf](?)>"
 # =============================================================================
 # CLASSES
 # =============================================================================
-def prompt(prompt):
+def get_prompt(prompt):
     '''Creates a specific prompt
     '''
     prompt = prompt.strip()
@@ -30,7 +30,7 @@ def readline(prompt, allow_empty=False, expect_digit=False, default=None):
             raise ValueError("default argument must be an string.")
         prompt = prompt.strip()
         prompt = f"{prompt} [default={default}] "
-    full_prompt = prompt(prompt)
+    full_prompt = get_prompt(prompt)
     while True:
         value = input(full_prompt)
         if len(value) > 0:
@@ -53,7 +53,7 @@ def readlines(prompt, subprompt, expect_digit=False):
     Stops when the line contains a single dot ('.') character.
     '''
     lines = []
-    print(prompt(prompt))
+    print(get_prompt(prompt))
     while True:
         value = readline(subprompt, True, expect_digit)
         if value == '.':
@@ -79,7 +79,7 @@ def choose_one(prompt, choices, default=None, allow_custom=False):
     has_default = default is not None
     if has_default and not default in choices:
         raise ValueError("default value must be one of choices.")
-    print(prompt(prompt))
+    print(get_prompt(prompt))
     k = 0
     for choice in choices:
         default_str = ''
@@ -141,7 +141,7 @@ def choose_many(prompt,
             raise ValueError("default list must respect min_choices value.")
         if max_choices is not None and length > max_choices:
             raise ValueError("default list must respect max_choices value.")
-    print(prompt(prompt))
+    print(get_prompt(prompt))
     if default is not None:
         print(f"default selection: {default}")
         if confirm("do you want the default selection?"):

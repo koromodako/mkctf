@@ -1,6 +1,8 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+
+from mkctf.helper.log import app_log
 from mkctf.helper.formatting import TAB, HSEP, format_text, format_dict2str
 # =============================================================================
 #  FUNCTIONS
@@ -10,19 +12,20 @@ async def enum(api, args):
     '''
     found = False
     print("challenges:")
-    for slug, conf in api.enum(args.tags, args.slug)
+    for challenge in api.enum(args.tags, args.slug):
+        slug, conf = challenge['slug'], challenge['conf']
         found = True
         if conf is None:
-            app_log.error(f"configuration missing. Run `mkctf configure -s {challenge.slug}`")
+            app_log.error(f"configuration missing. Run `mkctf configure -s {slug}`")
             continue
         static = ' [STANDALONE]' if conf['standalone'] else ''
-        chall_entry = f"{TAB}{TAB}- {challenge.slug}{static}"
+        chall_entry = f"{TAB}- {slug}{static}"
         color = 'green' if conf['enabled'] else 'red'
         chall_entry = format_text(chall_entry, color, attrs=['bold'])
         del conf['enabled']
         del conf['standalone']
         del conf['slug']
-        text = format_dict2str(conf).replace("\n", f"\n{TAB}{TAB}{TAB}")
+        text = format_dict2str(conf).replace("\n", f"\n{TAB}{TAB}")
         print(chall_entry)
         print(text[1:])
     if not found:

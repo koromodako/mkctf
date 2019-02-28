@@ -5,10 +5,7 @@ async def enable(api, args):
     '''Enables a challenge
     '''
     status = api.enable(args.slug)
-    enabled = status['enabled']
-    if enabled:
-        print(f"{args.slug}: enabled")
-    return enabled
+    return status['enabled']
 
 def setup_enable(subparsers):
     parser = subparsers.add_parser('enable', help="enable a challenge.")

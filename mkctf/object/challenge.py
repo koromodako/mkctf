@@ -1,10 +1,11 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+import tarfile
 from os import urandom
 from stat import S_IRWXU
+from pathlib import Path
 from asyncio import create_subprocess_exec, wait_for, TimeoutError
-from textwrap import dedent
 from subprocess import PIPE, CalledProcessError
 from mkctf.helper.log import app_log
 from mkctf.helper.hashing import hash_file
@@ -34,12 +35,9 @@ class Challenge(Configurable):
         '''Creates a directory
         '''
         dir_path = self.working_dir().joinpath(directory)
-
         if not dir_path.is_dir():
             dir_path.mkdir(parents=True, exist_ok=True)
-
             return True
-
         return False
 
     def __create_file(self, filename, executable=False):
@@ -47,7 +45,6 @@ class Challenge(Configurable):
         '''
         filepath = self.working_dir().joinpath(filename)
         filepath.parent.mkdir(parents=True, exist_ok=True)
-
         content = []
         if executable:
             content.append('#!/usr/bin/env bash')
@@ -90,24 +87,26 @@ class Challenge(Configurable):
 
         if not filepath.is_file():
             with filepath.open('w') as fp:
-                fp.write('\n'.join(code))
-
+                fp.write('\n'.join(content))
             if executable:
                 filepath.chmod(S_IRWXU)
-
             return True
-
         return False
 
     async def __run(self, script, timeout):
         '''Runs a script as an asynchronous subprocess
         '''
-        if not script.startswith('/'):
-            script = f'./{script}'
-        proc = await create_subprocess_exec(script,
-                                            stdout=PIPE,
-                                            stderr=PIPE,
-                                            cwd=str(self.working_dir()))
+        script_path = Path(script)
+        script_parents = script_path.parents
+        script = f'./{script_path.name}'
+        if script_path.is_absolute():
+            cwd = script_parents[0]
+        else:
+            cwd = self.working_dir()
+            if len(script_parents) > 1:
+                cwd /= script_parents[0]
+        app_log.debug(f"running {script_path.name} within {cwd}.")
+        proc = await create_subprocess_exec(script, stdout=PIPE, stderr=PIPE, cwd=str(cwd))
         rcode = -1
         stdout = None
         stderr = None
@@ -216,10 +215,10 @@ class Challenge(Configurable):
         '''
         if not self.is_standalone:
             app_log.warning(f"challenge ignored (not standalone): {self.slug}.")
-            return False
+            return {'ignored': True}
         if not include_disabled and not self.enabled:
             app_log.warning(f"challenge ignored (disabled): {self.slug}.")
-            return False
+            return {'ignored': True}
         app_log.info(f"exporting {self.slug}...")
         archive_name = f'{self.slug}.tgz'
         archive_path = export_dir.joinpath(archive_name)

@@ -3,6 +3,7 @@
 # =============================================================================
 import mkctf.helper.cli as cli
 from mkctf.api import MKCTFAPI
+from mkctf.helper.log import app_log
 from mkctf.helper.formatting import HSEP, format_text
 # =============================================================================
 #  FUNCTIONS
@@ -13,10 +14,8 @@ async def renew_flag(api, args):
     if not args.yes and not cli.confirm('do you really want to renew flags?'):
         app_log.warning("operation cancelled by user.")
         return False
-    for result in api.renew_flag(args.tags, args.slug, args.size):
-        chall_desc = format_text(f"{result['slug']}", 'blue')
-        print(f"{chall_desc} => {result['flag']}")
-    return True
+    renewed = [None for _ in api.renew_flag(args.tags, args.slug, args.size)]
+    return renewed
 
 def setup_renew_flag(subparsers):
     parser = subparsers.add_parser('renew-flag', help="renew flags. You might want to build and deploy/export after that.")
