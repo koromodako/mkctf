@@ -42,6 +42,7 @@ def main():
         web.get(r'/{slug:[a-z0-9\-]+}/status', handler.challenge_status),
         web.post(r'/{slug:[a-z0-9\-]+}/check-flag', handler.check_challenge_flag),
     ])
+    app_log.info(f"serving from {args.repo_root}")
     web.run_app(app)
 
 def app():

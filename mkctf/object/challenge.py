@@ -105,12 +105,15 @@ class Challenge(Configurable):
             cwd = self.working_dir()
             if len(script_parents) > 1:
                 cwd /= script_parents[0]
-        app_log.debug(f"running {script_path.name} within {cwd}.")
+
+        app_log.info(f"running {script_path.name} within {cwd}.")
         proc = await create_subprocess_exec(script, stdout=PIPE, stderr=PIPE, cwd=str(cwd))
+
         rcode = -1
         stdout = None
         stderr = None
         exception = None
+
         try:
             stdout, stderr = await wait_for(proc.communicate(), timeout=timeout)
             rcode = proc.returncode
@@ -125,6 +128,12 @@ class Challenge(Configurable):
             exception = 'called process error'
         except Exception as exc:
             exception = str(exc)
+
+        if rcode == 0:
+            app_log.info("subprocess terminated successfully.")
+        else:
+            app_log.warning(f"subprocess terminated unsuccessfully (rcode={rcode}).")
+
         return {
             'rcode': rcode,
             'stdout': stdout,

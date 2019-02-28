@@ -176,6 +176,7 @@ class MKCTFAPI:
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.slug:
+                app_log.info(f"building {challenge.slug}...")
                 result = await challenge.build(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
                 result.update({'slug': challenge.slug})
                 yield result
@@ -186,6 +187,7 @@ class MKCTFAPI:
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.slug:
+                app_log.info(f"deploying {challenge.slug}...")
                 result = await challenge.deploy(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
                 result.update({'slug': challenge.slug})
                 yield result
@@ -196,6 +198,7 @@ class MKCTFAPI:
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.slug:
+                app_log.info(f"checking {challenge.slug}'s status...")
                 result = await challenge.status(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
                 result.update({'slug': challenge.slug})
                 yield result

@@ -1,6 +1,7 @@
 #===============================================================================
 # IMPORTS
 #===============================================================================
+from base64 import b64encode
 from aiohttp import web
 #===============================================================================
 # CLASSES
@@ -18,9 +19,11 @@ class MKCTFWebHandler:
         return web.json_response({'challenges': slugs})
 
     async def challenge_status(self, request):
-        result = await self._api.status(slug=request.match_info['slug'])
-        if result:
-            return web.json_response(result)
+        async for result in self._api.status(slug=request.match_info['slug']):
+            if result:
+                result['stdout'] = b64encode(result['stdout']).decode()
+                result['stderr'] = b64encode(result['stderr']).decode()
+                return web.json_response(result)
         raise web.HTTPNotFound()
 
     async def check_challenge_flag(self, request):
