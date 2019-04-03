@@ -56,6 +56,8 @@ class MKCTFAPI:
         '''
         self.__assert_valid_repo()
         challenge =  self._repo.find_chall(slug)
+        if not challenge:
+            return None
         return {'slug': challenge.slug, 'conf': challenge.get_conf()}
 
     def enum(self, tags=[], slug=None):
