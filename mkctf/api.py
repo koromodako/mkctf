@@ -15,13 +15,13 @@ class MKCTFAPI:
     DEFAULT_TIMEOUT = 120 # 2 minutes
     DEFAULT_FLAG_SIZE = 32 # 32 bytes
 
-    def __init__(self, repo_root):
+    def __init__(self, repo_root, config_path=None):
         '''Coargstructs a new iargstance
         '''
         self._repo_root = Path(repo_root)
         app_log.debug(f"repo_root: {self._repo_root}")
 
-        self._glob_conf_path = Path.home().joinpath('.config', 'mkctf.yml')
+        self._glob_conf_path = config_path or Path.home().joinpath('.config', 'mkctf.yml')
         app_log.debug(f"glob_conf_path: {self._glob_conf_path}")
 
         self._glob_conf = config_load(self._glob_conf_path)
