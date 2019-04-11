@@ -13,7 +13,7 @@ This project was updated for INS'hAck 2018 event.
 
 Version [1](https://github.com/koromodako/mkctf/releases/tag/1.0.0) was used until INS'hAck 2019.
 
-INS'hAck 2019 will be using version [3+](https://github.com/koromodako/mkctf/releases/tag/3.0.0) or above.
+INS'hAck 2019 will be using version [4.x.x](https://github.com/koromodako/mkctf/releases/tag/4.0.0) or above.
 
 ## Minimal requirements
 
@@ -54,6 +54,7 @@ Represents a collection of categories which contain instances of `Challenge`.
 
 ```
 tags: [bugbounty, crypto, for, misc, prog, pwn, re, web, quest]
+difficulties: [trivial, easy, medium, hard, extreme]
 directories:
   public: [public-files]
   private: [server-files, exploit, src]
@@ -61,9 +62,9 @@ files:
   build: build
   deploy: deploy
   status: exploit/exploit
-  config:
-    challenge: .mkctf.yml
-  txt: [writeup.md, Dockerfile, public-files/description.md]
+  chall_conf: .mkctf.yml
+  description: public-files/description.md
+  txt: [writeup.md, Dockerfile]
 flag:
   prefix: 'INSA{'
   suffix: '}'
@@ -71,16 +72,16 @@ name: INS'hAck 2019
 ```
 
 + `tags`: tags used to classify CTF challenges
++ `difficulties`: difficulties used to classify CTF challenges
 + `directories`: folders to be created for each challenge
     + `public`: exportable folders
     + `private`: non-exportable folders
 + `files`: files to be created for each challenge
-    + `build`: a _script_ used to build a challenge (cf. Scripts)
-    + `deploy`: a _script_ used to deploy a challenge (cf. Scripts)
-    + `status`: a _script_ used to test the availability of the
-                challenge. It's usually an exploit (cf. Scripts)
-    + `config`: configuration-related files
-        + `challenge`: challenge configuration file name usually `.mkctf.yml`
+    + `build`: a _script_ building the challenge from sources (cf. Scripts)
+    + `deploy`: a _script_ deploying the challenge (cf. Scripts)
+    + `status`: a _script_ testing the _exploitability_ of the challenge. It's usually an exploit (cf. Scripts)
+    + `description`: a _text file_ describing the challenge
+    + `chall_conf`: challenge configuration file name usually `.mkctf.yml`
     + `txt`: list of non-executable mandatory files
 + `flag`: flag properties
     + `prefix`: flag's prefix, usually ends with `{`
@@ -101,24 +102,30 @@ name: Virtual Printer
 parameters: {}
 points: 100
 slug: virtual-printer
+difficulty: trivial
 standalone: false
+static_url: https://ctf.insecurity-insa.fr/virtual-printer.zip
+company_logo_url: https://insecurity-insa.fr/favicon.ico
 ```
 
-+ `tags`: challenge's tags
++ `tags`: challenge tags
 + `enabled`: is the challenge enabled?
-+ `flag`: challenge's flag
-+ `name`: challenge's name
++ `flag`: challenge flag
++ `name`: challenge name
 + `parameters`: _dict_ of challenge-specific parameters
-+ `points`: challenge's value
-+ `slug`: challenge's slug (should match challenge folder name)
++ `points`: challenge value
++ `slug`: challenge slug (should match challenge folder name)
++ `difficulty`: challenge difficulty
 + `standalone`: is the challenge standalone? (meaning it does not rely on a server)
++ `static_url`: URL of the archive containing challenge data
++ `company_logo_url`: URL of a logo for a sponsor challenge   
 
 ### Scripts
 
 Scripts like `build`, `deploy` and `status` are expected to behave according to the following rules:
 
-1. a _script_ **shall not take mandatory arguments**.
-2. a _script_ **shall execute before a timeout is triggered** which defaults to 60 seconds. `--timeout` option enable you to override this value.
+1. a _script_ **shall not take mandatory arguments**
+2. a _script_ **shall execute before a timeout is triggered** which defaults to 60 seconds. `--timeout` option enable you to override this value
 3. a _script_ **shall return a code** which will be interpreted according to the following table:
 
 | **exit code** | **status** | **description** |
@@ -129,8 +136,8 @@ Scripts like `build`, `deploy` and `status` are expected to behave according to 
 | `4` | `NOT IMPLEMENTED` | Script is not implemented. |
 | _other values_ | `FAILURE` | Script failed. |
 
-The special status `TIMED-OUT` may occur if your script took too long to execute as explained in `2.`.
+The special status `TIMED-OUT` may occur if your script took too long to execute as explained in `2.`
 
 If the **exit code differs from 0** both _stdout_ and _stderr_ will be printed out.
 
-You can use this behavior to print meaningful instructions/exceptions within these _scripts_ (particularly interesting if your script returns a code `3 (MANUAL)`).
+You can use this behavior to print meaningful instructions/exceptions within these _scripts_ (particularly interesting if your script returns a code `3 (MANUAL)`)
