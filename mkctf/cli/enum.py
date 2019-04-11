@@ -1,7 +1,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-
+from textwrap import indent, wrap
 from mkctf.helper.log import app_log
 from mkctf.helper.formatting import TAB, HSEP, format_text, format_dict2str
 # =============================================================================
@@ -25,9 +25,12 @@ async def enum(api, args):
         del conf['enabled']
         del conf['standalone']
         del conf['slug']
-        text = format_dict2str(conf).replace("\n", f"\n{TAB}{TAB}")
+        description = challenge['description'] or format_text('empty description', 'red', attrs=['bold'])
+        text = format_dict2str(conf)
+        text += "\n+ description:"
+        text += indent(f"\n{HSEP}\n{description}\n{HSEP}", TAB)
         print(chall_entry)
-        print(text[1:])
+        print(indent(text[1:], TAB * 2))
     if not found:
         app_log.warning("no challenge found matching given constraints.")
     return found

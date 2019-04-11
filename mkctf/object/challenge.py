@@ -160,6 +160,15 @@ class Challenge(Configurable):
         return self.get_conf('standalone')
 
     @property
+    def description(self):
+        '''Retrieve challenge description from filesystem
+        '''
+        desc_path = self.working_dir().joinpath(self.repo_conf['files']['description'])
+        if desc_path.is_file():
+            return desc_path.read_text()
+        return None
+
+    @property
     def enabled(self):
         '''Determines if challenge is enabled
         '''
@@ -258,5 +267,4 @@ class Challenge(Configurable):
         '''Queries the status of a deployed challenge
         '''
         return await self.__run(self.repo_conf['files']['status'], timeout)
-
 

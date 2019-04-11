@@ -1,5 +1,5 @@
 #
-# Default categories to be created for each CTF
+# Default categories to be created for each mkCTF repository
 #
 tags:
     - bugbounty
@@ -10,6 +10,15 @@ tags:
     - pwn
     - re
     - web
+#
+# Default difficulties to be created for each mkCTF repository
+#
+difficulties:
+    - trivial
+    - easy
+    - medium
+    - hard
+    - extreme
 #
 # Default directories to be created for each challenge
 #
@@ -27,13 +36,12 @@ files:
     txt:
         - Dockerfile
         - writeup.md
-        - public-files/description.md
     build: build
     deploy: deploy
     status: exploit/exploit
-    config:
-        challenge: .mkctf.yml
-        repository: .repo.mkctf.yml
+    repo_conf: .mkctf.repo.yml
+    chall_conf: .mkctf.yml
+    description: public-files/description.md
 #
 # Default flag information
 #

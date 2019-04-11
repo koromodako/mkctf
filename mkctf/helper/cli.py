@@ -1,10 +1,12 @@
 # =============================================================================
 # IMPORTS
 # =============================================================================
+import re
 from mkctf.helper.log import app_log
 # =============================================================================
 # GLOBALS
 # =============================================================================
+INT_RE = re.compile(r'[\-]?[0-9]+')
 PROG_PROMPT = f"[mkctf](?)>"
 # =============================================================================
 # CLASSES
@@ -34,7 +36,7 @@ def readline(prompt, allow_empty=False, expect_digit=False, default=None):
     while True:
         value = input(full_prompt)
         if len(value) > 0:
-            if expect_digit and not value.isdigit():
+            if expect_digit and not INT_RE.fullmatch(value):
                 app_log.error("answer must be a digit.")
                 continue
             break

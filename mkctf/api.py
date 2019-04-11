@@ -27,7 +27,7 @@ class MKCTFAPI:
         self._glob_conf = config_load(self._glob_conf_path)
         app_log.debug(f"glob_conf: {self._glob_conf}")
 
-        self._repo_conf_path = self._repo_root / self._glob_conf['files']['config']['repository']
+        self._repo_conf_path = self._repo_root / self._glob_conf['files']['repo_conf']
         app_log.debug(f"repo_conf_path: {self._repo_conf_path}")
 
         self._repo = Repository(self._repo_conf_path, self._glob_conf)
@@ -66,7 +66,11 @@ class MKCTFAPI:
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.slug:
-                yield {'slug': challenge.slug, 'conf': challenge.get_conf()}
+                yield {
+                    'slug': challenge.slug,
+                    'conf': challenge.get_conf(),
+                    'description': challenge.description,
+                }
 
     def create(self, configuration=None):
         '''
