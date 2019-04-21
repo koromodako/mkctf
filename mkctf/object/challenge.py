@@ -201,7 +201,10 @@ class Challenge(Configurable):
             if not self.__create_dir(directory):
                 app_log.warning(f"directory exists already: {directory}")
 
-        for file in self.repo_conf['files']['txt']:
+        txt_files = [self.repo_conf['files']['description']]
+        txt_files += self.repo_conf['files']['txt']
+
+        for file in txt_files:
             if not self.__create_file(file):
                 app_log.warning(f"file exists already: {file}")
 
