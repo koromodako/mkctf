@@ -234,14 +234,11 @@ class Challenge(Configurable):
 
         Creates an archive containing all of the challenge "exportable" files.
         '''
-        if not self.is_standalone:
-            app_log.warning(f"challenge ignored (not standalone): {self.slug}.")
-            return {'ignored': True}
         if not include_disabled and not self.enabled:
             app_log.warning(f"challenge ignored (disabled): {self.slug}.")
             return {'ignored': True}
         app_log.info(f"exporting {self.slug}...")
-        archive_name = f'{self.slug}.tgz'
+        archive_name = f'{self.slug}.tar.gz'
         archive_path = export_dir.joinpath(archive_name)
         with tarfile.open(str(archive_path), 'w:gz') as arch:
             for entry in self.exportable():
