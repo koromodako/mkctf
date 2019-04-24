@@ -10,3 +10,4 @@ from .export import setup_export
 from .init import setup_init
 from .renew_flag import setup_renew_flag
 from .status import setup_status
+from .update_meta import setup_update_meta

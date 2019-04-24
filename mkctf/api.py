@@ -114,6 +114,7 @@ class MKCTFAPI:
             configured = self._repo.configure(configuration)
             if configured:
                 app_log.info("repo successfully configured.")
+                app_log.warning("you might want to run `update-meta` command now.")
             else:
                 app_log.error("repo configuration failed.")
         else:
@@ -174,6 +175,19 @@ class MKCTFAPI:
                 yield {
                     'slug': challenge.slug,
                     'flag': challenge.renew_flag(size or MKCTFAPI.DEFAULT_FLAG_SIZE)
+                }
+
+    def update_meta(self, tags=[], slug=None):
+        '''Update static URL
+        '''
+        self.__assert_valid_repo()
+        for challenge in self._repo.scan(tags):
+            if slug is None or slug == challenge.slug:
+                static_url = challenge.update_static_url()
+                app_log.info(f"{challenge.slug} mapped to: {static_url}")
+                yield {
+                    'slug': challenge.slug,
+                    'static_url': static_url
                 }
 
     async def build(self, tags=[], slug=None, timeout=None):

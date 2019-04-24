@@ -21,7 +21,8 @@ from mkctf.cli import (
     setup_status,
     setup_disable,
     setup_configure,
-    setup_renew_flag
+    setup_renew_flag,
+    setup_update_meta
 )
 from mkctf.helper.log import app_log, log_enable_debug
 from mkctf.helper.formatting import format_enable_colors
@@ -52,6 +53,7 @@ def parse_args():
     setup_disable(subparsers)
     setup_configure(subparsers)
     setup_renew_flag(subparsers)
+    setup_update_meta(subparsers)
     # -- parse args and pre-process if needed
     args = parser.parse_args()
     args.configuration = None

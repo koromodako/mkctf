@@ -5,6 +5,7 @@ import tarfile
 from os import urandom
 from stat import S_IRWXU
 from pathlib import Path
+from hashlib import sha1
 from asyncio import create_subprocess_exec, wait_for, TimeoutError
 from subprocess import PIPE, CalledProcessError
 from mkctf.helper.log import app_log
@@ -24,6 +25,17 @@ class Challenge(Configurable):
         content = urandom(size).hex()
         suffix = repo_conf['flag']['suffix']
         return f"{prefix}{content}{suffix}"
+
+    @staticmethod
+    def make_static_url(repo_conf, slug):
+        '''Makes challenge static url
+        '''
+        url = repo_conf['static']['base_url']
+        if not url.endswith('/'):
+            url += '/'
+        key = slug.encode() + bytes.fromhex(repo_conf['static']['salt'])
+        url += f'{sha1(key).hexdigest()}.tar.gz'
+        return url
 
     def __init__(self, chall_conf_path, repo_conf):
         '''Constructs a new instance
@@ -170,27 +182,35 @@ class Challenge(Configurable):
 
     @property
     def enabled(self):
-        '''Determines if challenge is enabled
+        '''Determine if challenge is enabled
         '''
         return self.get_conf('enabled')
 
     def enable(self, enabled=True):
-        '''Enables or disables the challenge
+        '''Enable or disables the challenge
         '''
         conf = self.get_conf()
         conf['enabled'] = enabled
         self.set_conf(conf)
 
     def renew_flag(self, size=32):
-        '''Renews challenge's flag
+        '''Renew challenge's flag
         '''
         conf = self.get_conf()
         conf['flag'] = Challenge.make_flag(self.repo_conf, size)
         self.set_conf(conf)
         return conf['flag']
 
+    def update_static_url(self):
+        '''Update static_url parameter
+        '''
+        conf = self.get_conf()
+        conf['static_url'] = Challenge.make_static_url(self.repo_conf, self.slug)
+        self.set_conf(conf)
+        return conf['static_url']
+
     def create(self):
-        '''Creates challenge files
+        '''Create challenge files
         '''
         self.working_dir().mkdir(parents=True, exist_ok=True)
 
@@ -238,7 +258,8 @@ class Challenge(Configurable):
             app_log.warning(f"challenge ignored (disabled): {self.slug}.")
             return {'ignored': True}
         app_log.info(f"exporting {self.slug}...")
-        archive_name = f'{self.slug}.tar.gz'
+        conf = self.get_conf()
+        archive_name = conf['static_url'].split('/')[-1]
         archive_path = export_dir.joinpath(archive_name)
         with tarfile.open(str(archive_path), 'w:gz') as arch:
             for entry in self.exportable():

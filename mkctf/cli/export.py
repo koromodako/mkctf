@@ -1,6 +1,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from json import dump
 from pathlib import Path
 from mkctf.helper.log import app_log
 from mkctf.helper.formatting import TAB, HSEP, format_text
@@ -14,7 +15,12 @@ async def export(api, args):
     '''
     found = False
     export_dir = args.export_dir.resolve()
-    exported = [None for _ in api.export(export_dir, args.tags, args.slug, args.include_disabled)]
+    exported = [info for info in api.export(export_dir, args.tags, args.slug, args.include_disabled) if not 'ignored' in info]
+    export_map = {info['slug']: info['archive_path'].name for info in exported}
+    app_log.info("creating export.map...")
+    with export_dir.joinpath('export.map').open('w') as fp:
+        dump(export_map, fp)
+    app_log.info("done.")
     return exported
 
 def setup_export(subparsers):

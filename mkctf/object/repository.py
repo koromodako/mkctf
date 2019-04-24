@@ -1,6 +1,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from os import urandom
 from shutil import rmtree
 from pathlib import Path
 from slugify import slugify
@@ -22,7 +23,7 @@ class Repository(Configurable):
         self.glob_conf = glob_conf
 
     def __make_repo_conf(self, prev={}, override=None):
-        '''[summary]
+        '''Create or update a repository configuration
         '''
         if prev is None:
             prev = {}
@@ -31,6 +32,7 @@ class Repository(Configurable):
             conf.update(override)
         else:
             tags = prev.get('tags')
+            static = prev.get('static')
             difficulties = prev.get('difficulties')
             dirs = prev.get('directories', {})
             pub_dirs = dirs.get('public')
@@ -51,6 +53,7 @@ class Repository(Configurable):
             description_file = cli.readline("enter description file name:", default=files.get('description'))
             flag_prefix = cli.readline("enter flag prefix:", default=flag.get('prefix'))
             flag_suffix = cli.readline("enter flag suffix:", default=flag.get('suffix'))
+            base_url = cli.readline("enter static base url:", default=static.get('base_url'))
             conf = {
                 'name': name,
                 'tags': tags,
@@ -70,12 +73,16 @@ class Repository(Configurable):
                 'flag': {
                     'prefix': flag_prefix,
                     'suffix': flag_suffix,
+                },
+                'static': {
+                    'salt': urandom(32).hex(),
+                    'base_url': base_url
                 }
             }
         return conf
 
     def __make_chall_conf(self, prev={}, override=None):
-        '''[summary]
+        '''Create or update a challenge configuration
         '''
         repo_conf = self.get_conf()
         if prev is None:
@@ -84,28 +91,25 @@ class Repository(Configurable):
             conf = prev
             conf.update(override)
         else:
-            flag = prev.get('flag', Challenge.make_flag(repo_conf))
             name = cli.readline("enter challenge name:", default=prev.get('name'))
             tags = cli.choose_many("select one or more tags:", repo_conf['tags'], default=prev.get('tags'))
             points = cli.readline("enter number of points:", default=prev.get('points'), expect_digit=True)
-            enabled = prev.get('enabled', False)
             difficulties = repo_conf['difficulties']
-            difficulty = cli.choose_one("how difficult is your challenge?", repo_conf['difficulties'], default=prev.get('difficulty', ))
-            parameters = prev.get('parameters', {})
+            difficulty = cli.choose_one("how difficult is your challenge?", difficulties, default=prev.get('difficulty', difficulties[0]))
             standalone = cli.confirm("is it a standalone challenge?", default=prev.get('standalone'))
-            static_url = prev.get('static_url', '')
-            company_logo_url = prev.get('company_logo_url', '')
+            company_logo_url = cli.readline("enter company logo url if applicable:", default=prev.get('company_logo_url', ''))
+            slug = slugify(name)
             conf = {
                 'name': name,
                 'tags': tags,
-                'slug': slugify(name),
-                'flag': flag,
+                'slug': prev.get('slug', slug), # consistency: keep previous slug even if challenge renamed
+                'flag': prev.get('flag', Challenge.make_flag(repo_conf)),
                 'points': points,
-                'enabled': enabled,
+                'enabled': prev.get('enabled', False),
                 'difficulty': difficulty,
-                'parameters': parameters,
+                'parameters': prev.get('parameters', {}),
                 'standalone': standalone,
-                'static_url': static_url,
+                'static_url': prev.get('static_url', Challenge.make_static_url(repo_conf, slug)),
                 'company_logo_url': company_logo_url
             }
         return conf
