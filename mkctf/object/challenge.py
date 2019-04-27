@@ -67,27 +67,22 @@ class Challenge(Configurable):
                 'function print {',
                 '    (>&2 printf "\\x1b[34m${1}\\x1b[0m\\n")',
                 '}',
-                '',
                 'function exit_success {',
                 '    (>&2 printf "\\x1b[32m- Script succeeded.\\x1b[0m\\n")',
                 '    exit 0',
                 '}',
-                '',
                 'function exit_failure {',
                 '    (>&2 printf "\\x1b[31m- Script failed.\\x1b[0m\\n")',
                 '    exit 1',
                 '}',
-                '',
                 'function exit_non_applicable {',
                 '    (>&2 printf "\\x1b[36m- Script non applicable.\\x1b[0m\\n")',
                 '    exit 2',
                 '}',
-                '',
                 'function exit_manual {',
                 '    (>&2 printf "\\x1b[33m- Script requires a manual operation.\\x1b[0m\\n")',
                 '    exit 3',
                 '}',
-                '',
                 'function exit_not_implemented {',
                 '    (>&2 printf "\\x1b[35m- Script not implemented.\\x1b[0m\\n")',
                 '    exit 4',
@@ -260,6 +255,10 @@ class Challenge(Configurable):
         app_log.info(f"exporting {self.slug}...")
         conf = self.get_conf()
         archive_name = conf['static_url'].split('/')[-1]
+        if not archive_name:
+            app_log.error(f"challenge ignored (invalid/empty static_url): {self.slug}")
+            app_log.error(f"running `mkctf-cli update-meta` might fix this issue.")
+            return {'ignored': True}
         archive_path = export_dir.joinpath(archive_name)
         with tarfile.open(str(archive_path), 'w:gz') as arch:
             for entry in self.exportable():
