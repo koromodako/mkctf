@@ -26,17 +26,19 @@ async def enum(api, args):
         del conf['standalone']
         del conf['slug']
         description = challenge['description'] or format_text('empty description', 'red', attrs=['bold'])
-        text = format_dict2str(conf)
-        text += "\n+ description:"
-        text += indent(f"\n{HSEP}\n{description}\n{HSEP}", TAB)
+        chall_details = format_dict2str(conf)
+        chall_details += "\n+ description:"
+        chall_details += indent(f"\n{HSEP}\n{description}\n{HSEP}", TAB)
         print(chall_entry)
-        print(indent(text[1:], TAB * 2))
+        if not args.summarize:
+            print(indent(chall_details[1:], TAB * 2))
     if not found:
         app_log.warning("no challenge found matching given constraints.")
     return found
 
 def setup_enum(subparsers):
     parser = subparsers.add_parser('enum', help="enumerate challenges.")
+    parser.add_argument('--summarize', action='store_true', help="Print a list of challenges without details.")
     parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
     parser.add_argument('--slug', '-s', help="challenge's slug.")
     parser.set_defaults(func=enum)
