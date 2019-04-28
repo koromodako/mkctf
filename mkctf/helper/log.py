@@ -50,5 +50,5 @@ def log_enable_logging(enable=True):
     handlers = app_log.handlers
     if enable and _hdlr not in handlers:
         app_log.addHandler(_hdlr)
-    elif _hdlr in handlers:
+    elif not enable and _hdlr in handlers:
         app_log.removeHandler(_hdlr)
