@@ -72,24 +72,11 @@ class MKCTFAPI:
                     'description': challenge.description,
                 }
 
-    def create(self, configuration=None):
+    def create(self, configuration):
         '''
         '''
         self.__assert_valid_repo()
-        conf=None
-        if configuration:
-            slug = slugify(name)
-            conf = {
-                'name': name,
-                'tags': tags,
-                'slug': slug,
-                'flag': flag,
-                'points': points,
-                'enabled': enabled,
-                'parameters': parameters,
-                'standalone': standalone
-            }
-        created = self._repo.create_chall(conf)
+        created = self._repo.create_chall(configuration)
         if created:
             app_log.info("challenge successfully created.")
         return {'created': created}

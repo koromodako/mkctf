@@ -39,7 +39,16 @@ app_log.addHandler(_hdlr)
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def log_enable_debug(debug=True):
+def log_enable_debug(enable=True):
     '''[summary]
     '''
-    app_log.setLevel(DEBUG if debug else INFO)
+    app_log.setLevel(DEBUG if enable else INFO)
+
+def log_enable_logging(enable=True):
+    '''[summary]
+    '''
+    handlers = app_log.handlers
+    if enable and _hdlr not in handlers:
+        app_log.addHandler(_hdlr)
+    elif _hdlr in handlers:
+        app_log.removeHandler(_hdlr)

@@ -24,7 +24,7 @@ from mkctf.cli import (
     setup_renew_flag,
     setup_update_meta
 )
-from mkctf.helper.log import app_log, log_enable_debug
+from mkctf.helper.log import app_log, log_enable_debug, log_enable_logging
 from mkctf.helper.formatting import format_enable_colors
 # =============================================================================
 #  FUNCTIONS
@@ -35,6 +35,7 @@ def parse_args():
     parser = ArgumentParser(add_help=True,
                        description="Manage CTF challenges repository.")
     parser.add_argument('--yes', '-y', action='store_true', help="do not ask for confirmation.")
+    parser.add_argument('--quiet', '-q', action='store_true', help="disable logging.")
     parser.add_argument('--debug', '-d', action='store_true', help="output debug messages")
     parser.add_argument('--repo-root', '-r', type=Path, default=Path.cwd(), help="repository's root folder absolute path.")
     parser.add_argument('--no-color', action='store_true', help="disable colored output")
@@ -73,6 +74,7 @@ async def main():
     app_log.info(__banner__)
     args = parse_args()
     log_enable_debug(args.debug)
+    log_enable_logging(not args.quiet)
     format_enable_colors(not args.no_color)
     app_log.debug(args)
     api = MKCTFAPI(args.repo_root)
