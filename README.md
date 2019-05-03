@@ -13,11 +13,11 @@ This project was updated for INS'hAck 2018 event.
 
 Version [1](https://github.com/koromodako/mkctf/releases/tag/1.0.0) was used until INS'hAck 2019.
 
-INS'hAck 2019 will be using version [4.x.x](https://github.com/koromodako/mkctf/releases/tag/4.0.0) or above.
+INS'hAck 2019 will be using version [5.x.x](https://github.com/koromodako/mkctf/releases/tag/5.2.1) or above.
 
 ## Minimal requirements
 
- + `Python 3.6.7+`
+ + `Python 3.7.x`
 
 ## Getting started
 
