@@ -1,3 +1,5 @@
+pick
+jinja2
 aiohttp
 termcolor
 ruamel.yaml

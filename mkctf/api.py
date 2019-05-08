@@ -2,10 +2,9 @@
 #  IMPORTS
 # =============================================================================
 from pathlib import Path
-from slugify import slugify
-from mkctf.helper.log import app_log
-from mkctf.helper.config import config_load
-from mkctf.object.repository import Repository
+from .helper.log import app_log
+from .model.repository import Repository
+from .model.config.general import GeneralConfiguration
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -18,38 +17,26 @@ class MKCTFAPI:
     def __init__(self, repo_root, config_path=None):
         '''Coargstructs a new iargstance
         '''
+        self._general_conf = GeneralConfiguration()
         self._repo_root = Path(repo_root)
         app_log.debug(f"repo_root: {self._repo_root}")
-
-        self._glob_conf_path = config_path or Path.home().joinpath('.config', 'mkctf.yml')
-        app_log.debug(f"glob_conf_path: {self._glob_conf_path}")
-
-        self._glob_conf = config_load(self._glob_conf_path)
-        app_log.debug(f"glob_conf: {self._glob_conf}")
-
-        self._repo_conf_path = self._repo_root / self._glob_conf['files']['repo_conf']
-        app_log.debug(f"repo_conf_path: {self._repo_conf_path}")
-
-        self._repo = Repository(self._repo_conf_path, self._glob_conf)
+        self._repo = Repository(self._general_conf, self._repo_root)
+        if self._repo.initialized:
+            self._repo.load()
 
     def __assert_valid_repo(self):
         '''Checks if repository is valid
         '''
-        if not self._repo.get_conf():
+        if not self._repo.initialized:
             app_log.critical("mkctf repository must be initialized first. Run `mkctf init` first.")
             raise RuntimeError("Uninitialized repository.")
 
     def init(self):
         '''
         '''
-        conf = self._repo.get_conf()
-        need_init = conf is None
-        if need_init:
-            self._repo.init()
-            app_log.info("mkctf repository successfully created.")
-        else:
-            app_log.error("already in a mkctf repository.")
-        return {'initialized': need_init, 'conf': conf}
+        app_log.info("initializing mkCTF repository...")
+        self._repo.init()
+        return {'conf': self._repo.conf.raw}
 
     def find(self, slug):
         '''
@@ -58,7 +45,7 @@ class MKCTFAPI:
         challenge =  self._repo.find_chall(slug)
         if not challenge:
             return None
-        return {'slug': challenge.slug, 'conf': challenge.get_conf()}
+        return {'slug': challenge.slug, 'conf': challenge.conf.raw}
 
     def enum(self, tags=[], slug=None):
         '''
@@ -68,7 +55,7 @@ class MKCTFAPI:
             if slug is None or slug == challenge.slug:
                 yield {
                     'slug': challenge.slug,
-                    'conf': challenge.get_conf(),
+                    'conf': challenge.conf.raw,
                     'description': challenge.description,
                 }
 
@@ -161,7 +148,7 @@ class MKCTFAPI:
                 app_log.warning("you might want to call 'build' then 'deploy' to regenerate the challenge and deploy it.")
                 yield {
                     'slug': challenge.slug,
-                    'flag': challenge.renew_flag(size or MKCTFAPI.DEFAULT_FLAG_SIZE)
+                    'flag': challenge.conf.renew_flag(size or MKCTFAPI.DEFAULT_FLAG_SIZE)
                 }
 
     def update_meta(self, tags=[], slug=None):
@@ -170,7 +157,7 @@ class MKCTFAPI:
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.slug:
-                static_url = challenge.update_static_url()
+                static_url = challenge.conf.update_static_url()
                 app_log.info(f"{challenge.slug} mapped to: {static_url}")
                 yield {
                     'slug': challenge.slug,

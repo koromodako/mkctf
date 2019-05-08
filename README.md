@@ -2,123 +2,78 @@
 
 ## Why ?
 
-This tool might help your team to create challenges following a predefined format.
+This framework aims at helping your team create CTF challenges following format which will enable efficient integration
+and deployment on the CTF infrastructure.
 
-##  Origins
+This project was, initially, created for managing challenges for INS'hAck 2017 event.
+You can find challenges and writeups of the past editions of INS'hAck in [this repository](https://github.com/InsecurityAsso).
 
-This project was, initially, created for managing file for INS'hAck 2017 event.
-You can find challenges and writeups of the past editions of INS'hAck [here](https://github.com/InsecurityAsso).
+This project is constantly evolving to enable even more automation when deploying challenges on a VPS & Docker-based infrastructure.
 
-This project was updated for INS'hAck 2018 event.
+## Requirements
 
-Version [1](https://github.com/koromodako/mkctf/releases/tag/1.0.0) was used until INS'hAck 2019.
+This project has been design to run in a Linux environment having Python 3.7+ support.
 
-INS'hAck 2019 will be using version [5.x.x](https://github.com/koromodako/mkctf/releases/tag/5.2.1) or above.
+It might work on Mac as well though I'm not testing it on this platform.
 
-## Minimal requirements
+I won't invest time to make it work on Windows as WSL2 will enable having a Linux running on your Windows quite easily.
 
- + `Python 3.7.x`
+## Installing and Creating a new CTF
 
-## Getting started
+I advise you to setup mkctf using the following methodology:
 
+```bash
+# clone mkctf repository in tmp directory
+$ git clone https://github.com/koromodako/mkctf /tmp/mkctf
+# create ~/bin dir if required and enter ~/bin
+$ mkdir -p ~/bin && cd ~/bin
+# create a Python 3 virtual environment
+$ python3 -m venv .mkctf-venv
+# install mkctf in the venv
+$ .mkctf-venv/bin/pip install /tmp/mkctf
+# create symbolic links for mkctf scripts
+$ ln -s ./mkctf-venv/bin/mkctf-* .
+# leave ~/bin
+cd ..
+# ensure that config directory exists and copy configuration files in it
+$ mkdir -p ~/.config && cp -r /tmp/mkctf/config ~/.config/mkctf
+# ensure that ~/bin is part of your path and try invoking mkctf-cli
+$ mkctf-cli -h
 ```
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/koromodako/mkctf/master/scripts/install.sh)"
+
+Then lets say you want to create a CTF for INS'hAck 2020:
+
+```bash
+# create and enter inshack-2020/
+$ mkdir inshack-2020 && cd inshack-2020
+# initialize a mkCTF repository
+$ mkctf-cli init
+# then simply follow the instructions
 ```
 
-You might need to add `~/bin` to your `$PATH` (most of the time you just reload `.profile`)
+## Commandline tools
 
-Then lets say you want to create a CTF for INS'hAck 2019:
-
-```
-mkdir inshack-2019
-cd inshack-2019
-mkctf-cli init
-```
-
-Follow the instructions.
-
-You need help: `mkctf-cli -h`
-
-## What you need to understand
-
-`mkctf-cli` helps you manipulate two CTF concepts described bellow. These objects
-rely on YAML configuration files.
-
-`mkctf-serve` starts a web server exposing an API which _will be documented here soon_.
+- `mkctf-cli` helps you manipulate two concepts described bellow. These concepts rely on YAML configuration files.
+- `mkctf-serve` starts a web server exposing an API which will be documented here _soon_.
 
 ### Repository
 
-Represents a collection of categories which contain instances of `Challenge`.
+A repository represents a collection of CTF challenges.
 
-**How is it configured?**
+**How does it work?**
 
 ```
-tags: [bugbounty, crypto, for, misc, prog, pwn, re, web, quest]
-difficulties: [trivial, easy, medium, hard, extreme]
-directories:
-  public: [public-files]
-  private: [server-files, exploit, src]
-files:
-  build: build
-  deploy: deploy
-  status: exploit/exploit
-  chall_conf: .mkctf.yml
-  description: public-files/description.md
-  txt: [writeup.md, Dockerfile]
-flag:
-  prefix: 'INSA{'
-  suffix: '}'
-name: INS'hAck 2019
-```
 
-+ `tags`: tags used to classify CTF challenges
-+ `difficulties`: difficulties used to classify CTF challenges
-+ `directories`: folders to be created for each challenge
-    + `public`: exportable folders
-    + `private`: non-exportable folders
-+ `files`: files to be created for each challenge
-    + `build`: a _script_ building the challenge from sources (cf. Scripts)
-    + `deploy`: a _script_ deploying the challenge (cf. Scripts)
-    + `status`: a _script_ testing the _exploitability_ of the challenge. It's usually an exploit (cf. Scripts)
-    + `description`: a _text file_ describing the challenge
-    + `chall_conf`: challenge configuration file name usually `.mkctf.yml`
-    + `txt`: list of non-executable mandatory files
-+ `flag`: flag properties
-    + `prefix`: flag's prefix, usually ends with `{`
-    + `suffix`: flag's suffix, usually a single `}`
-+ `name`: CTF's name
+```
 
 ### Challenge
 
 Represents a CTF challenge.
 
-**How is it configured?**
+**How does it work?**
 
 ```
-tags: [for, crypto]
-enabled: false
-flag: INSA{[redacted]}
-name: Virtual Printer
-parameters: {}
-points: 100
-slug: virtual-printer
-difficulty: trivial
-standalone: false
-static_url: https://ctf.insecurity-insa.fr/virtual-printer.zip
-company_logo_url: https://insecurity-insa.fr/favicon.ico
 ```
-
-+ `tags`: challenge tags
-+ `enabled`: is the challenge enabled?
-+ `flag`: challenge flag
-+ `name`: challenge name
-+ `parameters`: _dict_ of challenge-specific parameters
-+ `points`: challenge value
-+ `slug`: challenge slug (should match challenge folder name)
-+ `difficulty`: challenge difficulty
-+ `standalone`: is the challenge standalone? (meaning it does not rely on a server)
-+ `static_url`: URL of the archive containing challenge data
-+ `company_logo_url`: URL of a logo for a sponsor challenge   
 
 ### Scripts
 

@@ -3,6 +3,10 @@
 # =============================================================================
 import os
 # =============================================================================
-#  GLOBALS
+#  FUNCTIONS
 # =============================================================================
-WINDOWS = os.name == 'nt'
+def scandir(root, keep):
+    for dentry in os.scandir(str(root)):
+        if keep is not None and not keep(dentry):
+            continue
+        yield dentry
