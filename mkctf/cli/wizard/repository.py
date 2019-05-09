@@ -58,44 +58,89 @@ class RepositoryConfigurationWizard:
                     'public': ['public-files'],
                     'private': ['healthcheck'],
                 },
-                'build': {'name': 'build', 'from': 'build.jinja'},
-                'deploy': {'name': 'deploy', 'from': 'deploy.jinja'},
-                'healthcheck': {'name': 'healthcheck', 'from': 'healthcheck.jinja'},
-                'description': {'name': 'description.md', 'from': 'description.md.jinja'},
+                'build': {
+                    'name': 'build',
+                    'from': 'build.jinja'
+                },
+                'deploy': {
+                    'name': 'deploy',
+                    'from': 'deploy.jinja'
+                },
+                'healthcheck': {
+                    'name': 'healthcheck/healthcheck',
+                    'from': 'healthcheck.jinja'
+                },
+                'description': {
+                    'name': 'public-files/description.md',
+                    'from': 'description.md.jinja'
+                },
                 'files': [
-                    {'name': '.gitignore'},
-                    {'name': 'writeup.md', 'from': ''},
-                    {'name': 'healthcheck/healthcheck.deps', 'from': 'healthcheck.deps'},
+                    {
+                        'name': '.gitignore'
+                    },
+                    {
+                        'name': 'writeup.md',
+                        'from': ''
+                    },
+                    {
+                        'name': 'healthcheck/healthcheck.deps',
+                        'from': 'healthcheck.deps'
+                    },
                 ],
             },
             'categories': {
                 'simple': {
                     'dirs': {
                         'public': [],
-                        'private': ['private-files'],
+                        'private': [
+                            'private-files'
+                        ],
                     },
                     'files': [],
                 },
                 'server': {
                     'dirs': {
                         'public': [],
-                        'private': ['server-files'],
+                        'private': [
+                            'server-files'
+                        ],
                     },
                     'files': [
-                        {'name': 'server-files/Dockerfile', 'from': 'Dockerfile.server'},
+                        {
+                            'name': 'server-files/Dockerfile',
+                            'from': 'Dockerfile.server'
+                        },
                     ],
                 },
                 'sandbox': {
                     'dirs': {
                         'public': [],
-                        'private': ['server-files'],
+                        'private': [
+                            'server-files'
+                        ],
                     },
                     'files': [
-                        {'name': 'server-files/Dockerfile', 'from': 'Dockerfile.sandbox-server'},
-                        {'name': 'server-files/Dockerfile.sandbox', 'from': 'Dockerfile.server'},
-                        {'name': 'server-files/banner', 'from': 'banner'},
-                        {'name': 'server-files/sshd_config', 'from': 'sshd_config'},
-                        {'name': 'server-files/sandbox_start.sh', 'exec': True, 'from': 'sandbox_start.sh.jinja'},
+                        {
+                            'name': 'server-files/Dockerfile',
+                            'from': 'Dockerfile.sandbox-server'
+                        },
+                        {
+                            'name': 'server-files/Dockerfile.sandbox',
+                            'from': 'Dockerfile.server'
+                        },
+                        {
+                            'name': 'server-files/banner',
+                            'from': 'banner'
+                        },
+                        {
+                            'name': 'server-files/sshd_config',
+                            'from': 'sshd_config'
+                        },
+                        {
+                            'name': 'server-files/sandbox_start.sh',
+                            'exec': True,
+                            'from': 'sandbox_start.sh.jinja'
+                        },
                     ],
                 },
             },
@@ -106,8 +151,12 @@ class RepositoryConfigurationWizard:
             self._name = readline("Enter a name", default=self._name)
             # - tags & difficulties
             self._tags = choose(self._tags, "Tags Selection", min_count=2, multi=True, custom=True)
+            tags_str = '\n - '.join(self._tags)
+            print(f"Selected tags:\n - {tags_str}")
             self._difficulties = choose(self._difficulties, "Difficulties Selection",
                                         min_count=2, multi=True, custom=True)
+            difficulties_str = '\n - '.join(self._difficulties)
+            print(f"Selected difficulties:\n - {difficulties_str}")
             # - flag
             self._flag_prefix = readline("Enter flag prefix", default=self._flag_prefix)
             self._flag_suffix = readline("Enter flag prefix", default=self._flag_suffix)

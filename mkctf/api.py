@@ -51,16 +51,16 @@ class MKCTFAPI:
         challenge =  self._repo.find_chall(slug)
         if not challenge:
             return None
-        return {'slug': challenge.slug, 'conf': challenge.conf.raw}
+        return {'slug': challenge.conf.slug, 'conf': challenge.conf.raw}
 
     def enum(self, tags=[], slug=None):
         '''
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
-            if slug is None or slug == challenge.slug:
+            if slug is None or slug == challenge.conf.slug:
                 yield {
-                    'slug': challenge.slug,
+                    'slug': challenge.conf.slug,
                     'conf': challenge.conf.raw,
                     'description': challenge.description,
                 }
@@ -129,32 +129,36 @@ class MKCTFAPI:
         '''
         self.__assert_valid_repo()
         export_dir.mkdir(parents=True, exist_ok=True)
-        app_log.info(f"exporting standalone challenges to: {export_dir}")
+        app_log.info(f"exporting challenges public data to: {export_dir}")
         if not slug:
             for challenge in self._repo.scan(tags):
-                info = challenge.export(export_dir, include_disabled)
-                info.update({'slug': challenge.slug})
-                yield info
+                archive_path = challenge.export(export_dir, include_disabled)
+                yield {
+                    'slug': challenge.conf.slug,
+                    'archive_path': archive_path
+                }
             return
         challenge = self._repo.find_chall(slug)
         if not challenge:
-            app_log.error(f"challenge not found: {challenge.slug}")
+            app_log.error(f"challenge not found: {challenge.conf.slug}")
             return
-        info = challenge.export(export_dir, include_disabled)
-        info.update({'slug': challenge.slug})
-        yield info
+        archive_path = challenge.export(export_dir, include_disabled)
+        yield {
+            'slug': challenge.conf.slug,
+            'archive_path': archive_path
+        }
 
     def renew_flag(self, tags=[], slug=None, size=None):
         '''Renews one or more challenge flags
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
-            if slug is None or slug == challenge.slug:
+            if slug is None or slug == challenge.conf.slug:
                 app_log.info(f"{slug}'s flag has been renewed.")
                 app_log.warning("you might want to call 'build' then 'deploy' to regenerate the challenge and deploy it.")
                 yield {
-                    'slug': challenge.slug,
-                    'flag': challenge.conf.renew_flag(size or MKCTFAPI.DEFAULT_FLAG_SIZE)
+                    'slug': challenge.conf.slug,
+                    'flag': challenge.renew_flag(size or MKCTFAPI.DEFAULT_FLAG_SIZE)
                 }
 
     def update_meta(self, tags=[], slug=None):
@@ -162,11 +166,11 @@ class MKCTFAPI:
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
-            if slug is None or slug == challenge.slug:
-                static_url = challenge.conf.update_static_url()
-                app_log.info(f"{challenge.slug} mapped to: {static_url}")
+            if slug is None or slug == challenge.conf.slug:
+                static_url = challenge.update_static_url()
+                app_log.info(f"{challenge.conf.slug} mapped to: {static_url}")
                 yield {
-                    'slug': challenge.slug,
+                    'slug': challenge.conf.slug,
                     'static_url': static_url
                 }
 
@@ -175,10 +179,10 @@ class MKCTFAPI:
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
-            if slug is None or slug == challenge.slug:
-                app_log.info(f"building {challenge.slug}...")
+            if slug is None or slug == challenge.conf.slug:
+                app_log.info(f"building {challenge.conf.slug}...")
                 result = await challenge.build(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
-                result.update({'slug': challenge.slug})
+                result.update({'slug': challenge.conf.slug})
                 yield result
 
     async def deploy(self, tags=[], slug=None, timeout=None):
@@ -186,19 +190,19 @@ class MKCTFAPI:
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
-            if slug is None or slug == challenge.slug:
-                app_log.info(f"deploying {challenge.slug}...")
+            if slug is None or slug == challenge.conf.slug:
+                app_log.info(f"deploying {challenge.conf.slug}...")
                 result = await challenge.deploy(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
-                result.update({'slug': challenge.slug})
+                result.update({'slug': challenge.conf.slug})
                 yield result
 
-    async def status(self, tags=[], slug=None, timeout=None):
+    async def healthcheck(self, tags=[], slug=None, timeout=None):
         '''
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
-            if slug is None or slug == challenge.slug:
-                app_log.info(f"checking {challenge.slug}'s status...")
-                result = await challenge.status(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
-                result.update({'slug': challenge.slug})
+            if slug is None or slug == challenge.conf.slug:
+                app_log.info(f"checking {challenge.conf.slug} health...")
+                result = await challenge.healthcheck(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
+                result.update({'slug': challenge.conf.slug})
                 yield result

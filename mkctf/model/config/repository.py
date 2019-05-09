@@ -93,7 +93,7 @@ class RepositoryConfiguration(Configuration):
 
     @property
     def categories(self):
-        return (list,)(self['categories'].keys())
+        return list(self['categories'].keys())
 
     @property
     def flag_prefix(self):

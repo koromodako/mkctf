@@ -42,6 +42,10 @@ class Configuration(dict, metaclass=MetaConfiguration):
                 raise MKCTFAPIException("configuration load failed.")
         return conf
 
+    @property
+    def raw(self):
+        return dict(self)
+
     def __dict_check(self, obj, expected_obj, chain=''):
         '''Recursive diffing and type checking between two dicts
         '''
@@ -84,4 +88,4 @@ class Configuration(dict, metaclass=MetaConfiguration):
                      "# Do not edit it manually unless you know exactly what you're doing.\n"
                      "# Keep #PEBCAK in mind.\n"
                      "#\n")
-            yaml.dump(dict(self), fp)
+            yaml.dump(self.raw, fp)

@@ -19,13 +19,13 @@ from .config import ChallengeConfiguration
 class Challenge:
     '''[summary]
     '''
-    def __init__(self, repo, conf=None):
+    def __init__(self, repo, path, conf=None):
         '''Constructs a new instance
         '''
         self._conf = conf
         self._repo = repo
-        self._path = repo.path.joinpath(conf.slug)
-        self._conf_path = self._chall_path.joinpath('.mkctf.yml')
+        self._path = path
+        self._conf_path = path.joinpath('.mkctf.yml')
         if not conf:
             self._conf = ChallengeConfiguration.load(self._conf_path)
             self._conf.validate()
@@ -40,7 +40,7 @@ class Challenge:
 
     @property
     def path(self):
-        return self._chall_path
+        return self._path
 
     @property
     def description(self):
@@ -82,7 +82,11 @@ class Challenge:
             tmpl_path = self.repo.template_dir.joinpath(template)
             if tmpl_path.is_file():
                 tmpl = Template(tmpl_path.read_text())
-                content = tmpl.render(repo_conf=self.repo.conf, chall_conf=self.conf)
+                try:
+                    content = tmpl.render(repo_conf=self.repo.conf, chall_conf=self.conf)
+                except:
+                    content = tmpl_path.read_text()
+                    app_log.error(f"{filepath} rendering failed, copying template content instead...")
         if not filepath.is_file():
             with filepath.open('w') as fp:
                 fp.write(content)
@@ -208,15 +212,17 @@ class Challenge:
                         app_log.warning(f"export ignored {entry_path} within {self.conf.slug} (directory)")
                         continue
                     checksum_file.add(entry_path)
+                    app_log.debug(f"adding {entry_path} to archive...")
                     arch.add(str(entry_path), arcname=entry.name)
             with tempfile.NamedTemporaryFile('w') as tmpfile:
                 tmpfile.write(checksum_file.content)
-                arch.add(tmpfile, arcname='checksum.sha256')
+                tmpfile.flush()
+                app_log.debug(f"adding checksum.sha256 to archive...")
+                arch.add(tmpfile.name, arcname='checksum.sha256')
 
         arch_checksum_file = ChecksumFile()
         arch_checksum_file.add(archive_path)
         export_dir.joinpath(f'{archive_name}.sha256').write_text(arch_checksum_file.content)
-        app_log.info("done.")
         return archive_path
 
     async def build(self, timeout=4):

@@ -69,7 +69,7 @@ def confirm(prompt, default=Answer.NO, abort=False):
         return Answer.ABORT
     return Answer.NO
 
-def choose(choices, title, min_count=0, multi=False, custom=False):
+def choose(choices, title, multi=False, min_count=1, custom=False):
     '''Elect one element among a collection
 
     You can also allow tht user to enter a custom value
@@ -94,7 +94,10 @@ def choose(choices, title, min_count=0, multi=False, custom=False):
     else:
         text.append(f"Choose an item from the list below (optional) then validate.")
     selection = pick(choices, '\n'.join(text), multi_select=multi, min_selection_count=min_count)
-    selection = [item[0] for item in selection]
+    if isinstance(selection, list):
+        selection = [item[0] for item in selection]
+    else:
+        selection = selection[0]
     if custom:
         while True:
             selection_str = '\n - '.join(selection)

@@ -30,11 +30,11 @@ class ChallengeConfigurationWizard:
         self._slug = prev_conf.get('slug') # consistency: keep previous slug even if challenge renamed
         self._tags = prev_conf.get('tags')
         self._flag = prev_conf.get('flag') # consistency: keep previous flag even if challenge renamed
-        self._author = prev_conf.get('author')
-        self._points = prev_conf.get('points')
-        self._enabled = prev_conf.get('enabled') # consistency: keep previous enabled even if challenge renamed
+        self._author = prev_conf.get('author', '')
+        self._points = prev_conf.get('points', -3)
+        self._enabled = prev_conf.get('enabled', False) # consistency: keep previous enabled even if challenge renamed
         self._category = prev_conf.get('category')
-        self._logo_url = prev_conf.get('logo_url')
+        self._logo_url = prev_conf.get('logo_url', '')
         self._difficulty = prev_conf.get('difficulty')
         self._static_url = prev_conf.get('static_url')
 
@@ -60,16 +60,19 @@ class ChallengeConfigurationWizard:
             self._name = readline("Enter challenge display name", default=self._name)
             # consistency: keep previous slug even if challenge renamed
             self._slug = self._slug or slugify(self._name)
-            self._tags = choose(self._repo_conf.tags, "Tags Selection",
-                                min_count=1, multi=True)
+            self._tags = choose(self._repo_conf.tags, "Tags Selection", multi=True)
+            tags_str = '\n - '.join(self._tags)
+            print(f"Selected tags:\n - {tags_str}")
             # consistency: keep previous flag even if challenge renamed
             self._flag = self._flag or self._repo_conf.make_rand_flag()
-            self._author = readline("Enter challenge author name", default=self._author)
+            self._author = readline("Enter challenge author name", empty=True, default=self._author)
             self._points = readline("Enter challenge points or '-3' for dynamic", default=self._points)
             #self._enabled = self._enabled
-            self._category = choose(self._repo_conf.categories, "Category Selection", min_count=1)
-            self._logo_url = readline("Enter challenge logo url", default=self._logo_url)
-            self._difficulty = choose(self._repo_conf.difficulties, "Difficulty Selection", min_count=1)
+            self._category = choose(self._repo_conf.categories, "Category Selection")
+            print(f"Selected category: {self._category}")
+            self._logo_url = readline("Enter challenge logo url", empty=True, default=self._logo_url)
+            self._difficulty = choose(self._repo_conf.difficulties, "Difficulty Selection")
+            print(f"Selected difficulty: {self._difficulty}")
             # consistency: keep previous enabled even if challenge renamed
             self._static_url = self._static_url or self._repo_conf.make_static_url(self._slug)
             # confirm, abort or retry

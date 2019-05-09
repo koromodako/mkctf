@@ -18,13 +18,12 @@ async def enum(api, args):
         if conf is None:
             app_log.error(f"configuration missing. Run `mkctf configure -s {slug}`")
             continue
-        static = ' [STANDALONE]' if conf['standalone'] else ''
-        chall_entry = f"{TAB}- {slug}{static}"
+        chall_entry = f"{TAB}- {slug} [{conf['category'].upper()}]"
         color = 'green' if conf['enabled'] else 'red'
         chall_entry = format_text(chall_entry, color, attrs=['bold'])
-        del conf['enabled']
-        del conf['standalone']
         del conf['slug']
+        del conf['enabled']
+        del conf['category']
         description = challenge['description'] or format_text('empty description', 'red', attrs=['bold'])
         chall_details = format_dict2str(conf)
         chall_details += "\n+ description:"

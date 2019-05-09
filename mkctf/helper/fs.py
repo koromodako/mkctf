@@ -5,7 +5,7 @@ import os
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def scandir(root, keep):
+def scandir(root, keep=None):
     for dentry in os.scandir(str(root)):
         if keep is not None and not keep(dentry):
             continue

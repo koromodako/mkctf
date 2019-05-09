@@ -90,8 +90,8 @@ class Repository:
         keep = lambda entry: entry.is_dir() and not entry.name.startswith('.')
         challs = []
         for chall_dirent in scandir(self.challenges_dir, keep):
-            chall = Challenge(self)
-            if not chall.is_valid():
+            chall = Challenge(self, self.challenges_dir.joinpath(chall_dirent.name))
+            if not chall.conf.validate(throw=False):
                 app_log.warning(f"challenge has invalid configuration: {slug} => skipped")
                 continue
             if not tags or tags.intersection(chall.conf.tags):
@@ -105,8 +105,8 @@ class Repository:
         if not chall_path.is_dir():
             app_log.warning(f"challenge not found: {slug}")
             return None
-        chall = Challenge(self)
-        if not chall.is_valid():
+        chall = Challenge(self, chall_path)
+        if not chall.conf.validate(throw=False):
             app_log.warning(f"challenge has invalid configuration: {slug}")
             return None
         return chall
@@ -128,11 +128,11 @@ class Repository:
         '''
         final_conf = override_conf
         if not final_conf:
-            wizard = ChallengeConfigurationWizard()
+            wizard = ChallengeConfigurationWizard(self.conf)
             if not wizard.show():
                 return False
             final_conf = wizard.result
-        chall = Challenge(self, final_conf)
+        chall = Challenge(self, self.challenges_dir.joinpath(final_conf.slug), final_conf)
         return chall.init()
 
     def configure_chall(self, slug, override_conf=None):
@@ -161,7 +161,7 @@ class Repository:
         chall = self.find_chall(slug)
         if chall is None:
             return False
-        chall.conf.enable(True)
+        chall.enable(True)
         return True
 
     def disable_chall(self, slug):
@@ -170,5 +170,5 @@ class Repository:
         chall = self.find_chall(slug)
         if chall is None:
             return False
-        chall.conf.enable(False)
+        chall.enable(False)
         return True
