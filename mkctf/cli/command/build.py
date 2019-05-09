@@ -1,8 +1,8 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-import mkctf.helper.cli as cli
 from mkctf.api import MKCTFAPI
+from mkctf.cli import Answer, confirm
 from mkctf.helper.log import app_log
 from mkctf.helper.formatting import HSEP, format_text, format_rcode2str
 # =============================================================================
@@ -11,7 +11,7 @@ from mkctf.helper.formatting import HSEP, format_text, format_rcode2str
 async def build(api, args):
     '''Builds at least one challenge
     '''
-    if not args.yes and not cli.confirm('do you really want to build?'):
+    if not args.yes and confirm('do you really want to build?') == Answer.NO:
         app_log.warning("operation cancelled by user.")
         return False
     err_sep = format_text(f'{HSEP[:35]} [STDERR] {HSEP[:35]}', 'red')

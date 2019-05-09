@@ -3,10 +3,14 @@
 # =============================================================================
 import shutil
 from pathlib import Path
+from mkctf.cli import Answer, confirm
 from mkctf.helper.fs import scandir
 from mkctf.helper.log import app_log
-from mkctf.helper.cli import Answer, confirm
-from .config import GeneralConfiguration, RepositoryConfiguration
+from mkctf.cli.wizard import *
+from mkctf.model.config import (
+    GeneralConfiguration,
+    RepositoryConfiguration,
+)
 from .challenge import Challenge
 # =============================================================================
 #  CLASSES
@@ -14,91 +18,130 @@ from .challenge import Challenge
 class Repository:
     '''[summary]
     '''
-    def __init__(self, general_conf, repo_dir):
+    def __init__(self, repo_dir, general_conf, conf=None):
         '''[summary]
         '''
+        self._conf = conf
         self._repo_dir = repo_dir
-        self._config_file = repo_dir.joinpath('.mkctf', 'repo.yml')
-        self._template_dir = repo_dir.joinpath('.mkctf', 'templates')
-        self._challenges_dir = repo_dir.joinpath('challenges')
-        self._monitoring_dir = repo_dir.joinpath('monitoring')
-        self._conf = RepositoryConfiguration(general_conf, self._config_file)
+        self._conf_path = repo_dir.joinpath('.mkctf', 'repo.yml')
+        self._general_conf = general_conf
+        if not conf:
+            self._conf = RepositoryConfiguration.load(self._conf_path)
+            if not self._conf.validate(throw=False):
+                app_log.warning("repository requires initialization.")
 
     @property
     def conf(self):
         return self._conf
 
     @property
+    def path(self):
+        return self._repo_dir
+
+    @property
     def template_dir(self):
-        return self._template_dir
+        return self.path.joinpath('.mkctf', 'templates')
 
     @property
     def challenges_dir(self):
-        return self._challenges_dir
+        return self.path.joinpath('challenges')
 
     @property
     def monitoring_dir(self):
-        return self._monitoring_dir
+        return self.path.joinpath('monitoring')
 
     @property
     def initialized(self):
-        return self._template_dir.parent.is_dir()
+        return self.template_dir.is_dir() and self._conf_path.is_file()
+
+    def _save_conf(self):
+        '''Save repository configuration to disk
+        '''
+        if not self._conf.validate(throw=False):
+            app_log.error("save operation aborted: invalid configuration")
+            return False
+        self._conf.save(self._conf_path)
+        return True
 
     def init(self):
         '''[summary]
         '''
-        self._repo_dir.mkdir(parents=True, exist_ok=True)
         if not self.initialized:
-            self._template_dir.parent.mkdir(parents=True)
-            shutil.copytree(str(GeneralConfiguration.TEMPLATES_DIR), str(self._template_dir))
-            self._conf.update()
+            wizard = RepositoryConfigurationWizard(self._general_conf)
+            if not wizard.show():
+                return False
+            self._conf = wizard.result
+            self.path.mkdir(parents=True, exist_ok=True)
+            self.challenges_dir.mkdir(parents=True, exist_ok=True)
+            app_log.info("copying templates...")
+            shutil.copytree(str(GeneralConfiguration.TEMPLATES_DIR), str(self.template_dir))
+            app_log.info("copying monitoring...")
+            shutil.copytree(str(GeneralConfiguration.MONITORING_DIR), str(self.monitoring_dir))
+            app_log.info("saving repository configuration...")
+            return self._save_conf()
+        return False
 
     def scan(self, tags=[]):
-        '''Returns a list of Challenges containing at least one tag in tags
+        '''Returns a list of challenges having at least one tag in common with tags
 
-           Notes:
-            An empty list of tags means all tags
+        An empty list of tags means all tags
         '''
         tags = set(tags)
         keep = lambda entry: entry.is_dir() and not entry.name.startswith('.')
-        challenges = []
-        for chall_dirent in scandir(self._challenges_dir, keep):
-            chall = Challenge(self, Path(chall_dirent.path))
-            chall.load()
+        challs = []
+        for chall_dirent in scandir(self.challenges_dir, keep):
+            chall = Challenge(self)
+            if not chall.is_valid():
+                app_log.warning(f"challenge has invalid configuration: {slug} => skipped")
+                continue
             if not tags or tags.intersection(chall.conf.tags):
-                challenges.append(chall)
-        return sorted(challenges, key=lambda challenge: challenge.conf.slug)
+                challs.append(chall)
+        return sorted(challs, key=lambda chall: chall.conf.slug)
 
     def find_chall(self, slug):
         '''Finds challenge
         '''
-        chall_path = self._challenges_dir.joinpath(slug)
+        chall_path = self.challenges_dir.joinpath(slug)
         if not chall_path.is_dir():
             app_log.warning(f"challenge not found: {slug}")
             return None
-        chall = Challenge(self, chall_path)
-        chall.load()
+        chall = Challenge(self)
+        if not chall.is_valid():
+            app_log.warning(f"challenge has invalid configuration: {slug}")
+            return None
         return chall
 
-    def configure(self, configuration=None):
+    def configure(self, override_conf=None):
         '''Configures repository
         '''
-        self.conf.update(override_conf=configuration)
-        return True
+        final_conf = override_conf
+        if not final_conf:
+            wizard = RepositoryConfigurationWizard(self._general_conf, self.conf)
+            if not wizard.show():
+                return False
+            final_conf = wizard.result
+        self._conf = final_conf
+        return self._save_conf()
 
-    def create_chall(self, configuration=None):
+    def create_chall(self, override_conf=None):
         '''Creates a challenge
         '''
-        return Challenge.create(override_conf=configuration)
+        final_conf = override_conf
+        if not final_conf:
+            wizard = ChallengeConfigurationWizard()
+            if not wizard.show():
+                return False
+            final_conf = wizard.result
+        chall = Challenge(self, final_conf)
+        return chall.init()
 
-    def configure_chall(self, slug, configuration=None):
+    def configure_chall(self, slug, override_conf=None):
         '''Configures a challenge
         '''
         chall = self.find_chall(slug)
         if chall is None:
             return False
-        chall.conf.update(override_conf=configuration)
-        return True
+        return chall.configure(override_conf)
 
     def delete_chall(self, slug):
         '''Deletes a challenge
@@ -106,10 +149,10 @@ class Repository:
         chall = self.find_chall(slug)
         if chall is None:
             return False
-        if confirm(f"do you really want to remove {slug}") != Answer.YES:
+        if confirm(f"do you really want to remove {slug}") == Answer.NO:
             app_log.warning("operation cancelled by user.")
             return False
-        shutil.rmtree(str(chall.path()))
+        shutil.rmtree(str(chall.path))
         return True
 
     def enable_chall(self, slug):

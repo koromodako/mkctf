@@ -10,7 +10,7 @@ from subprocess import PIPE, CalledProcessError
 from jinja2 import Template
 from mkctf.helper.fs import scandir
 from mkctf.helper.log import app_log
-from mkctf.cli.wizards import ChallengeConfigurationWizard
+from mkctf.cli.wizard import ChallengeConfigurationWizard
 from mkctf.helper.checksum import ChecksumFile
 from .config import ChallengeConfiguration
 # =============================================================================
@@ -19,38 +19,24 @@ from .config import ChallengeConfiguration
 class Challenge:
     '''[summary]
     '''
-    @classmethod
-    def create(cls, repo, override_conf):
-        final_conf = override_conf
-        if not final_conf:
-            wizard = ChallengeConfigurationWizard(override_conf)
-            if not wizard.show():
-                return
-            final_conf = wizard.result
-        chall_path = repo.challenges_dir.joinpath(final_conf['slug'])
-        chall_path.mkdir(parents=True)
-        conf = ChallengeConfiguration(repo.conf, chall_path.joinpath('.mkctf.yml'))
-        conf.override(final_conf)
-        conf.save()
-        challenge = cls(repo, chall_path, conf)
-        challenge.__create_files()
-        return challenge
-
-    def __init__(self, repo, chall_path, conf=None):
+    def __init__(self, repo, conf=None):
         '''Constructs a new instance
         '''
+        self._conf = conf
         self._repo = repo
-        self._chall_path = chall_path
-        self._config_file = chall_path.joinpath('.mkctf.yml')
-        self._conf = conf or ChallengeConfiguration(repo.conf, self._config_file)
-
-    @property
-    def repo(self):
-        return self._repo
+        self._path = repo.path.joinpath(conf.slug)
+        self._conf_path = self._chall_path.joinpath('.mkctf.yml')
+        if not conf:
+            self._conf = ChallengeConfiguration.load(self._conf_path)
+            self._conf.validate()
 
     @property
     def conf(self):
         return self._conf
+
+    @property
+    def repo(self):
+        return self._repo
 
     @property
     def path(self):
@@ -60,34 +46,43 @@ class Challenge:
     def description(self):
         '''Retrieve challenge description from filesystem
         '''
-        desc_path = self._chall_path.joinpath(self.repo.conf.description)
+        desc_path = self.path.joinpath(self.repo.conf.description)
         if desc_path.is_file():
             return desc_path.read_text()
         return None
 
-    def __create_dir(self, directory):
+    def _save_conf(self):
+        '''Save challenge configuration to disk
+        '''
+        if not self._conf.validate(throw=False):
+            app_log.error("save operation aborted: invalid configuration")
+            return False
+        self._conf.save(self._conf_path)
+        return True
+
+    def _create_dir(self, directory):
         '''Creates a directory
         '''
-        dir_path = self._chall_path.joinpath(directory)
+        dir_path = self.path.joinpath(directory)
         if not dir_path.is_dir():
             dir_path.mkdir(parents=True, exist_ok=True)
             return True
         return False
 
-    def __create_file(self, file):
+    def _create_file(self, file):
         '''Creates a file
         '''
         name = file['name']
         exe = file.get('exec')
         template = file.get('from')
-        filepath = self._chall_path.joinpath(name)
+        filepath = self.path.joinpath(name)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         content = "# mkCTF generated this file automatically without using a template\n"
         if template:
             tmpl_path = self.repo.template_dir.joinpath(template)
             if tmpl_path.is_file():
                 tmpl = Template(tmpl_path.read_text())
-                content = tmpl.render(repository=self.repo, challenge=self)
+                content = tmpl.render(repo_conf=self.repo.conf, chall_conf=self.conf)
         if not filepath.is_file():
             with filepath.open('w') as fp:
                 fp.write(content)
@@ -96,7 +91,7 @@ class Challenge:
             return True
         return False
 
-    async def __run(self, script, timeout):
+    async def _run(self, script, timeout):
         '''Runs a script as an asynchronous subprocess
         '''
         script_path = Path(script)
@@ -105,7 +100,7 @@ class Challenge:
         if script_path.is_absolute():
             cwd = script_parents[0]
         else:
-            cwd = self._chall_path
+            cwd = self.path
             if len(script_parents) > 1:
                 cwd /= script_parents[0]
         app_log.info(f"running {script_path.name} within {cwd}.")
@@ -139,33 +134,66 @@ class Challenge:
             'exception': exception
         }
 
-    def __create_files(self):
+    def init(self):
         '''Create challenge files
         '''
-        self._chall_path.mkdir(parents=True, exist_ok=True)
+        self.path.mkdir(parents=True, exist_ok=True)
         dir_list = self.repo.conf.directories(self.conf.category)
         for directory in dir_list:
-            if not self.__create_dir(directory):
+            if not self._create_dir(directory):
                 app_log.warning(f"directory exists already: {directory}")
         file_list = self.repo.conf.files(self.conf.category)
         for file in file_list:
-            if not self.__create_file(file):
+            if not self._create_file(file):
                 app_log.warning(f"file exists already: {file}")
-        return True
+        return self._save_conf()
+
+    def configure(self, override_conf=None):
+        final_conf = override_conf
+        if not final_conf:
+            wizard = ChallengeConfigurationWizard(self.conf)
+            if not wizard.show():
+                return False
+            final_conf = wizard.result
+        self._conf = final_conf
+        return self._save_conf()
+
+    def enable(self, enabled):
+        '''Enable or disable the challenge
+        '''
+        self._conf['enabled'] = enabled
+        self._save_conf()
+
+    def renew_flag(self, size):
+        '''Replace current flag by a randomly generated one
+        '''
+        flag = self.repo.conf.make_rand_flag(size)
+        self._conf['flag'] = enabled
+        self._save_conf()
+        return flag
+
+    def update_static_url(self):
+        '''Update challenge static url in configuration if required
+        '''
+        static_url = self.repo.conf.make_static_url(self.slug)
+        if self.conf.static_url != static_url:
+            self._conf['static_url'] = static_url
+            self._save_conf()
+        return static_url
 
     def export(self, export_dir, include_disabled):
         '''Export the challenge
 
-        Creates an archive containing all of the challenge "exportable" files.
+        Creates a gzipped tar archive containing all of the challenge "exportable" files
         '''
-        if not include_disabled and not self.enabled:
-            app_log.warning(f"export ignored {self.slug} (disabled)")
+        if not include_disabled and not self.conf.enabled:
+            app_log.warning(f"export ignored {self.conf.slug} (disabled)")
             return {'ignored': True}
 
-        app_log.info(f"exporting {self.slug}...")
+        app_log.info(f"exporting {self.conf.slug}...")
         archive_name = self.conf.static_url.split('/')[-1]
         if not archive_name:
-            app_log.error(f"export ignored {self.slug} (invalid/empty static_url)")
+            app_log.error(f"export ignored {self.conf.slug} (invalid/empty static_url)")
             app_log.error(f"running `mkctf-cli update-meta` should be enough to fix this issue.")
             return {'ignored': True}
 
@@ -173,11 +201,11 @@ class Challenge:
         checksum_file = ChecksumFile()
         with tarfile.open(str(archive_path), 'w:gz') as arch:
             for directory in self.repo.conf.directories(self.conf.category, public_only=True):
-                dir_path = self._chall_path.joinpath(directory)
+                dir_path = self.path.joinpath(directory)
                 for entry in scandir(dir_path):
                     entry_path = Path(entry.path)
                     if entry_path.is_dir():
-                        app_log.warning(f"export ignored {entry_path} within {self.slug} (directory)")
+                        app_log.warning(f"export ignored {entry_path} within {self.conf.slug} (directory)")
                         continue
                     checksum_file.add(entry_path)
                     arch.add(str(entry_path), arcname=entry.name)
@@ -194,14 +222,14 @@ class Challenge:
     async def build(self, timeout=4):
         '''Build the challenge
         '''
-        return await self.__run(self.repo.conf.build, timeout)
+        return await self._run(self.repo.conf.build, timeout)
 
     async def deploy(self, timeout=4):
         '''Deploy the challenge
         '''
-        return await self.__run(self.repo.conf.deploy, timeout)
+        return await self._run(self.repo.conf.deploy, timeout)
 
     async def healthcheck(self, timeout=4):
         '''Check the health of a deployed challenge
         '''
-        return await self.__run(self.repo.conf.healthcheck, timeout)
+        return await self._run(self.repo.conf.healthcheck, timeout)

@@ -3,101 +3,153 @@
 # ==============================================================================
 import os
 from hashlib import sha1
+from mkctf.exception import MKCTFAPIException
 from .configuration import Configuration
-from mkctf.cli.wizards import RepositoryConfigurationWizard
 # ==============================================================================
 # CLASSES
 # ==============================================================================
 class RepositoryConfiguration(Configuration):
     '''[summary]
     '''
-    def __init__(self, general_conf, path):
-        '''[summary]
-        '''
-        super().__init__(path)
-        self._general_conf = general_conf
+    TYPE = 'repository'
+    DEFINITION = {
+        'name': (str,),
+        'tags': (list,),
+        'difficulties': (list,),
+        'flag': {
+            'prefix': (str,),
+            'suffix': (str,),
+        },
+        'domain': (str,),
+        'docker': {
+            'user': (str,),
+            'registry': (str,),
+        },
+        'static': {
+            'salt': (str,),
+            'base_url': (str,)
+        },
+        'standard': {
+            'dirs': {
+                'public': (list,),
+                'private': (list,),
+            },
+            'build': {'name': (str,)},
+            'deploy': {'name': (str,)},
+            'healthcheck': {'name': (str,)},
+            'description': {'name': (str,)},
+            'files': (list,),
+        },
+        'categories': {
+            'simple': {
+                'dirs': {
+                    'public': (list,),
+                    'private': (list,),
+                },
+                'files': (list,),
+            },
+            'server': {
+                'dirs': {
+                    'public': (list,),
+                    'private': (list,),
+                },
+                'files': (list,),
+            },
+            'sandbox': {
+                'dirs': {
+                    'public': (list,),
+                    'private': (list,),
+                },
+                'files': (list,),
+            },
+        },
+    }
 
-    def load(self):
-        super().load()
-        exe = {'exec': True}
-        self.raw['standard']['build'].update(exe)
-        self.raw['standard']['deploy'].update(exe)
-        self.raw['standard']['healthcheck'].update(exe)
+    @classmethod
+    def load(cls, path):
+        '''Overrided load classmethod
 
-    def update(self, override_conf=None):
-        '''[summary]
+        Ensure some specific files have exe mode set to True
         '''
-        final_conf = override_conf
-        if not final_conf:
-            default_conf = self.raw or self._general_conf.raw
-            wizard = RepositoryConfigurationWizard(default_conf)
-            if not wizard.show():
-                return
-            final_conf = wizard.result
-        self.override(final_conf)
-        self.save()
+        conf = super(RepositoryConfiguration, cls).load(path)
+        if conf.get('standard'):
+            exe = {'exec': True}
+            conf['standard']['build'].update(exe)
+            conf['standard']['deploy'].update(exe)
+            conf['standard']['healthcheck'].update(exe)
+        return conf
+
+    @property
+    def name(self):
+        return self['name']
 
     @property
     def tags(self):
-        return self.raw['tags']
+        return self['tags']
 
     @property
     def difficulties(self):
-        return self.raw['difficulties']
+        return self['difficulties']
 
     @property
     def categories(self):
-        return list(self.raw['categories'].keys())
+        return (list,)(self['categories'].keys())
 
     @property
     def flag_prefix(self):
-        return self.raw['flag']['prefix']
+        return self['flag']['prefix']
 
     @property
     def flag_suffix(self):
-        return self.raw['flag']['suffix']
+        return self['flag']['suffix']
 
     @property
     def static_base_url(self):
-        return self.raw['static']['base_url']
+        return self['static']['base_url']
 
     @property
     def static_salt(self):
-        return bytes.fromhex(self.raw['static']['salt'])
+        return bytes.fromhex(self['static']['salt'])
 
     @property
     def build(self):
-        return self.raw['standard']['build']['name']
+        return self['standard']['build']['name']
 
     @property
     def deploy(self):
-        return self.raw['standard']['deploy']['name']
+        return self['standard']['deploy']['name']
 
     @property
     def healthcheck(self):
-        return self.raw['standard']['healthcheck']['name']
+        return self['standard']['healthcheck']['name']
 
     @property
     def description(self):
-        return self.raw['standard']['description']['name']
+        return self['standard']['description']['name']
 
     def directories(self, category, public_only=False):
-        dir_list = self.raw['standard']['dirs']['public']
-        dir_list += self.raw['categories'][category]['dirs']['public']
+        '''List dirs of given category
+
+        List public dirs only when public_only is set to True
+        '''
+        dir_list = self['standard']['dirs']['public']
+        dir_list += self['categories'][category]['dirs']['public']
         if not public_only:
-            dir_list += self.raw['standard']['dirs']['private']
-            dir_list += self.raw['categories'][category]['dirs']['private']
+            dir_list += self['standard']['dirs']['private']
+            dir_list += self['categories'][category]['dirs']['private']
         return dir_list
 
     def files(self, category):
+        '''List files of given category
+        '''
         file_list = [
-            self.raw['standard']['build'],
-            self.raw['standard']['deploy'],
-            self.raw['standard']['healthcheck'],
-            self.raw['standard']['description'],
+            self['standard']['build'],
+            self['standard']['deploy'],
+            self['standard']['healthcheck'],
+            self['standard']['description'],
         ]
-        file_list += self.raw['standard']['files']
-        file_list += self.raw['categories'][category]['files']
+        file_list += self['standard']['files']
+        file_list += self['categories'][category]['files']
         return file_list
 
     def make_rand_flag(self, size=16):

@@ -7,7 +7,6 @@ from termcolor import colored
 # =============================================================================
 TAB = ' ' * 2
 HSEP = '-' * 80
-COLORIZE = not WINDOWS
 EXIT_CODE_MAP = {
     None: ['TIMED-OUT', 'magenta'],
     0: ['SUCCESS', 'green'],
@@ -18,16 +17,12 @@ EXIT_CODE_MAP = {
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def format_enable_colors(enable):
-    global COLORIZE
-    COLORIZE = enable
-
 def format_text(text, color, attrs=None):
+    '''Wrap text in ANSI tags
+    '''
     if not attrs:
         attrs = []
-    if COLORIZE:
-        return colored(text, color, attrs=attrs)
-    return text
+    return colored(text, color, attrs=attrs)
 
 def format_set_tab_size(size):
     '''Sets the tab size.

@@ -4,38 +4,39 @@
 import os
 import json
 from datetime import datetime
-from mkctf.helper.log import app_log
-from mkctf.helper.cli import (
+from mkctf.cli import (
     Answer,
     choose,
     confirm,
     readline,
-    readline_file,
-    readline_files
 )
+from mkctf.helper.log import app_log
+from mkctf.model.config import RepositoryConfiguration
 # ==============================================================================
 # CLASSES
 # ==============================================================================
 class RepositoryConfigurationWizard:
     '''[summary]
     '''
-    def __init__(self, default):
+    def __init__(self, general_conf, prev_conf=None):
+        if not prev_conf:
+            prev_conf = {}
         self._name = f'Example CTF {datetime.now().year}'
         # - tags & difficulties
-        self._tags = default['tags']
-        self._difficulties = default['difficulties']
+        self._tags = prev_conf.get('tags', general_conf.tags)
+        self._difficulties = prev_conf.get('difficulties', general_conf.difficulties)
         # - flag
-        self._flag_prefix = default['flag']['prefix']
-        self._flag_suffix = default['flag']['suffix']
+        self._flag_prefix = prev_conf.get('flag', {}).get('prefix', general_conf.flag_prefix)
+        self._flag_suffix = prev_conf.get('flag', {}).get('suffix', general_conf.flag_suffix)
         # - domain
-        self._domain = default['domain']
+        self._domain = prev_conf.get('domain', general_conf.domain)
         # - docker
-        self._docker_user = default['docker']['user']
-        self._docker_registry = default['docker']['registry']
+        self._docker_user = prev_conf.get('docker', {}).get('user', general_conf.docker_user)
+        self._docker_registry = prev_conf.get('docker', {}).get('registry', general_conf.docker_registry)
 
     @property
     def result(self):
-        return {
+        return RepositoryConfiguration({
             'name': self._name,
             'tags': self._tags,
             'difficulties': self._difficulties,
@@ -50,7 +51,7 @@ class RepositoryConfigurationWizard:
             },
             'static': {
                 'salt': os.urandom(16).hex(),
-                'base_url': f'https://static.{self.domain}/'
+                'base_url': f'https://static.{self._domain}/'
             },
             'standard': {
                 'dirs': {
@@ -98,23 +99,23 @@ class RepositoryConfigurationWizard:
                     ],
                 },
             },
-        }
+        })
 
     def show(self):
         while True:
-            self._name = readline(self._name, "Enter a name")
+            self._name = readline("Enter a name", default=self._name)
             # - tags & difficulties
-            self._tags = choose(self._tags, "Choose tags or/and add some", min_count=2, multi=True, custom=True)
-            self._difficulties = choose(self._difficulties, "Choose difficulties or/and add some",
+            self._tags = choose(self._tags, "Tags Selection", min_count=2, multi=True, custom=True)
+            self._difficulties = choose(self._difficulties, "Difficulties Selection",
                                         min_count=2, multi=True, custom=True)
             # - flag
-            self._flag_prefix = readline(self._flag_prefix, "Enter flag prefix")
-            self._flag_suffix = readline(self._flag_suffix, "Enter flag prefix")
+            self._flag_prefix = readline("Enter flag prefix", default=self._flag_prefix)
+            self._flag_suffix = readline("Enter flag prefix", default=self._flag_suffix)
             # - domain
-            self._domain = readline(self._domain, "Enter domain")
+            self._domain = readline("Enter domain", default=self._domain)
             # - docker
-            self._docker_user = readline(self._docker_user, "Enter docker user")
-            self._docker_registry = readline(self._docker_registry, "Enter docker registry host")
+            self._docker_user = readline("Enter docker user", default=self._docker_user)
+            self._docker_registry = readline("Enter docker registry host", default=self._docker_registry)
             # confirm, abort or retry
             answer = confirm(f"Are you ok with this configuration:\n{json.dumps(self.result, indent=2)}", abort=True)
             if answer == Answer.YES:

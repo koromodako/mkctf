@@ -2,9 +2,10 @@
 #  IMPORTS
 # =============================================================================
 from pathlib import Path
+from .exception import MKCTFAPIException
 from .helper.log import app_log
+from .model.config import GeneralConfiguration
 from .model.repository import Repository
-from .model.config.general import GeneralConfiguration
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -14,29 +15,34 @@ class MKCTFAPI:
     DEFAULT_TIMEOUT = 120 # 2 minutes
     DEFAULT_FLAG_SIZE = 32 # 32 bytes
 
-    def __init__(self, repo_root, config_path=None):
+    def __init__(self, repo_dir, general_conf_path=None):
         '''Coargstructs a new iargstance
         '''
-        self._general_conf = GeneralConfiguration()
-        self._repo_root = Path(repo_root)
-        app_log.debug(f"repo_root: {self._repo_root}")
-        self._repo = Repository(self._general_conf, self._repo_root)
-        if self._repo.initialized:
-            self._repo.load()
+        self._repo_dir = Path(repo_dir)
+        self._general_conf = GeneralConfiguration.load(general_conf_path)
+        self._general_conf.validate()
+        app_log.debug(f"repository directory: {self._repo_dir}")
+        self._repo = Repository(self._repo_dir, self._general_conf)
 
     def __assert_valid_repo(self):
         '''Checks if repository is valid
         '''
-        if not self._repo.initialized:
-            app_log.critical("mkctf repository must be initialized first. Run `mkctf init` first.")
-            raise RuntimeError("Uninitialized repository.")
+        self._repo.conf.validate()
 
     def init(self):
         '''
         '''
-        app_log.info("initializing mkCTF repository...")
-        self._repo.init()
-        return {'conf': self._repo.conf.raw}
+        initialized = True
+        if self._repo.conf.validate(throw=False):
+            app_log.info("repository already initialized.")
+        else:
+            app_log.info("initializing mkCTF repository...")
+            initialized = self._repo.init()
+            if initialized:
+                app_log.info("repository successfully initialized.")
+            else:
+                app_log.error("failed to initialize repository.")
+        return {'initialized': initialized, 'conf': self._repo.conf}
 
     def find(self, slug):
         '''

@@ -8,24 +8,9 @@ from asyncio import get_event_loop
 from pathlib import Path
 from argparse import ArgumentParser
 from mkctf import __banner__
-from mkctf.api import MKCTFAPI
-from mkctf.cli import (
-    setup_init,
-    setup_enum,
-    setup_build,
-    setup_create,
-    setup_delete,
-    setup_enable,
-    setup_export,
-    setup_deploy,
-    setup_status,
-    setup_disable,
-    setup_configure,
-    setup_renew_flag,
-    setup_update_meta
-)
+from mkctf.api import MKCTFAPI, MKCTFAPIException
+from mkctf.cli.command import *
 from mkctf.helper.log import app_log, log_enable_debug, log_enable_logging
-from mkctf.helper.formatting import format_enable_colors
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -75,11 +60,13 @@ async def main():
     args = parse_args()
     log_enable_debug(args.debug)
     log_enable_logging(not args.quiet)
-    format_enable_colors(not args.no_color)
     app_log.debug(args)
-    api = MKCTFAPI(args.repo_root)
     try:
+        api = MKCTFAPI(args.repo_root)
         rcode = 0 if await args.func(api, args) else 1
+    except MKCTFAPIException as exc:
+        app_log.critical(f"critical error: {exc.args[0]}")
+        rcode = 1
     except:
         app_log.exception("Ouch... unhandled exception... (>_<)")
         rcode = 2

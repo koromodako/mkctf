@@ -30,7 +30,7 @@ class ColoredFormatter(Formatter):
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-_fmtr = ColoredFormatter('[mkctf](%(levelname)s)> %(message)s')
+_fmtr = ColoredFormatter('[mkctf](%(levelname)8s)> %(message)s')
 _hdlr = StreamHandler()
 _hdlr.setFormatter(_fmtr)
 app_log = getLogger('mkctf')
