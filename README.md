@@ -20,7 +20,7 @@ I won't invest time to make it work on Windows as WSL2 will enable having a Linu
 
 ## Installing and Creating a new CTF
 
-I advise you to setup mkctf using the following methodology:
+mkCTF should be installed using `setup.sh` which does the following:
 
 ```bash
 # clone mkctf repository in tmp directory
