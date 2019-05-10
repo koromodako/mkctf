@@ -158,7 +158,7 @@ class Challenge:
     def configure(self, override_conf=None):
         final_conf = override_conf
         if not final_conf:
-            wizard = ChallengeConfigurationWizard(self.conf)
+            wizard = ChallengeConfigurationWizard(self.repo.conf, self.conf)
             if not wizard.show():
                 return False
             final_conf = wizard.result

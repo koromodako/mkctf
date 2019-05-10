@@ -8,6 +8,7 @@ from .enable import setup_enable
 from .enum import setup_enum
 from .export import setup_export
 from .init import setup_init
+from .push import setup_push
 from .renew_flag import setup_renew_flag
 from .healthcheck import setup_healthcheck
 from .update_meta import setup_update_meta

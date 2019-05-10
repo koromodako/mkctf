@@ -241,46 +241,45 @@ tags:
 - web
 ```
 
-### Build, deploy and healthcheck scripts
+### Build, deploy and healthcheck executables
 
-mkCTF framework defines some mandatory script that have a specific purpose in the context of integrating a challenge
-into a CTF infrastructure. These scripts are described below.
+mkCTF framework defines some mandatory executbales that have a specific purpose in the context of integrating each
+challenge into the CTF infrastructure. These executables are described underneath.
 
-| **Script Name** | **Script Purpose**                                                                                   |
-|:---------------:|:-----------------------------------------------------------------------------------------------------|
-|     `build`     | This script builds the challenge from the sources and the configuration (flag)                       |
-|     `deploy`    | This script perform the deployment-related operations for the challenge                              |
-|   `healthcheck` | This script performs a healcheck on the deployed challenge (checking checksum or playing an exploit) |
+| **Executable Name** | **Executable Purpose**                                                                                   |
+|:-------------------:|:---------------------------------------------------------------------------------------------------------|
+|       `build`       | This executable builds the challenge from the sources and the configuration (flag)                       |
+|       `deploy`      | This executable perform the deployment-related operations for the challenge                              |
+|    `healthcheck`    | This executable performs a healcheck on the deployed challenge (checking checksum or playing an exploit) |
 
-Previously defined scripts shall respect the following specifications.
+Previously defined executables shall respect the following specifications:
 
-| **#** | **Specification**                                                            | **Details**                                                                                                          |
-|:-----:|:-----------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------|
-| **1** | The _script_ **shall not take positional arguments**                         | The caller will not provide any positional argument                                                                  |
-| **2** | The _script_ **shall be able to to handle an optional** `--dev` **argument** | This argument might be given by the caller which will expect the script to run in `development` mode when applicable |
-| **3** | The _script_ **execution shall end before a timeout is triggered**           | Timeout defaults to 2 minutes. `--timeout` option enable you to override this value                                  |
-| **4** | The _script_ **shall return a code**                                         | This code will be interpreted using the rules defined in the next table                                              |
-| **5** | The _script_ **shall have permissions allowing it to be called directly**    | In brief, `chmod +x script`                                                                                          |
+| **#** | **Specification**                                                                | **Details**                                                                                                              |
+|:-----:|:---------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------|
+| **1** | The executable **shall not take positional arguments**                         | The caller will not provide any positional argument                                                                      |
+| **2** | The executable **shall be able to to handle an optional** `--dev` **argument** | This argument might be given by the caller which will expect the executable to run in `development` mode when applicable |
+| **3** | The executable **execution shall end before a timeout is triggered**           | Timeout defaults to 2 minutes. `--timeout` option enable you to override this value                                      |
+| **4** | The executable **shall return a code**                                         | This code will be interpreted using the rules defined in the next table                                                  |
 
-As explained in specification `#4` the script return code will be interpreted according to the following table.
+As explained in specification `#4` the executable return code will be interpreted according to the following table:
 
-|   **Exit Code**   |    **Meaning**    | **Description**                                                                     |
-|:-----------------:|:-----------------:|:------------------------------------------------------------------------------------|
-|        `0`        |     `SUCCESS`     | The script execution succeeded                                                      |
-|        `2`        |       `N/A`       | The script does have a meaning in the context of this challenge                     |
-|        `3`        |      `MANUAL`     | The script cannot perform this task entirely, you will have to get your hands dirty |
-|        `4`        | `NOT IMPLEMENTED` | The script is not implemented yet                                                   |
-| _any other value_ |     `FAILURE`     | The script execution failed                                                         |
+|   **Exit Code**   |    **Meaning**    | **Description**                                                                         |
+|:-----------------:|:-----------------:|:----------------------------------------------------------------------------------------|
+|        `0`        |     `SUCCESS`     | The executable execution succeeded                                                      |
+|        `2`        |       `N/A`       | The executable does have a meaning in the context of this challenge                     |
+|        `3`        |      `MANUAL`     | The executable cannot perform this task entirely, you will have to get your hands dirty |
+|        `4`        | `NOT IMPLEMENTED` | The executable is not implemented yet                                                   |
+| _any other value_ |     `FAILURE`     | The executable execution failed                                                         |
 
 When using `mkctf-cli` `build`, `deploy` or `healthcheck` commands, the CLI will behave as described below.
 
 A special status `TIMEOUT` may occur when using `mkctf-cli` `build`, `deploy` or `healthcheck` command.
-In that case, it means that your script took too long to execute as explained in specification`#3`.
+In that case, it means that your executable took too long to execute as explained in specification`#3`.
 
-If the **exit code** differs from `0` script output (both _stdout_ and _stderr_) will be printed out.
+If the **exit code** differs from `0` executable output (both _stdout_ and _stderr_) will be printed out.
 You can use this behavior to print meaningful instructions/exceptions from within these _scripts_.
-This behavior is particularly interesting if your script returns a code `3` (`MANUAL`) which means the user must
-perform a manual operation.
+This behavior is particularly interesting if your executable returns a code `3` (`MANUAL`) which means the user must
+perform a manual operation to complete the task.
 
 ### CTF Website
 
@@ -293,9 +292,10 @@ The _scoreboard_ must provide an HTTP API defined below.
 | **#** | **Specification**                                                   | **Details**                                                     |
 |:-----:|:--------------------------------------------------------------------|:----------------------------------------------------------------|
 | **1** | The _scoreboard_ **shall implement HTTPS with a valid certificate** | mkCTF will always use `https` scheme to post the configuration  |
-| **2** | The _scoreboard_ **endpoint shall implement basic authentication**  | mkCTF will set the Authorization header using Basic method      |
-| **3** | The _scoreboard_ **endpoint shall expect a HTTP POST query**        | mkCTF will POST challenge configuration to the _scoreboard_     |
-| **4** | The _scoreboard_ **endpoint shall expect a application/json body**  | mkCTF will POST a JSON body (defined below) to the _scoreboard_ |
+| **2** | The _scoreboard_ **endpoint path shall be `/mkctf-api/push`**       | mkCTF will push to `https://{host}:{port}/mkctf-api/push`       |
+| **3** | The _scoreboard_ **endpoint shall implement basic authentication**  | mkCTF will set the Authorization header using Basic method      |
+| **4** | The _scoreboard_ **endpoint shall expect a HTTP POST query**        | mkCTF will POST challenge configuration to the _scoreboard_     |
+| **5** | The _scoreboard_ **endpoint shall expect a application/json body**  | mkCTF will POST a JSON body (defined below) to the _scoreboard_ |
 
 Details of the body which will be posted to the _scoreboard_:
 

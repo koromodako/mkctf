@@ -53,6 +53,7 @@ def parse_args():
     setup_healthcheck(subparsers)
     setup_delete(subparsers)
     setup_export(subparsers)
+    setup_push(subparsers)
     # -- parse args and pre-process if needed
     return parser.parse_args()
 

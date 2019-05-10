@@ -2,6 +2,7 @@
 #  IMPORTS
 # =============================================================================
 from pathlib import Path
+from aiohttp import ClientSession, ClientTimeout, BasicAuth
 from .exception import MKCTFAPIException
 from .helper.log import app_log
 from .model.config import GeneralConfiguration
@@ -86,7 +87,10 @@ class MKCTFAPI:
         return {'deleted': deleted}
 
     def configure(self, configuration=None, slug=None):
-        '''
+        '''Configure a challenge
+
+        Mind specifying 'configuration' if you don't want to spawn a command
+        line based wizard.
         '''
         self.__assert_valid_repo()
         if slug is None:
@@ -107,7 +111,7 @@ class MKCTFAPI:
         return {'configured': configured}
 
     def enable(self, slug):
-        '''
+        '''Enable a challenge
         '''
         self.__assert_valid_repo()
         enabled = self._repo.enable_chall(slug)
@@ -116,7 +120,7 @@ class MKCTFAPI:
         return {'enabled': enabled}
 
     def disable(self, slug):
-        '''
+        '''Disable a challenge
         '''
         self.__assert_valid_repo()
         disabled = self._repo.disable_chall(slug)
@@ -124,8 +128,27 @@ class MKCTFAPI:
             app_log.info(f"{slug} successfully disabled.")
         return {'disabled': disabled}
 
-    def export(self, export_dir, tags=[], slug=None, include_disabled=False):
+    async def push(self, host, port=443, username='', password='', no_verify_ssl=False):
+        '''Push challenge configuration to a scoreboard
         '''
+        self.__assert_valid_repo()
+        challenges = []
+        for challenge in self._repo.scan([]):
+                challenges.append(challenge.conf.raw)
+        url = f'https://{host}:{port}/mkctf-api/push'
+        ssl = False if no_verify_ssl else None
+        auth = BasicAuth(username, password)
+        timeout = ClientTimeout(total=2*60)
+        async with ClientSession(auth=auth, timeout=timeout) as session:
+            async with session.post(url, ssl=ssl, json={'challenges': challenges}) as resp:
+                if resp.status < 400:
+                    app_log.info("push succeeded.")
+                    return {'pushed': True}
+        app_log.error("push failed.")
+        return {'pushed': False}
+
+    def export(self, export_dir, tags=[], slug=None, include_disabled=False):
+        '''Export challenge public data as an archive to 'export_dir'
         '''
         self.__assert_valid_repo()
         export_dir.mkdir(parents=True, exist_ok=True)
@@ -149,7 +172,7 @@ class MKCTFAPI:
         }
 
     def renew_flag(self, tags=[], slug=None, size=None):
-        '''Renews one or more challenge flags
+        '''Renew flag for one challenge or more
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
@@ -162,7 +185,9 @@ class MKCTFAPI:
                 }
 
     def update_meta(self, tags=[], slug=None):
-        '''Update static URL
+        '''Update static metadata
+
+        Only static_url might be updated at the moment
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
@@ -176,7 +201,7 @@ class MKCTFAPI:
             app_log.info("done.")
 
     async def build(self, tags=[], slug=None, dev=False, timeout=None):
-        '''
+        '''Run build executable
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
@@ -187,7 +212,7 @@ class MKCTFAPI:
                 yield result
 
     async def deploy(self, tags=[], slug=None, dev=False, timeout=None):
-        '''
+        '''Run deploy executable
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
@@ -198,7 +223,7 @@ class MKCTFAPI:
                 yield result
 
     async def healthcheck(self, tags=[], slug=None, dev=False, timeout=None):
-        '''
+        '''Run healthcheck executable
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
