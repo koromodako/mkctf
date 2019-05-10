@@ -13,7 +13,7 @@ class MKCTFAPI:
     '''Provides access to all functionalities programmatically
     '''
     DEFAULT_TIMEOUT = 120 # 2 minutes
-    DEFAULT_FLAG_SIZE = 32 # 32 bytes
+    DEFAULT_FLAG_SIZE = 16 # 16 bytes
 
     def __init__(self, repo_dir, general_conf_path=None):
         '''Coargstructs a new iargstance
@@ -48,7 +48,7 @@ class MKCTFAPI:
         '''
         '''
         self.__assert_valid_repo()
-        challenge =  self._repo.find_chall(slug)
+        challenge =  self._repo.find(slug)
         if not challenge:
             return None
         return {'slug': challenge.conf.slug, 'conf': challenge.conf.raw}
@@ -138,7 +138,7 @@ class MKCTFAPI:
                     'archive_path': archive_path
                 }
             return
-        challenge = self._repo.find_chall(slug)
+        challenge = self._repo.find(slug)
         if not challenge:
             app_log.error(f"challenge not found: {challenge.conf.slug}")
             return
@@ -154,7 +154,7 @@ class MKCTFAPI:
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.conf.slug:
-                app_log.info(f"{slug}'s flag has been renewed.")
+                app_log.info(f"{challenge.conf.slug}'s flag has been renewed.")
                 app_log.warning("you might want to call 'build' then 'deploy' to regenerate the challenge and deploy it.")
                 yield {
                     'slug': challenge.conf.slug,

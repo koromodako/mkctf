@@ -258,7 +258,7 @@ Previously defined scripts shall respect the following specifications.
 |:-----:|:-----------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------|
 | **1** | The _script_ **shall not take positional arguments**                         | The caller will not provide any positional argument                                                                  |
 | **2** | The _script_ **shall be able to to handle an optional** `--dev` **argument** | This argument might be given by the caller which will expect the script to run in `development` mode when applicable |
-| **3** | The _script_ **execution shall end before a timeout is triggered**           | Timeout defaults to 60 seconds. `--timeout` option enable you to override this value                                 |
+| **3** | The _script_ **execution shall end before a timeout is triggered**           | Timeout defaults to 2 minutes. `--timeout` option enable you to override this value                                  |
 | **4** | The _script_ **shall return a code**                                         | This code will be interpreted using the rules defined in the next table                                              |
 | **5** | The _script_ **shall have permissions allowing it to be called directly**    | In brief, `chmod +x script`                                                                                          |
 
@@ -293,7 +293,7 @@ The _scoreboard_ must provide an HTTP API defined below.
 | **#** | **Specification**                                                   | **Details**                                                     |
 |:-----:|:--------------------------------------------------------------------|:----------------------------------------------------------------|
 | **1** | The _scoreboard_ **shall implement HTTPS with a valid certificate** | mkCTF will always use `https` scheme to post the configuration  |
-| **2** | The _scoreboard_ **endpoint shall implement basic authentication**  | mkCTF will POST challenge configuration to the _scoreboard_     |
+| **2** | The _scoreboard_ **endpoint shall implement basic authentication**  | mkCTF will set the Authorization header using Basic method      |
 | **3** | The _scoreboard_ **endpoint shall expect a HTTP POST query**        | mkCTF will POST challenge configuration to the _scoreboard_     |
 | **4** | The _scoreboard_ **endpoint shall expect a application/json body**  | mkCTF will POST a JSON body (defined below) to the _scoreboard_ |
 

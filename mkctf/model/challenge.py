@@ -175,7 +175,7 @@ class Challenge:
         '''Replace current flag by a randomly generated one
         '''
         flag = self.repo.conf.make_rand_flag(size)
-        self._conf['flag'] = enabled
+        self._conf['flag'] = flag
         self._save_conf()
         return flag
 

@@ -97,7 +97,7 @@ class Repository:
                 challs.append(chall)
         return sorted(challs, key=lambda chall: chall.conf.slug)
 
-    def find_chall(self, slug):
+    def find(self, slug):
         '''Finds challenge
         '''
         chall_path = self.challenges_dir.joinpath(slug)
@@ -141,7 +141,7 @@ class Repository:
     def configure_chall(self, slug, override_conf=None):
         '''Configures a challenge
         '''
-        chall = self.find_chall(slug)
+        chall = self.find(slug)
         if chall is None:
             return False
         return chall.configure(override_conf)
@@ -149,7 +149,7 @@ class Repository:
     def delete_chall(self, slug):
         '''Deletes a challenge
         '''
-        chall = self.find_chall(slug)
+        chall = self.find(slug)
         if chall is None:
             return False
         shutil.rmtree(str(chall.path))
@@ -158,7 +158,7 @@ class Repository:
     def enable_chall(self, slug):
         '''Enables a chalenge
         '''
-        chall = self.find_chall(slug)
+        chall = self.find(slug)
         if chall is None:
             return False
         chall.enable(True)
@@ -167,7 +167,7 @@ class Repository:
     def disable_chall(self, slug):
         '''Disables a challenge
         '''
-        chall = self.find_chall(slug)
+        chall = self.find(slug)
         if chall is None:
             return False
         chall.enable(False)
