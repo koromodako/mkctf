@@ -274,7 +274,7 @@ As explained in specification `#4` the script return code will be interpreted ac
 
 When using `mkctf-cli` `build`, `deploy` or `healthcheck` commands, the CLI will behave as described below.
 
-A special status `TIMED-OUT` may occur when using `mkctf-cli` `build`, `deploy` or `healthcheck` command.
+A special status `TIMEOUT` may occur when using `mkctf-cli` `build`, `deploy` or `healthcheck` command.
 In that case, it means that your script took too long to execute as explained in specification`#3`.
 
 If the **exit code** differs from `0` script output (both _stdout_ and _stderr_) will be printed out.

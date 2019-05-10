@@ -4,7 +4,7 @@
 from mkctf.api import MKCTFAPI
 from mkctf.cli import Answer, confirm
 from mkctf.helper.log import app_log
-from mkctf.helper.formatting import HSEP, format_text, format_rcode2str
+from mkctf.helper.formatting import HSEP, format_text, format_rcode2health
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -42,4 +42,4 @@ def setup_healthcheck(subparsers):
     parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
     parser.add_argument('--slug', '-s', help="challenge's slug.")
     parser.add_argument('--timeout', type=int, default=MKCTFAPI.DEFAULT_TIMEOUT, help="override default timeout for subprocesses.")
-    parser.set_defaults(func=status)
+    parser.set_defaults(func=healthcheck)

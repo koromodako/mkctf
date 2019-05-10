@@ -42,17 +42,17 @@ def parse_args():
     subparsers.required = True
     setup_init(subparsers)
     setup_enum(subparsers)
-    setup_build(subparsers)
     setup_create(subparsers)
-    setup_delete(subparsers)
     setup_enable(subparsers)
-    setup_export(subparsers)
-    setup_deploy(subparsers)
-    setup_status(subparsers)
     setup_disable(subparsers)
-    setup_configure(subparsers)
     setup_renew_flag(subparsers)
     setup_update_meta(subparsers)
+    setup_configure(subparsers)
+    setup_build(subparsers)
+    setup_deploy(subparsers)
+    setup_healthcheck(subparsers)
+    setup_delete(subparsers)
+    setup_export(subparsers)
     # -- parse args and pre-process if needed
     return parser.parse_args()
 

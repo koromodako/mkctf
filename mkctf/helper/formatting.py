@@ -8,12 +8,13 @@ from termcolor import colored
 TAB = ' ' * 2
 HSEP = '-' * 80
 EXIT_CODE_MAP = {
-    None: ['TIMED-OUT', 'magenta'],
-    0: ['SUCCESS', 'green'],
-    2: ['N/A', 'grey'],
-    3: ['MANUAL', 'yellow'],
-    4: ['NOT-IMPLEMENTED', 'yellow']
+    None: ('TIMEOUT', 'magenta'),
+    0: ('SUCCESS', 'green'),
+    2: ('N/A', 'grey'),
+    3: ('MANUAL', 'yellow'),
+    4: ('NOT-IMPLEMENTED', 'yellow'),
 }
+HEALTHY_EXIT_CODES = {0, 2, 3}
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -25,7 +26,7 @@ def format_text(text, color, attrs=None):
     return colored(text, color, attrs=attrs)
 
 def format_set_tab_size(size):
-    '''Sets the tab size.
+    '''Set the tab size.
 
     Tabs are converted to spaces, this functions sets the size of a tabulation
     in spaces.
@@ -38,7 +39,7 @@ def format_set_tab_size(size):
         TAB = ' ' * size
 
 def format_dict2str(dictionary):
-    '''Converts a dictionary recursively into human-readable nested lists
+    '''Convert a dictionary recursively into human-readable nested lists
 
     >>> d = {'a': 1, 'b': 2, 'c': { 4: ['a', 'b'] }}
     >>> print(dict2str(d))
@@ -61,18 +62,21 @@ def format_dict2str(dictionary):
 
 def format_rcode2str(code):
     '''[summary]
-
-    [description]
-
-    Arguments:
-        code {int or None} -- [description]
-        no_color {bool} -- [description]
     '''
     attrs = ['bold']
-    value = EXIT_CODE_MAP.get(code)
-    if value is None:
-        value = ['FAILURE', 'red']
-    status = f'[{value[0]}]'
+    status, color = EXIT_CODE_MAP.get(code, ('FAILURE', 'red'))
+    status = f'[{status}]'
     if code is not None:
         status += f'(code={code})'
-    return format_text(status, value[1], attrs)
+    return format_text(status, color, attrs)
+
+def format_rcode2health(code):
+    '''[summary]
+    '''
+    attrs = ['bold']
+    color = 'red'
+    status = 'UNHEALTHY'
+    if code in HEALTHY_EXIT_CODES:
+        color = 'green'
+        status = 'HEALTHY'
+    return format_text(f'[{status}]', color, attrs)
