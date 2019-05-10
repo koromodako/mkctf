@@ -4,7 +4,7 @@
 async def create(api, args):
     '''Creates a challenge
     '''
-    result = api.create(args.configuration)
+    result = api.create()
     return result['created']
 
 def setup_create(subparsers):

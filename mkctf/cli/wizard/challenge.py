@@ -26,17 +26,33 @@ class ChallengeConfigurationWizard:
         # params
         if not prev_conf:
             prev_conf = {}
-        self._name = prev_conf.get('name', "My New Challenge")
-        self._slug = prev_conf.get('slug') # consistency: keep previous slug even if challenge renamed
-        self._tags = prev_conf.get('tags')
-        self._flag = prev_conf.get('flag') # consistency: keep previous flag even if challenge renamed
-        self._author = prev_conf.get('author', '')
-        self._points = prev_conf.get('points', -3)
-        self._enabled = prev_conf.get('enabled', False) # consistency: keep previous enabled even if challenge renamed
-        self._category = prev_conf.get('category')
-        self._logo_url = prev_conf.get('logo_url', '')
-        self._difficulty = prev_conf.get('difficulty')
-        self._static_url = prev_conf.get('static_url')
+        self.default = {
+            'name': prev_conf.get('name', "My New Challenge"),
+            # consistency: keep previous slug even if challenge renamed
+            'slug': prev_conf.get('slug'),
+            'tags': prev_conf.get('tags'),
+            # consistency: keep previous flag even if challenge renamed
+            'flag': prev_conf.get('flag'),
+            'author': prev_conf.get('author', ''),
+            'points': prev_conf.get('points', -3),
+            # consistency: keep previous enabled even if challenge renamed
+            'enabled': prev_conf.get('enabled', False),
+            'category': prev_conf.get('category'),
+            'logo_url': prev_conf.get('logo_url', ''),
+            'difficulty': prev_conf.get('difficulty'),
+            'static_url': prev_conf.get('static_url'),
+        }
+        self._name = self.default['name']
+        self._slug = self.default['slug']
+        self._tags = self.default['tags']
+        self._flag = self.default['flag']
+        self._author = self.default['author']
+        self._points = self.default['points']
+        self._enabled = self.default['enabled']
+        self._category = self.default['category']
+        self._logo_url = self.default['logo_url']
+        self._difficulty = self.default['difficulty']
+        self._static_url = self.default['static_url']
 
     @property
     def result(self):
@@ -57,7 +73,7 @@ class ChallengeConfigurationWizard:
     def show(self):
         while True:
             # - tags & difficulties
-            self._name = readline("Enter challenge display name", default=self._name)
+            self._name = readline("Enter challenge display name", default=self.default['name'])
             # consistency: keep previous slug even if challenge renamed
             self._slug = self._slug or slugify(self._name)
             self._tags = choose(self._repo_conf.tags, "Tags Selection", multi=True)
@@ -65,8 +81,8 @@ class ChallengeConfigurationWizard:
             print(f"Selected tags:\n - {tags_str}")
             # consistency: keep previous flag even if challenge renamed
             self._flag = self._flag or self._repo_conf.make_rand_flag()
-            self._author = readline("Enter challenge author name", empty=True, default=self._author)
-            self._points = readline("Enter challenge points or '-3' for dynamic", default=self._points)
+            self._author = readline("Enter challenge author name", empty=True, default=self.default['author'])
+            self._points = readline("Enter challenge points or '-3' for dynamic", default=self.default['points'])
             #self._enabled = self._enabled
             self._category = choose(self._repo_conf.categories, "Category Selection")
             print(f"Selected category: {self._category}")

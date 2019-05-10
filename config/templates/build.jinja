@@ -6,9 +6,10 @@ set -e
 # ------------------------------------------------------------------------------
 # VARIABLES
 # ------------------------------------------------------------------------------
+DEV=0
 CWD=$(pwd)
 PROG=$0
-SLUG={{challenge.slug}}
+SLUG={{chal_conf.slug}}
 FLAG=$(grep -Eo 'INSA{.+}' .mkctf.yml)
 # ------------------------------------------------------------------------------
 # FUNCTIONS
@@ -51,9 +52,11 @@ print "*************************************************************************
 while test $# -gt 0
 do
     case "$1" in
+        --dev|-d) DEV=1
+            ;;
         --help|-h) usage
             ;;
-        *) print "skipped argument: $1"
+        *) print "skipped unknown argument: $1"
             ;;
     esac
     shift

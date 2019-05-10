@@ -16,7 +16,7 @@ async def export(api, args):
     found = False
     export_dir = args.export_dir.resolve()
     exported = [info for info in api.export(export_dir, args.tags, args.slug, args.include_disabled) if not 'ignored' in info]
-    export_map = {info['slug']: info['archive_path'].name for info in exported}
+    export_map = {info['slug']: str(info['archive_path']) for info in exported}
     app_log.info("creating export.map...")
     with export_dir.joinpath('export.map').open('w') as fp:
         dump(export_map, fp)

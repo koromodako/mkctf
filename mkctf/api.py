@@ -65,7 +65,7 @@ class MKCTFAPI:
                     'description': challenge.description,
                 }
 
-    def create(self, configuration):
+    def create(self, configuration=None):
         '''
         '''
         self.__assert_valid_repo()
@@ -85,7 +85,7 @@ class MKCTFAPI:
             app_log.error(f"challenge {slug} deletion failed.")
         return {'deleted': deleted}
 
-    def configure(self, configuration, slug=None):
+    def configure(self, configuration=None, slug=None):
         '''
         '''
         self.__assert_valid_repo()
@@ -167,42 +167,43 @@ class MKCTFAPI:
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.conf.slug:
+                app_log.info(f"updating {challenge.conf.slug} meta...")
                 static_url = challenge.update_static_url()
-                app_log.info(f"{challenge.conf.slug} mapped to: {static_url}")
                 yield {
                     'slug': challenge.conf.slug,
                     'static_url': static_url
                 }
+            app_log.info("done.")
 
-    async def build(self, tags=[], slug=None, timeout=None):
+    async def build(self, tags=[], slug=None, dev=False, timeout=None):
         '''
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.conf.slug:
                 app_log.info(f"building {challenge.conf.slug}...")
-                result = await challenge.build(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
+                result = await challenge.build(dev, timeout or MKCTFAPI.DEFAULT_TIMEOUT)
                 result.update({'slug': challenge.conf.slug})
                 yield result
 
-    async def deploy(self, tags=[], slug=None, timeout=None):
+    async def deploy(self, tags=[], slug=None, dev=False, timeout=None):
         '''
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.conf.slug:
                 app_log.info(f"deploying {challenge.conf.slug}...")
-                result = await challenge.deploy(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
+                result = await challenge.deploy(dev, timeout or MKCTFAPI.DEFAULT_TIMEOUT)
                 result.update({'slug': challenge.conf.slug})
                 yield result
 
-    async def healthcheck(self, tags=[], slug=None, timeout=None):
+    async def healthcheck(self, tags=[], slug=None, dev=False, timeout=None):
         '''
         '''
         self.__assert_valid_repo()
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.conf.slug:
                 app_log.info(f"checking {challenge.conf.slug} health...")
-                result = await challenge.healthcheck(timeout or MKCTFAPI.DEFAULT_TIMEOUT)
+                result = await challenge.healthcheck(dev, timeout or MKCTFAPI.DEFAULT_TIMEOUT)
                 result.update({'slug': challenge.conf.slug})
                 yield result

@@ -24,7 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mkctf-cli = mkctf.mkctf_cli:app',
-            'mkctf-serve = mkctf.mkctf_serve:app',
+            'mkctf-server = mkctf.mkctf_server:app',
         ]
     }
 )

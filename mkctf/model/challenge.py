@@ -83,10 +83,10 @@ class Challenge:
             if tmpl_path.is_file():
                 tmpl = Template(tmpl_path.read_text())
                 try:
-                    content = tmpl.render(repo_conf=self.repo.conf, chall_conf=self.conf)
+                    content = tmpl.render(repo_conf=self.repo.conf, chal_conf=self.conf)
                 except:
                     content = tmpl_path.read_text()
-                    app_log.error(f"{filepath} rendering failed, copying template content instead...")
+                    app_log.exception(f"{filepath} rendering failed, copying template content instead...")
         if not filepath.is_file():
             with filepath.open('w') as fp:
                 fp.write(content)
@@ -95,7 +95,7 @@ class Challenge:
             return True
         return False
 
-    async def _run(self, script, timeout):
+    async def _run(self, script, dev, timeout):
         '''Runs a script as an asynchronous subprocess
         '''
         script_path = Path(script)
@@ -108,7 +108,10 @@ class Challenge:
             if len(script_parents) > 1:
                 cwd /= script_parents[0]
         app_log.info(f"running {script_path.name} within {cwd}.")
-        proc = await create_subprocess_exec(script, stdout=PIPE, stderr=PIPE, cwd=str(cwd))
+        if dev:
+            proc = await create_subprocess_exec(script, '--dev', stdout=PIPE, stderr=PIPE, cwd=str(cwd))
+        else:
+            proc = await create_subprocess_exec(script, stdout=PIPE, stderr=PIPE, cwd=str(cwd))
         rcode = -1
         stdout = None
         stderr = None
@@ -179,7 +182,7 @@ class Challenge:
     def update_static_url(self):
         '''Update challenge static url in configuration if required
         '''
-        static_url = self.repo.conf.make_static_url(self.slug)
+        static_url = self.repo.conf.make_static_url(self.conf.slug)
         if self.conf.static_url != static_url:
             self._conf['static_url'] = static_url
             self._save_conf()
@@ -225,17 +228,17 @@ class Challenge:
         export_dir.joinpath(f'{archive_name}.sha256').write_text(arch_checksum_file.content)
         return archive_path
 
-    async def build(self, timeout=4):
+    async def build(self, dev=False, timeout=4):
         '''Build the challenge
         '''
-        return await self._run(self.repo.conf.build, timeout)
+        return await self._run(self.repo.conf.build, dev, timeout)
 
-    async def deploy(self, timeout=4):
+    async def deploy(self, dev=False, timeout=4):
         '''Deploy the challenge
         '''
-        return await self._run(self.repo.conf.deploy, timeout)
+        return await self._run(self.repo.conf.deploy, dev, timeout)
 
-    async def healthcheck(self, timeout=4):
+    async def healthcheck(self, dev=False, timeout=4):
         '''Check the health of a deployed challenge
         '''
-        return await self._run(self.repo.conf.healthcheck, timeout)
+        return await self._run(self.repo.conf.healthcheck, dev, timeout)

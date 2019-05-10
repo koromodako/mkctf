@@ -13,8 +13,8 @@ INT_RE = re.compile(r'[\-]?[0-9]+')
 # CLASSES
 # =============================================================================
 class Answer(enum.Enum):
-    YES = 'yes'
-    NO = 'no'
+    YES = 'y'
+    NO = 'n'
     ABORT = 'abort'
 # =============================================================================
 # FUNCTIONS
@@ -63,7 +63,7 @@ def confirm(prompt, default=Answer.NO, abort=False):
             answers.append(answer.value)
     resp = readline(prompt, default=(Answer.NO.value, '/'.join(answers)))
     resp = resp.strip().lower()
-    if resp in [Answer.YES.value, 'y']:
+    if resp in [Answer.YES.value, 'yes']:
         return Answer.YES
     elif abort and resp in [Answer.ABORT.value, 'a']:
         return Answer.ABORT

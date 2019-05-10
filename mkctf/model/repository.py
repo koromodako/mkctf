@@ -3,7 +3,6 @@
 # =============================================================================
 import shutil
 from pathlib import Path
-from mkctf.cli import Answer, confirm
 from mkctf.helper.fs import scandir
 from mkctf.helper.log import app_log
 from mkctf.cli.wizard import *
@@ -132,6 +131,10 @@ class Repository:
             if not wizard.show():
                 return False
             final_conf = wizard.result
+        chall_path = self.challenges_dir.joinpath(final_conf.slug)
+        if chall_path.is_dir():
+            app_log.error(f"this challenge ({final_conf.slug}) macthes an existing one")
+            return False
         chall = Challenge(self, self.challenges_dir.joinpath(final_conf.slug), final_conf)
         return chall.init()
 
@@ -148,9 +151,6 @@ class Repository:
         '''
         chall = self.find_chall(slug)
         if chall is None:
-            return False
-        if confirm(f"do you really want to remove {slug}") == Answer.NO:
-            app_log.warning("operation cancelled by user.")
             return False
         shutil.rmtree(str(chall.path))
         return True

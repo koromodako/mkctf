@@ -104,6 +104,18 @@ class RepositoryConfiguration(Configuration):
         return self['flag']['suffix']
 
     @property
+    def domain(self):
+        return self['domain']
+
+    @property
+    def docker_user(self):
+        return self['docker']['user']
+
+    @property
+    def docker_registry(self):
+        return self['docker']['registry']
+
+    @property
     def static_base_url(self):
         return self['static']['base_url']
 

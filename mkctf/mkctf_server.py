@@ -6,11 +6,21 @@
 from pathlib import Path
 from argparse import ArgumentParser
 from aiohttp import web
-from mkctf import __banner__
+from mkctf import __version__
 from mkctf.api import MKCTFAPI
 from mkctf.helper.log import app_log, log_enable_debug
 from mkctf.web_handler import MKCTFWebHandler
-from mkctf.helper.formatting import format_enable_colors
+# =============================================================================
+#  GLOBALS
+# =============================================================================
+__banner__ = r"""
+           _     ____ _____ _____   ____
+ _ __ ___ | | __/ ___|_   _|  ___| / ___|  ___ _ ____   _____ _ __
+| '_ ` _ \| |/ / |     | | | |_    \___ \ / _ \ '__\ \ / / _ \ '__|
+| | | | | |   <| |___  | | |  _|    ___) |  __/ |   \ V /  __/ |
+|_| |_| |_|_|\_\\____| |_| |_|     |____/ \___|_|    \_/ \___|_|   v{}
+
+""".format(__version__)
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -20,12 +30,9 @@ def parse_args():
     parser = ArgumentParser(add_help=True,
                        description="Manage CTF challenges repository.")
     parser.add_argument('--debug', '-d', action='store_true', help="output debug messages")
-    parser.add_argument('--repo-root', '-r', type=Path, default=Path.cwd(), help="repository's root folder absolute path.")
-    parser.add_argument('--no-color', action='store_true', help="disable colored output")
+    parser.add_argument('--repo-dir', '-r', type=Path, default=Path.cwd(), help="absolute path of a mkCTF repository directory")
     # -- parse args and pre-process if needed
-    args = parser.parse_args()
-    args.configuration = None
-    return args
+    return parser.parse_args()
 
 def main():
     '''Main function
@@ -33,16 +40,15 @@ def main():
     app_log.info(__banner__)
     args = parse_args()
     log_enable_debug(args.debug)
-    format_enable_colors(not args.no_color)
-    api = MKCTFAPI(args.repo_root)
+    api = MKCTFAPI(args.repo_dir)
     handler = MKCTFWebHandler(api)
     app = web.Application()
     app.add_routes([
         web.get(r'/challenges', handler.enum_challenges),
-        web.get(r'/{slug:[a-z0-9\-]+}/status', handler.challenge_status),
+        web.get(r'/{slug:[a-z0-9\-]+}/health', handler.challenge_status),
         web.post(r'/{slug:[a-z0-9\-]+}/check-flag', handler.check_challenge_flag),
     ])
-    app_log.info(f"serving from {args.repo_root}")
+    app_log.info(f"serving from {args.repo_dir}")
     web.run_app(app)
 
 def app():

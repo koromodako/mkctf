@@ -11,7 +11,7 @@ from mkctf.helper.formatting import HSEP, format_text, format_rcode2str
 async def deploy(api, args):
     '''Deploys at least one challenge
     '''
-    if not args.yes and confirm('do you really want to deploy?') == Answer.NO:
+    if not args.yes and confirm('do you really want to perform a deployment?') == Answer.NO:
         app_log.warning("operation cancelled by user.")
         return False
     err_sep = format_text(f'{HSEP[:35]} [STDERR] {HSEP[:35]}', 'red')
@@ -19,7 +19,7 @@ async def deploy(api, args):
     exc_sep = format_text(f'{HSEP[:35]} [EXCEPT] {HSEP[:35]}', 'magenta')
     chall_sep = format_text(HSEP, 'blue', attrs=['bold'])
     success = True
-    async for build_result in api.deploy(args.tags, args.slug, args.timeout):
+    async for build_result in api.deploy(args.tags, args.slug, args.dev, args.timeout):
         rcode = build_result['rcode']
         chall_desc = format_text(f"{build_result['slug']}", 'blue')
         chall_status = format_rcode2str(rcode)
@@ -38,6 +38,7 @@ async def deploy(api, args):
 
 def setup_deploy(subparsers):
     parser = subparsers.add_parser('deploy', help="deploy challenges.")
+    parser.add_argument('--dev', action='store_true', help="Runs the script in development mode.")
     parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
     parser.add_argument('--slug', '-s', help="challenge's slug.")
     parser.add_argument('--timeout', type=int, default=MKCTFAPI.DEFAULT_TIMEOUT, help="override default timeout for subprocesses.")

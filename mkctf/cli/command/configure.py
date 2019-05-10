@@ -8,7 +8,7 @@ from mkctf.helper.log import app_log
 async def configure(api, args):
     '''Configures mkctf repository or a specific challenge
     '''
-    result = api.configure(args.configuration, args.slug)
+    result = api.configure(slug=args.slug)
     return result['configured']
 
 def setup_configure(subparsers):

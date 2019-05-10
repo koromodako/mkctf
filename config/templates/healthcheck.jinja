@@ -6,11 +6,11 @@ set -e
 # ------------------------------------------------------------------------------
 # VARIABLES
 # ------------------------------------------------------------------------------
+DEV=0
 CWD=$(pwd)
 PROG=$0
-SLUG={{challenge.slug}}
+SLUG={{chal_conf.slug}}
 FLAG=$(grep -Eo 'INSA{.+}' ../.mkctf.yml)
-DEBUG=0
 # ------------------------------------------------------------------------------
 # FUNCTIONS
 # ------------------------------------------------------------------------------
@@ -61,19 +61,20 @@ print "*************************************************************************
 while test $# -gt 0
 do
     case "$1" in
+        --dev|-d) DEV=1
+            ;;
         --help|-h) usage
             ;;
-        --debug|-d) DEBUG=1
-            ;;
-        *) print "skipped argument: $1"
+        *) print "skipped unknown argument: $1"
             ;;
     esac
     shift
 done
+# the following lines implements healthcheck 'simple' challenges
 arch=static.tar.gz
-if [ ${DEBUG} -eq 0 ]; then
+if [ ${DEV} -eq 0 ]; then
     print "- Downloading archive..."
-    wget -O ${arch} {{challenge.static_url}}
+    wget -O ${arch} {{chal_conf.static_url}}
 else
     print "- Copying memory dump..."
     if [ ! -f ../public-files/${arch} ]; then

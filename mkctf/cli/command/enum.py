@@ -11,10 +11,11 @@ async def enum(api, args):
     '''Enumerates challenges
     '''
     found = False
-    print("challenges:")
     for challenge in api.enum(args.tags, args.slug):
         slug, conf = challenge['slug'], challenge['conf']
-        found = True
+        if not found:
+            found = True
+            print("challenges:")
         if conf is None:
             app_log.error(f"configuration missing. Run `mkctf configure -s {slug}`")
             continue
@@ -32,7 +33,7 @@ async def enum(api, args):
         if not args.summarize:
             print(indent(chall_details[1:], TAB * 2))
     if not found:
-        app_log.warning("no challenge found matching given constraints.")
+        app_log.warning("no challenge found.")
     return found
 
 def setup_enum(subparsers):

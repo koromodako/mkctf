@@ -7,23 +7,36 @@ from signal import SIGINT, SIGTERM
 from asyncio import get_event_loop
 from pathlib import Path
 from argparse import ArgumentParser
-from mkctf import __banner__
+from mkctf import __version__
 from mkctf.api import MKCTFAPI, MKCTFAPIException
 from mkctf.cli.command import *
-from mkctf.helper.log import app_log, log_enable_debug, log_enable_logging
+from mkctf.helper.log import (
+    app_log,
+    log_enable_debug,
+    log_enable_logging
+)
+# =============================================================================
+#  GLOBALS
+# =============================================================================
+__banner__ = r"""
+           _     ____ _____ _____    ____ _     ___
+ _ __ ___ | | __/ ___|_   _|  ___|  / ___| |   |_ _|
+| '_ ` _ \| |/ / |     | | | |_    | |   | |    | |
+| | | | | |   <| |___  | | |  _|   | |___| |___ | |
+|_| |_| |_|_|\_\\____| |_| |_|      \____|_____|___| v{}
+
+""".format(__version__)
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
 def parse_args():
     '''Parse command line arguments
     '''
-    parser = ArgumentParser(add_help=True,
-                       description="Manage CTF challenges repository.")
-    parser.add_argument('--yes', '-y', action='store_true', help="do not ask for confirmation.")
-    parser.add_argument('--quiet', '-q', action='store_true', help="disable logging.")
-    parser.add_argument('--debug', '-d', action='store_true', help="output debug messages")
-    parser.add_argument('--repo-root', '-r', type=Path, default=Path.cwd(), help="repository's root folder absolute path.")
-    parser.add_argument('--no-color', action='store_true', help="disable colored output")
+    parser = ArgumentParser(add_help=True, description="A CLI to manage a mkCTF repository")
+    parser.add_argument('--yes', '-y', action='store_true', help="some operations will stop asking for confirmation")
+    parser.add_argument('--quiet', '-q', action='store_true', help="disable logging")
+    parser.add_argument('--debug', '-d', action='store_true', help="enable debug messages")
+    parser.add_argument('--repo-dir', '-r', type=Path, default=Path.cwd(), help="absolute path of a mkCTF repository directory")
     # -- add subparsers
     subparsers = parser.add_subparsers(dest='command', metavar='COMMAND')
     subparsers.required = True
@@ -41,9 +54,7 @@ def parse_args():
     setup_renew_flag(subparsers)
     setup_update_meta(subparsers)
     # -- parse args and pre-process if needed
-    args = parser.parse_args()
-    args.configuration = None
-    return args
+    return parser.parse_args()
 
 def sigint_handler():
     '''Handles user interrupt signal
@@ -62,7 +73,7 @@ async def main():
     log_enable_logging(not args.quiet)
     app_log.debug(args)
     try:
-        api = MKCTFAPI(args.repo_root)
+        api = MKCTFAPI(args.repo_dir)
         rcode = 0 if await args.func(api, args) else 1
     except MKCTFAPIException as exc:
         app_log.critical(f"critical error: {exc.args[0]}")
