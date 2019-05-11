@@ -14,8 +14,8 @@ from .helper.formatting import format_text
 class MKCTFAPI:
     '''Provides access to all functionalities programmatically
     '''
-    DEFAULT_TIMEOUT = 120 # 2 minutes
-    DEFAULT_FLAG_SIZE = 16 # 16 bytes
+    FLAG_SIZE = 16 # 16 bytes
+    EXEC_TIMEOUT = 120 # 2 minutes
     RCODE_MAPPING = {
         None: ('TIMEOUT', 'magenta'),
         0: ('SUCCESS', 'green'),
@@ -24,6 +24,27 @@ class MKCTFAPI:
         4: ('NOT-IMPLEMENTED', 'yellow'),
     }
     HEALTHY_RCODES = {0, 2, 3}
+
+    @classmethod
+    def rcode2str(cls, code):
+        '''Convert a return code to a string
+        '''
+        status, color = cls.RCODE_MAPPING.get(code, ('FAILURE', 'red'))
+        status = f'[{status}]'
+        if code is not None:
+            status += f'(code={code})'
+        return format_text(status, color, ['bold'])
+
+    @classmethod
+    def rcode2health_str(cls, code):
+        '''Convert a return code to a health string
+        '''
+        color = 'red'
+        status = 'UNHEALTHY'
+        if code in cls.HEALTHY_RCODES:
+            color = 'green'
+            status = 'HEALTHY'
+        return format_text(f'[{status}]', color, ['bold'])
 
     def __init__(self, repo_dir, general_conf_path=None):
         '''Coargstructs a new iargstance
@@ -190,7 +211,7 @@ class MKCTFAPI:
                 app_log.warning("you might want to call 'build' then 'deploy' to regenerate the challenge and deploy it.")
                 yield {
                     'slug': challenge.conf.slug,
-                    'flag': challenge.renew_flag(size or MKCTFAPI.DEFAULT_FLAG_SIZE)
+                    'flag': challenge.renew_flag(size or MKCTFAPI.FLAG_SIZE)
                 }
 
     def update_meta(self, tags=[], slug=None):
@@ -216,7 +237,7 @@ class MKCTFAPI:
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.conf.slug:
                 app_log.info(f"building {challenge.conf.slug}...")
-                result = await challenge.build(dev, timeout or MKCTFAPI.DEFAULT_TIMEOUT)
+                result = await challenge.build(dev, timeout or MKCTFAPI.EXEC_TIMEOUT)
                 result.update({'slug': challenge.conf.slug})
                 yield result
 
@@ -227,7 +248,7 @@ class MKCTFAPI:
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.conf.slug:
                 app_log.info(f"deploying {challenge.conf.slug}...")
-                result = await challenge.deploy(dev, timeout or MKCTFAPI.DEFAULT_TIMEOUT)
+                result = await challenge.deploy(dev, timeout or MKCTFAPI.EXEC_TIMEOUT)
                 result.update({'slug': challenge.conf.slug})
                 yield result
 
@@ -238,25 +259,6 @@ class MKCTFAPI:
         for challenge in self._repo.scan(tags):
             if slug is None or slug == challenge.conf.slug:
                 app_log.info(f"checking {challenge.conf.slug} health...")
-                result = await challenge.healthcheck(dev, timeout or MKCTFAPI.DEFAULT_TIMEOUT)
+                result = await challenge.healthcheck(dev, timeout or MKCTFAPI.EXEC_TIMEOUT)
                 result.update({'slug': challenge.conf.slug})
                 yield result
-
-    def rcode2str(self, code):
-        '''Convert a return code to a string
-        '''
-        status, color = self.RCODE_MAPPING.get(code, ('FAILURE', 'red'))
-        status = f'[{status}]'
-        if code is not None:
-            status += f'(code={code})'
-        return format_text(status, color, ['bold'])
-
-    def rcode2health_str(self, code):
-        '''Convert a return code to a health string
-        '''
-        color = 'red'
-        status = 'UNHEALTHY'
-        if code in self.HEALTHY_RCODES:
-            color = 'green'
-            status = 'HEALTHY'
-        return format_text(f'[{status}]', color, ['bold'])

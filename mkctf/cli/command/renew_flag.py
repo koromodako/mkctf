@@ -21,5 +21,5 @@ def setup_renew_flag(subparsers):
     parser = subparsers.add_parser('renew-flag', help="renew flags. You might want to build and deploy/export after that.")
     parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
     parser.add_argument('--slug', '-s', help="challenge's slug.")
-    parser.add_argument('--size', type=int, default=MKCTFAPI.DEFAULT_FLAG_SIZE, help="flag's random string size (in bytes).")
+    parser.add_argument('--size', type=int, default=MKCTFAPI.FLAG_SIZE, help="flag's random string size (in bytes).")
     parser.set_defaults(func=renew_flag)

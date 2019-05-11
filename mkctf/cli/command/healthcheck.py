@@ -41,5 +41,5 @@ def setup_healthcheck(subparsers):
     parser.add_argument('--dev', action='store_true', help="Runs the script in development mode.")
     parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
     parser.add_argument('--slug', '-s', help="challenge's slug.")
-    parser.add_argument('--timeout', type=int, default=MKCTFAPI.DEFAULT_TIMEOUT, help="override default timeout for subprocesses.")
+    parser.add_argument('--timeout', type=int, default=MKCTFAPI.EXEC_TIMEOUT, help="override default timeout for subprocesses.")
     parser.set_defaults(func=healthcheck)
