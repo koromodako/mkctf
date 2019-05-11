@@ -3,12 +3,12 @@
 #===============================================================================
 #  IMPORTS
 #===============================================================================
-from signal import SIGINT, SIGTERM
 from asyncio import get_event_loop
 from mkctf import __version__
 from mkctf.api import MKCTFAPI, MKCTFAPIException
 from mkctf.cli.command import *
 from mkctf.helper.log import app_log
+from mkctf.helper.signal import setup_signals_handler
 from mkctf.helper.argument_parser import MKCTFArgumentParser
 # =============================================================================
 #  GLOBALS
@@ -76,8 +76,7 @@ def app():
     '''mkctf-cli script entry point
     '''
     loop = get_event_loop()
-    loop.add_signal_handler(SIGINT, sigint_handler)
-    loop.add_signal_handler(SIGTERM, sigint_handler)
+    setup_signals_handler(loop)
     rcode = loop.run_until_complete(main())
     loop.close()
     return rcode

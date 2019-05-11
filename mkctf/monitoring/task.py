@@ -64,6 +64,6 @@ class MonitorTask:
         async for report in self._monitor.healthcheck(self.slug):
             healthy = report['rcode'] in MKCTFAPI.HEALTHY_RCODES
             report['healthy'] = healthy
-            await self._monitor.post(self.slug, healthy)
-        self._duration = int(time()) - self._start
-        return report
+            self._duration = int(time()) - self._start
+            return report
+        return None

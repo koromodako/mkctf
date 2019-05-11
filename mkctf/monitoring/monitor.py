@@ -4,6 +4,7 @@
 import sys
 from time import time
 from asyncio import (
+    CancelledError,
     get_event_loop,
     create_task,
     gather,
@@ -38,10 +39,12 @@ async def worker_routine(worker_id, monitor):
         await monitor.print(f"[{worker_id}]: running exploit for {task.slug}")
         try:
             report = await task.run()
-        except:
+        except Exception as exc:
             report = None
-            await monitor.post(task.slug, False)
-            await monitor.print(f"[{worker_id}]: an exception occured while running {task.slug}")
+            await monitor.post(worker_id, task.slug, False)
+            await monitor.print(f"[{worker_id}]: an exception occured while running healthcheck for {task.slug}: {exc}")
+        else:
+            await monitor.post(worker_id, task.slug, report['healthy'])
         # inject exploit back in queue if needed
         if task.should_run_again:
             await monitor.task_queue.put(task)
@@ -87,7 +90,7 @@ class MKCTFMonitor:
         self._url = f'https://{host}:{port}/mkctf-api/healthcheck'
         self._ssl = False if no_verify_ssl else None
         self._auth = BasicAuth(username, password)
-        self._post_timeout = ClientTimeout(timeout=post_timeout)
+        self._post_timeout = ClientTimeout(total=post_timeout)
 
     @property
     def task_queue(self):
@@ -100,31 +103,6 @@ class MKCTFMonitor:
     @property
     def iter_delay(self):
         return self._iter_delay
-
-    async def run(self):
-        '''[summary]
-        '''
-        for challenge in self._api.enum():
-            if not challenge['conf']['enabled']:
-                app_log.warning(f"{challenge['slug']} skipped (disabled)")
-                continue
-            app_log.info(f"injecting a task for {challenge['slug']}...")
-            await self._task_queue.put(MonitorTask(self, challenge['slug']))
-        # check if queue is empty before starting
-        if self._task_queue.empty():
-            app_log.warning(f"no task to process, exiting.")
-            return
-        # create 4 worker tasks to process the queue concurrently
-        for k in range(self._worker_cnt):
-            worker = create_task(worker_routine(f'worker-{k}', self))
-            self._workers.append(worker)
-        # await queue to be processed entirely
-        await self._task_queue.join()
-        # terminate workers
-        for _ in self._workers:
-            await self._task_queue.put(None)
-        # await workers termination
-        await gather(*self._workers, return_exceptions=True)
 
     async def print(self, data, raw=False):
         '''Print a message without interruption by a concurrent
@@ -145,13 +123,48 @@ class MKCTFMonitor:
         async for report in self._api.healthcheck(slug, timeout=self._task_timeout):
             yield report
 
-    async def post(self, slug, healthy):
+    async def post(self, caller_id, slug, healthy):
         '''Post a healthcheck report to the scoreboard
         '''
-        async with ClientSession(auth=self._auth, timeout=self._post_timeout) as session:
-            app_log.info(f"posting {slug} report to {self._url}...")
-            async with session.post(self._url, ssl=self._ssl, json={slug: healthy}) as resp:
-                if resp.status < 400:
-                    app_log.info("post succeeded.")
-                else:
-                    app_log.error("post failed.")
+        try:
+            async with ClientSession(auth=self._auth, timeout=self._post_timeout) as session:
+                await self.print(f"[{caller_id}]: posting {slug} report to {self._url}...")
+                async with session.post(self._url, ssl=self._ssl, json={slug: healthy}) as resp:
+                    if resp.status < 400:
+                        await self.print(f"[{caller_id}]: post succeeded.")
+                    else:
+                        await self.print(f"[{caller_id}]: post failed.")
+        except Exception as exc:
+            await self.print(f"[{caller_id}]: an execption occured while contacting the scoreboard: {exc}")
+
+    async def run(self):
+        '''[summary]
+        '''
+        for challenge in self._api.enum():
+            if not challenge['conf']['enabled']:
+                await self.print(f"[monitor]: {challenge['slug']} skipped (disabled)")
+                continue
+            await self.print(f"[monitor]: injecting a task for {challenge['slug']}...")
+            await self._task_queue.put(MonitorTask(self, challenge['slug']))
+        # check if queue is empty before starting
+        if self._task_queue.empty():
+            await self.print(f"[monitor]: no task to process, exiting.")
+            return
+        # create 4 worker tasks to process the queue concurrently
+        for k in range(self._worker_cnt):
+            worker = create_task(worker_routine(f'worker-{k}', self))
+            self._workers.append(worker)
+        # await queue to be processed entirely
+        await self.print(f"[monitor]: waiting for tasks to be processed...")
+        try:
+            await self._task_queue.join()
+        except CancelledError:
+            await self.print("[monitor]: tasks cancelled.")
+        # terminate workers
+        await self.print(f"[monitor]: terminating workers...")
+        for _ in self._workers:
+            await self._task_queue.put(None)
+        # await workers termination
+        await self.print(f"[monitor]: waiting for workers to terminate...")
+        await gather(*self._workers, return_exceptions=True)
+        await self.print(f"[monitor]: exiting.")

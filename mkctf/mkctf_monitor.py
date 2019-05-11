@@ -4,13 +4,13 @@
 #  IMPORTS
 #===============================================================================
 from os import getenv
-from signal import SIGINT, SIGTERM
 from getpass import getpass
 from asyncio import get_event_loop
 from mkctf import __version__
 from mkctf.api import MKCTFAPI, MKCTFAPIException
 from mkctf.helper.log import app_log
 from mkctf.monitoring import MKCTFMonitor
+from mkctf.helper.signal import setup_signals_handler
 from mkctf.helper.argument_parser import MKCTFArgumentParser
 # =============================================================================
 #  GLOBALS
@@ -29,7 +29,7 @@ BANNER = r"""
 def parse_args():
     '''Parse command line arguments
     '''
-    parser = MKCTFArgumentParser(banner=BANNER, description="A tool to monitor CTF challenges running cron-like healchecks")
+    parser = MKCTFArgumentParser(banner=BANNER, description="A tool to monitor CTF challenges running cron-like healthchecks")
     # -- add arguments
     parser.add_argument('--host', default=getenv('MKCTF_SB_HOST', 'scoreboard.ctf.insecurity-insa.fr'), help="scoreboard host, overrides MKCTF_SB_HOST (env)")
     parser.add_argument('--port', default=getenv('MKCTF_SB_PORT', 443), type=int, help="scoreboard port, overrides MKCTF_SB_PORT (env)")
@@ -44,14 +44,6 @@ def parse_args():
     # -- parse args and pre-process if needed
     return parser.parse_args()
 
-def sigint_handler():
-    '''Handles user interrupt signal
-    '''
-    app_log.warning("\nOuch... you just killed me... (x_x)")
-    loop = get_event_loop()
-    loop.stop()
-    loop.close()
-
 async def main():
     '''Main function
     '''
@@ -61,10 +53,11 @@ async def main():
     try:
         api = MKCTFAPI(args.repo_dir)
         monitor = MKCTFMonitor(api, args.host, args.port, args.username, args.password,
-                               iter_cnt=-1, iter_delay=600,
-                               task_timeout=120, worker_cnt=4,
-                               post_timeout=60, no_verify_ssl=False)
+                               args.iter_cnt, args.iter_delay,
+                               args.task_timeout, args.worker_cnt,
+                               args.post_timeout, args.no_verify_ssl)
         await monitor.run()
+        rcode = 0
     except MKCTFAPIException as exc:
         app_log.critical(f"critical error: {exc.args[0]}")
         rcode = 1
@@ -77,8 +70,7 @@ def app():
     '''mkctf-cli script entry point
     '''
     loop = get_event_loop()
-    loop.add_signal_handler(SIGINT, sigint_handler)
-    loop.add_signal_handler(SIGTERM, sigint_handler)
+    setup_signals_handler(loop)
     rcode = loop.run_until_complete(main())
     loop.close()
     return rcode
