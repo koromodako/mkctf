@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# ------------------------------------------------------------------------------
+# BASH OPTIONS
+# ------------------------------------------------------------------------------
+set -e
+# ------------------------------------------------------------------------------
+# VARIABLES
+# ------------------------------------------------------------------------------
+DEV=0
+CWD=$(pwd)
+PROG=$0
+SLUG={{chal_conf.slug}}
+FLAG=$(grep -Eo 'INSA{.+}' .mkctf.yml)
+# ------------------------------------------------------------------------------
+# FUNCTIONS
+# ------------------------------------------------------------------------------
+function print {
+    (>&2 printf "\x1b[34m${1}\x1b[0m\n")
+}
+function exit_success {
+    (>&2 printf "\x1b[32m- Script succeeded.\x1b[0m\n")
+    exit 0
+}
+function exit_failure {
+    (>&2 printf "\x1b[31m- Script failed.\x1b[0m\n")
+    exit 1
+}
+function exit_non_applicable {
+    (>&2 printf "\x1b[36m- Script non applicable.\x1b[0m\n")
+    exit 2
+}
+function exit_manual {
+    (>&2 printf "\x1b[33m- Script requires a manual operation.\x1b[0m\n")
+    exit 3
+}
+function exit_not_implemented {
+    (>&2 printf "\x1b[35m- Script not implemented.\x1b[0m\n")
+    exit 4
+}
+function usage {
+    print "usage: ${PROG} [-h]\n"
+    print "options:"
+    print "    -h,--help: show this message"
+    exit 1
+}
+# ------------------------------------------------------------------------------
+# SCRIPT
+# ------------------------------------------------------------------------------
+print "********************************************************************************"
+print "                                   DEPLOY                                       "
+print "********************************************************************************"
+while test $# -gt 0
+do
+    case "$1" in
+        --dev|-d) DEV=1
+            ;;
+        --help|-h) usage
+            ;;
+        *) print "skipped unknown argument: $1"
+            ;;
+    esac
+    shift
+done
+
+# TODO: implement script here
+#   - it can be a docker login + push
+#   - it can be a scp
+#   - it can be whatever your challenge needs to be deployed
+#   - it can be exit_non_applicable if this script is meaningless in the context of
+#     your challenge
+exit_not_implemented

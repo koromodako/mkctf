@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# ------------------------------------------------------------------------------
+# BASH OPTIONS
+# ------------------------------------------------------------------------------
+set -e
+# ------------------------------------------------------------------------------
+# VARIABLES
+# ------------------------------------------------------------------------------
+DEV=0
+CWD=$(pwd)
+PROG=$0
+SLUG={{chal_conf.slug}}
+FLAG=$(grep -Eo 'INSA{.+}' ../.mkctf.yml)
+# ------------------------------------------------------------------------------
+# FUNCTIONS
+# ------------------------------------------------------------------------------
+function print {
+    (>&2 printf "\x1b[34m${1}\x1b[0m\n")
+}
+function exit_success {
+    (>&2 printf "\x1b[32m- Script succeeded.\x1b[0m\n")
+    exit 0
+}
+function exit_failure {
+    (>&2 printf "\x1b[31m- Script failed.\x1b[0m\n")
+    exit 1
+}
+function exit_non_applicable {
+    (>&2 printf "\x1b[36m- Script non applicable.\x1b[0m\n")
+    exit 2
+}
+function exit_manual {
+    (>&2 printf "\x1b[33m- Script requires a manual operation.\x1b[0m\n")
+    exit 3
+}
+function exit_not_implemented {
+    (>&2 printf "\x1b[35m- Script not implemented.\x1b[0m\n")
+    exit 4
+}
+function check_flag {
+    print "- Checking flag..."
+    if [ "${1}" = "${FLAG}" ]; then
+        exit_success
+    fi
+    exit_failure
+}
+function usage {
+    print "usage: ${PROG} [-h]\n"
+    print "options:"
+    print "    -h,--help: show this message"
+    print "    -d,--debug: do not attempt to download archive from remote host,"
+    print "                attempt to find it locally instead"
+    exit 1
+}
+# ------------------------------------------------------------------------------
+# SCRIPT
+# ------------------------------------------------------------------------------
+print "********************************************************************************"
+print "                                HEALTHCHECK                                     "
+print "********************************************************************************"
+while test $# -gt 0
+do
+    case "$1" in
+        --dev|-d) DEV=1
+            ;;
+        --help|-h) usage
+            ;;
+        *) print "skipped unknown argument: $1"
+            ;;
+    esac
+    shift
+done
+# the following lines implements healthcheck 'simple' challenges
+arch=static.tar.gz
+if [ ${DEV} -eq 0 ]; then
+    print "- Downloading archive..."
+    wget -O ${arch} {{chal_conf.static_url}}
+else
+    print "- Copying memory dump..."
+    if [ ! -f ../public-files/${arch} ]; then
+        print "- ../public-files/${arch} not found. Aborting."
+        exit_failure
+    fi
+    cp ../public-files/${arch} .
+fi
+print "- Uncompressing archive..."
+tar xzvf ${arch}
+print "- Removing archive..."
+rm -f ${arch}
+print "- Computing checksum..."
+sha256sum -c checksum.sha256
+
+# TODO: implement script here
+#   - it can call an automated 'exploit' to extract the flag from extracted files
+#   - it can be whatever your challenge needs to be solved
+#   - it can be exit_manual if this script requires manual validation
+exit_not_implemented
