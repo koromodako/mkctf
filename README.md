@@ -89,9 +89,19 @@ to the _scoreboard_ using an HTTP API defined in **CTF Website** section.
 
 ![mkctf-monitor -h screenshot](images/mkctf_monitor_help.png)
 
-### mkctf-server
+Once you have initialized your mkCTF repository, you can build a monitoring image and run it by following this procedure:
 
-Starts a server exposing a HTTP API which is not production-ready nor well specified right now.
+```bash
+$ cd inshack-2020 && ls
+# challenges  monitoring
+$ sudo docker build -f monitoring/Dockerfile -t inshack-2020/monitoring .
+# docker build proceeds...
+$ sudo docker run --rm --name monitoring inshack-2020/monitoring
+```
+
+### mkCTF Server
+
+`mkctf-server` starts a server exposing a HTTP API which is not production-ready nor well specified right now.
 **It is advised not to use it for the moment.**
 
 ![mkctf-server -h screenshot](images/mkctf_server_help.png)
