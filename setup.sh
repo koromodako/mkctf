@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-CWD=$(pwd)
 BIN_DIR=~/bin
 VENV_DIR=.mkctf-venv
-CONFIG_DIR=~/.config/mkctf
 LOCAL_REPO=/tmp/mkctf
+# everything above this line can be modified -------------------------
+# everything below this line shall not be modified -------------------
+CWD=$(pwd)
+CONFIG_DIR=~/.config/mkctf
 
 function print {
     echo "[setup.sh]: ${1}"
