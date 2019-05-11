@@ -41,7 +41,7 @@ class MonitorTask:
     def should_run_again(self):
         '''Determine if the task should run again
         '''
-        if self._monitor.iter_cnt > 0
+        if self._monitor.iter_cnt > 0:
             return self._iter_cnt < self._monitor.iter_cnt
         return True
 

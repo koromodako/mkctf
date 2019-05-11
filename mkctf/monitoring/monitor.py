@@ -66,7 +66,7 @@ async def worker_routine(worker_id, monitor):
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Monitor:
+class MKCTFMonitor:
     '''[summary]
     '''
     def __init__(self, api, host, port, username, password,

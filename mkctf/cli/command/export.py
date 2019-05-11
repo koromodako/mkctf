@@ -26,7 +26,7 @@ async def export(api, args):
 def setup_export(subparsers):
     parser = subparsers.add_parser('export', help="export public resources for each challenge.")
     parser.add_argument('export_dir', type=Path, help="folder where archives must be written. If the folder does not exist it will be created.")
-    parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
-    parser.add_argument('--slug', '-s', help="challenge's slug.")
+    parser.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
+    parser.add_argument('-s', '--slug', help="challenge's slug.")
     parser.add_argument('--include-disabled', action='store_true', help="export disabled challenges too.")
     parser.set_defaults(func=export)

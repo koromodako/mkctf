@@ -26,7 +26,7 @@ BANNER = r"""
 def main():
     '''Main function
     '''
-    parser = MKCTFArgumentParser(BANNER, "An HTTP API to perform operations on a mkCTF repository.")
+    parser = MKCTFArgumentParser(banner=BANNER, description="An HTTP API to perform operations on a mkCTF repository.")
     args = parser.parse_args()
     api = MKCTFAPI(args.repo_dir)
     handler = MKCTFWebHandler(api)

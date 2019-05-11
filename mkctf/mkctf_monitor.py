@@ -29,12 +29,12 @@ BANNER = r"""
 def parse_args():
     '''Parse command line arguments
     '''
-    parser = MKCTFArgumentParser(BANNER, "A tool to monitor CTF challenges running cron-like healchecks")
+    parser = MKCTFArgumentParser(banner=BANNER, description="A tool to monitor CTF challenges running cron-like healchecks")
     # -- add arguments
     parser.add_argument('--host', default=getenv('MKCTF_SB_HOST', 'scoreboard.ctf.insecurity-insa.fr'), help="scoreboard host, overrides MKCTF_SB_HOST (env)")
     parser.add_argument('--port', default=getenv('MKCTF_SB_PORT', 443), type=int, help="scoreboard port, overrides MKCTF_SB_PORT (env)")
-    parser.add_argument('--username', '-u', default=getenv('MKCTF_SB_USER'), help="scoreboard username, overrides MKCTF_SB_USER (env)")
-    parser.add_argument('--password', '-p', default=getenv('MKCTF_SB_PSWD'), help="scoreboard password, overrides MKCTF_SB_PSWD (env). Using this option is strongly discouraged.")
+    parser.add_argument('-u', '--username', default=getenv('MKCTF_SB_USER'), help="scoreboard username, overrides MKCTF_SB_USER (env)")
+    parser.add_argument('-p', '--password', default=getenv('MKCTF_SB_PSWD'), help="scoreboard password, overrides MKCTF_SB_PSWD (env). Using this option is strongly discouraged.")
     parser.add_argument('--iter-cnt', default=-1, type=int, help="how many times should each task be executed, -1 means infinite.")
     parser.add_argument('--iter-delay', default=600, type=int, help="the interval between two starts of the same task (in seconds).")
     parser.add_argument('--task-timeout', default=480, type=int, help="the timeout for task execution (in seconds).")

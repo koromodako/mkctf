@@ -39,6 +39,6 @@ async def enum(api, args):
 def setup_enum(subparsers):
     parser = subparsers.add_parser('enum', help="enumerate challenges.")
     parser.add_argument('--summarize', action='store_true', help="Print a list of challenges without details.")
-    parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
-    parser.add_argument('--slug', '-s', help="challenge's slug.")
+    parser.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
+    parser.add_argument('-s', '--slug', help="challenge's slug.")
     parser.set_defaults(func=enum)

@@ -27,8 +27,8 @@ BANNER = r"""
 def parse_args():
     '''Parse command line arguments
     '''
-    parser = MKCTFArgumentParser(BANNER, "A CLI to manage a mkCTF repository")
-    parser.add_argument('--yes', '-y', action='store_true', help="some operations will stop asking for confirmation")
+    parser = MKCTFArgumentParser(banner=BANNER, description="A CLI to manage a mkCTF repository")
+    parser.add_argument('-y', '--yes', action='store_true', help="some operations will stop asking for confirmation")
     # -- add subparsers
     subparsers = parser.add_subparsers(dest='command', metavar='COMMAND')
     subparsers.required = True

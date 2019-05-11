@@ -15,6 +15,6 @@ async def update_meta(api, args):
 
 def setup_update_meta(subparsers):
     parser = subparsers.add_parser('update-meta', help="Update challenge metadata. You might want to run this command after reconfiguring the repository.")
-    parser.add_argument('--tags', '-t', action='append', default=[], help="challenge's tags.")
-    parser.add_argument('--slug', '-s', help="challenge's slug.")
+    parser.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
+    parser.add_argument('-s', '--slug', help="challenge's slug.")
     parser.set_defaults(func=update_meta)

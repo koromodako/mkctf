@@ -13,5 +13,5 @@ async def configure(api, args):
 
 def setup_configure(subparsers):
     parser = subparsers.add_parser('configure', help="edit repository's config or challenge's config.")
-    parser.add_argument('--slug', '-s', help="challenge's slug.")
+    parser.add_argument('-s', '--slug', help="challenge's slug.")
     parser.set_defaults(func=configure)
