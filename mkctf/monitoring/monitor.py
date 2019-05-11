@@ -110,6 +110,10 @@ class MKCTFMonitor:
                 continue
             app_log.info(f"injecting a task for {challenge['slug']}...")
             await self._task_queue.put(MonitorTask(self, challenge['slug']))
+        # check if queue is empty before starting
+        if self._task_queue.empty():
+            app_log.warning(f"no task to process, exiting.")
+            return
         # create 4 worker tasks to process the queue concurrently
         for k in range(self._worker_cnt):
             worker = create_task(worker_routine(f'worker-{k}', self))

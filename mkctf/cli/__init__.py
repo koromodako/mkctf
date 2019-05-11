@@ -9,6 +9,23 @@ from mkctf.helper.log import app_log
 # GLOBALS
 # =============================================================================
 INT_RE = re.compile(r'[\-]?[0-9]+')
+MULTI_SELECT_CONTROLS = '''
+--------------------------------------------------------------------------------
+Controls:
+    Arrow Up: move up
+  Arrow Down: move down
+    Spacebar: toggle selection
+       Enter: validate selection
+--------------------------------------------------------------------------------
+'''
+SINGLE_SELECT_CONTROLS = '''
+--------------------------------------------------------------------------------
+Controls:
+    Arrow Up: move up
+  Arrow Down: move down
+       Enter: validate selection
+--------------------------------------------------------------------------------
+'''
 # =============================================================================
 # CLASSES
 # =============================================================================
@@ -76,23 +93,15 @@ def choose(choices, title, multi=False, min_count=1, custom=False):
     '''
     sep = '=' * ((78 - len(title)) // 2)
     title = f'{sep} {title} {sep}'
-    text = [
-        title,
-        "",
-        "Controls:",
-        "    Arrow Up: move up",
-        "  Arrow Down: move down",
-        "    Spacebar: toggle selection",
-        "       Enter: validate selection",
-        ""
-    ]
+    text = [title]
     if multi:
         plural = 's' if min_count > 1 else ''
+        text += MULTI_SELECT_CONTROLS.split('\n')
         text.append(f"Choose {min_count} item{plural} or more from the list below then validate.")
-    elif not multi and min_count == 1:
-        text.append(f"Choose exactly one item from the list below then validate.")
     else:
-        text.append(f"Choose an item from the list below (optional) then validate.")
+        min_count = 1
+        text += SINGLE_SELECT_CONTROLS.split('\n')
+        text.append(f"Choose exactly one item from the list below then validate.")
     selection = pick(choices, '\n'.join(text), multi_select=multi, min_selection_count=min_count)
     if isinstance(selection, list):
         selection = [item[0] for item in selection]
