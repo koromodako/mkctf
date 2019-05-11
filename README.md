@@ -54,8 +54,33 @@ $ mkctf-cli init
 
 ## Commandline tools
 
-- `mkctf-cli` helps you manipulate two concepts described bellow. These concepts rely on YAML configuration files.
-- `mkctf-server` starts a web server exposing an API which will be documented here _soon_.
+_Each tool description might refer to concepts defined in **mkCTF Concepts** so be sure to check it out if you
+encounter an undefined/ambiguous concept._
+
+### mkCTF CLI
+
+`mkctf-cli` helps you and CTF co-authors to manipulate a mkCTF repository. It ensures that challenges integration with
+the CTF infrastructure won't give you a headache.
+
+![mkctf-cli -h screenshot](images/mkctf_cli_help.png)
+
+You can enumerate challenges to have a quick overview of the work progression and repartition in terms of tags and categories.
+
+![mkctf-cli enum screenshot](images/mkctf_cli_enum.png)
+
+### mkCTF Monitor
+
+`mkctf-monitor` is a all-in-one monitoring solution based on running healthchecks regularly and send notifications
+to the _scoreboard_ using an HTTP API defined below.
+
+![mkctf-monitor -h screenshot](images/mkctf_monitor_help.png)
+
+### mkctf-server
+
+Starts a server exposing an HTTP API which is not production-ready nor well specified right now.
+It is advised not to use it for the moment.
+
+![mkctf-server -h screenshot](images/mkctf_server_help.png)
 
 ## mkCTF Concepts
 
@@ -285,44 +310,69 @@ perform a manual operation to complete the task.
 
 Lets call the _CTF website_ a _scoreboard_ because it's shorter even if it's more than a scoreboard.
 
-mkCTF provides a command `push` to push every challenge configuration to a _scoreboard_.
+This website is expected to provide some HTTP APIs defined below.
 
-The _scoreboard_ must provide an HTTP API defined below.
+[Here is an example](https://github.com/InsecurityAsso/inshack-scoreboard) of a _scoreboard_ providing these APIs (might not be up to date).
+
+Every HTTP API shall respect the specifications defined underneath.
 
 | **#** | **Specification**                                                   | **Details**                                                     |
 |:-----:|:--------------------------------------------------------------------|:----------------------------------------------------------------|
 | **1** | The _scoreboard_ **shall implement HTTPS with a valid certificate** | mkCTF will always use `https` scheme to post the configuration  |
-| **2** | The _scoreboard_ **endpoint path shall be `/mkctf-api/push`**       | mkCTF will push to `https://{host}:{port}/mkctf-api/push`       |
-| **3** | The _scoreboard_ **endpoint shall implement basic authentication**  | mkCTF will set the Authorization header using Basic method      |
-| **4** | The _scoreboard_ **endpoint shall expect a HTTP POST query**        | mkCTF will POST challenge configuration to the _scoreboard_     |
-| **5** | The _scoreboard_ **endpoint shall expect a application/json body**  | mkCTF will POST a JSON body (defined below) to the _scoreboard_ |
+| **2** | The _scoreboard_ **endpoint shall implement basic authentication**  | mkCTF will set the Authorization header using Basic method      |
+| **3** | The _scoreboard_ **endpoint shall expect a HTTP POST query**        | mkCTF will POST challenge configuration to the _scoreboard_     |
+| **4** | The _scoreboard_ **endpoint shall expect a application/json body**  | mkCTF will POST a JSON body (defined below) to the _scoreboard_ |
 
-Details of the body which will be posted to the _scoreboard_:
+#### Configuration Synchronization API
 
-```json
-{
-    "challenges": [
-        {
-            "author": "someone",
-            "category": "simple",
-            "difficulty": "hard",
-            "enabled": false,
-            "flag": "INSA{Th1s_Is_N0t_A_R34L_flag;)}",
-            "logo_url": "",
-            "name": "My New Challenge",
-            "points": -3,
-            "slug": "my-new-challenge",
-            "static_url": "https://static.ctf.insecurity-insa.fr/9afb7029e93ed50c280c69c8443418c5683d05f8.tar.gz",
-            "tags": [
-                "forensics",
-                "network"
-            ]
-        },
-        ...
-    ]
-}
-```
+`mkctf-cli` provides a `push` command to push every challenge configuration to the _scoreboard_.
+
+The _scoreboard_ must provide an HTTP API defined below.
+
+ - method: `POST`
+ - endpoint: `/mkctf-api/push`
+ - content-type: `application/json`
+ - request body:
+    ```json
+    {
+        "challenges": [
+            {
+                "author": "someone",
+                "category": "simple",
+                "difficulty": "hard",
+                "enabled": false,
+                "flag": "INSA{Th1s_Is_N0t_A_R34L_flag;)}",
+                "logo_url": "",
+                "name": "My New Challenge",
+                "points": -3,
+                "slug": "my-new-challenge",
+                "static_url": "https://static.ctf.insecurity-insa.fr/9afb7029e93ed50c280c69c8443418c5683d05f8.tar.gz",
+                "tags": [
+                    "forensics",
+                    "network"
+                ]
+            },
+            ...
+        ]
+    }
+    ```
 
 **Warning:** the _scoreboard_ is expected to **store a hash** of the `flag`, not the `flag` itself.
 
-[Here is an example](https://github.com/InsecurityAsso/inshack-scoreboard) of a scoreboard providing that kind of API.
+#### Healthcheck Notification API
+
+`mkctf-monitor` will attempt to push healthcheck reports to the _scoreboard_.
+
+The _scoreboard_ must provide an HTTP API defined below.
+
+ - method: `POST`
+ - endpoint: `/mkctf-api/healthcheck`
+ - content-type: `application/json`
+ - request body:
+    ```json
+    {
+        "challenge-1": true
+    }
+    ```
+
+Previous body means challenge having `challenge-1` slug **is healthy**.

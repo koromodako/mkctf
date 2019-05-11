@@ -92,13 +92,13 @@ class Repository:
         for chall_dirent in scandir(self.challenges_dir, keep):
             chall = Challenge(self, self.challenges_dir.joinpath(chall_dirent.name))
             if not chall.conf.validate(throw=False):
-                app_log.warning(f"challenge has invalid configuration: {chall.conf.slug} => skipped")
+                app_log.warning(f"{chall.conf.slug} has invalid configuration => skipped")
                 continue
             if tags and not tags.intersection(chall.conf.tags):
-                app_log.warning(f"challenge does not match selected tags: {chall.conf.slug} => skipped")
+                app_log.warning(f"{chall.conf.slug} does not match selected tags => skipped")
                 continue
             if categories and chall.conf.category not in categories:
-                app_log.warning(f"challenge does not match selected categories: {chall.conf.slug} => skipped")
+                app_log.warning(f"{chall.conf.slug} does not match selected categories => skipped")
                 continue
             challs.append(chall)
         return sorted(challs, key=lambda chall: chall.conf.slug)
@@ -108,11 +108,11 @@ class Repository:
         '''
         chall_path = self.challenges_dir.joinpath(slug)
         if not chall_path.is_dir():
-            app_log.warning(f"challenge not found: {slug}")
+            app_log.warning(f"{slug} not found")
             return None
         chall = Challenge(self, chall_path)
         if not chall.conf.validate(throw=False):
-            app_log.warning(f"challenge has invalid configuration: {slug}")
+            app_log.warning(f"{slug} has invalid configuration")
             return None
         return chall
 
@@ -139,7 +139,7 @@ class Repository:
             final_conf = wizard.result
         chall_path = self.challenges_dir.joinpath(final_conf.slug)
         if chall_path.is_dir():
-            app_log.error(f"this challenge ({final_conf.slug}) macthes an existing one")
+            app_log.error(f"{final_conf.slug} already exists")
             return False
         chall = Challenge(self, self.challenges_dir.joinpath(final_conf.slug), final_conf)
         return chall.init()
