@@ -34,7 +34,7 @@ async def worker_routine(worker_id, monitor):
             await monitor.print(f"[{worker_id}]: exiting gracefully")
             break
         # process task
-        await monitor.print(f"[{worker_id}]: waiting for {task.slug} to reach schedule")
+        await monitor.print(f"[{worker_id}]: waiting for {task.slug} to reach schedule: {naturaldelta(task.countdown)} remaining")
         await task.is_ready()
         await monitor.print(f"[{worker_id}]: running healthcheck for {task.slug}")
         try:
@@ -55,8 +55,8 @@ async def worker_routine(worker_id, monitor):
             stdout = b''
             stderr = b''
             health = 'healthy' if report['healthy'] else 'DEAD'
-            text = '=' * 80
-            text += '\n'
+            sep = ('=' * 80) + '\n'
+            text = sep
             text += f"[{worker_id}]: reporting for {task.slug}\n"
             text += f"[{worker_id}]:  - state: {health}\n"
             text += f"[{worker_id}]:  - check duration: {naturaldelta(task.duration)}\n"
@@ -65,7 +65,7 @@ async def worker_routine(worker_id, monitor):
                 stdout = stdout.encode() + report['stdout']
                 stderr = f"----------------[{task.slug}:STDERR]----------------\n"
                 stderr = stderr.encode() + report['stderr']
-            text = text.encode() + stdout + stderr
+            text = text.encode() + stdout + stderr + sep.encode()
             await monitor.print(text, raw=True)
 # =============================================================================
 #  CLASSES

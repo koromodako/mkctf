@@ -39,6 +39,11 @@ class MonitorTask:
         return self._duration
 
     @property
+    def countdown(self):
+        remaining = self._monitor.iter_delay - (int(time()) - self._start)
+        return max(0, remaining)
+
+    @property
     def should_run_again(self):
         '''Determine if the task should run again
         '''
@@ -49,7 +54,7 @@ class MonitorTask:
     async def is_ready(self):
         '''Sleep for some time
         '''
-        remaining = self._monitor.iter_delay - (int(time()) - self._start)
+        remaining = self.countdown
         if remaining > 0:
             await sleep(remaining)
 
