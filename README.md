@@ -386,4 +386,4 @@ The _scoreboard_ must provide an HTTP API defined below.
     }
     ```
 
-Previous body means challenge having `challenge-1` slug **is healthy**.
+Previous body means `challenge-1` is **healthy**.
