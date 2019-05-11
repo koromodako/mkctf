@@ -49,14 +49,6 @@ def parse_args():
     # -- parse args and pre-process if needed
     return parser.parse_args()
 
-def sigint_handler():
-    '''Handles user interrupt signal
-    '''
-    app_log.warning("\nOuch... you just killed me... (x_x)")
-    loop = get_event_loop()
-    loop.stop()
-    loop.close()
-
 async def main():
     '''Main function
     '''
