@@ -28,15 +28,15 @@ async def worker_routine(worker_id, monitor):
     '''Represent a monitoring worker
     '''
     while True:
-        # get next exploit_task out of the queue
+        # get next task out of the queue
         task = await monitor.task_queue.get()
         if task is None:
             await monitor.print(f"[{worker_id}]: exiting gracefully")
             break
-        # process exploit_task
+        # process task
         await monitor.print(f"[{worker_id}]: waiting for {task.slug} to reach schedule")
         await task.is_ready()
-        await monitor.print(f"[{worker_id}]: running exploit for {task.slug}")
+        await monitor.print(f"[{worker_id}]: running healthcheck for {task.slug}")
         try:
             report = await task.run()
         except Exception as exc:
@@ -48,7 +48,7 @@ async def worker_routine(worker_id, monitor):
         # inject exploit back in queue if needed
         if task.should_run_again:
             await monitor.task_queue.put(task)
-        # notify the queue that the exploit_task has been processed
+        # notify the queue that the task has been processed
         monitor.task_queue.task_done()
         # print report
         if report:
@@ -151,6 +151,7 @@ class MKCTFMonitor:
             await self.print(f"[monitor]: no task to process, exiting.")
             return
         # create 4 worker tasks to process the queue concurrently
+        await self.print(f"[monitor]: spawning {self._worker_cnt} workers...")
         for k in range(self._worker_cnt):
             worker = create_task(worker_routine(f'worker-{k}', self))
             self._workers.append(worker)
