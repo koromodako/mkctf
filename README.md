@@ -342,7 +342,6 @@ The _scoreboard_ must provide an HTTP API defined below.
 
  - method: `POST`
  - endpoint: `/mkctf-api/push`
- - content-type: `application/json`
  - request body:
     ```json
     {
@@ -378,7 +377,6 @@ The _scoreboard_ must provide an HTTP API defined below.
 
  - method: `POST`
  - endpoint: `/mkctf-api/healthcheck`
- - content-type: `application/json`
  - request body:
     ```json
     {
