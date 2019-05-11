@@ -5,20 +5,15 @@
 #===============================================================================
 from signal import SIGINT, SIGTERM
 from asyncio import get_event_loop
-from pathlib import Path
-from argparse import ArgumentParser
 from mkctf import __version__
 from mkctf.api import MKCTFAPI, MKCTFAPIException
 from mkctf.cli.command import *
-from mkctf.helper.log import (
-    app_log,
-    log_enable_debug,
-    log_enable_logging
-)
+from mkctf.helper.log import app_log
+from mkctf.helper.argument_parser import MKCTFArgumentParser
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-__banner__ = r"""
+BANNER = r"""
            _     ____ _____ _____    ____ _     ___
  _ __ ___ | | __/ ___|_   _|  ___|  / ___| |   |_ _|
 | '_ ` _ \| |/ / |     | | | |_    | |   | |    | |
@@ -32,11 +27,8 @@ __banner__ = r"""
 def parse_args():
     '''Parse command line arguments
     '''
-    parser = ArgumentParser(add_help=True, description="A CLI to manage a mkCTF repository")
+    parser = MKCTFArgumentParser(BANNER, "A CLI to manage a mkCTF repository")
     parser.add_argument('--yes', '-y', action='store_true', help="some operations will stop asking for confirmation")
-    parser.add_argument('--quiet', '-q', action='store_true', help="disable logging")
-    parser.add_argument('--debug', '-d', action='store_true', help="enable debug messages")
-    parser.add_argument('--repo-dir', '-r', type=Path, default=Path.cwd(), help="absolute path of a mkCTF repository directory")
     # -- add subparsers
     subparsers = parser.add_subparsers(dest='command', metavar='COMMAND')
     subparsers.required = True
@@ -68,11 +60,7 @@ def sigint_handler():
 async def main():
     '''Main function
     '''
-    app_log.info(__banner__)
     args = parse_args()
-    log_enable_debug(args.debug)
-    log_enable_logging(not args.quiet)
-    app_log.debug(args)
     try:
         api = MKCTFAPI(args.repo_dir)
         rcode = 0 if await args.func(api, args) else 1

@@ -3,17 +3,16 @@
 #===============================================================================
 #  IMPORTS
 #===============================================================================
-from pathlib import Path
-from argparse import ArgumentParser
 from aiohttp import web
 from mkctf import __version__
 from mkctf.api import MKCTFAPI
-from mkctf.helper.log import app_log, log_enable_debug
+from mkctf.helper.log import app_log
 from mkctf.web_handler import MKCTFWebHandler
+from mkctf.helper.argument_parser import MKCTFArgumentParser
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-__banner__ = r"""
+BANNER = r"""
            _     ____ _____ _____   ____
  _ __ ___ | | __/ ___|_   _|  ___| / ___|  ___ _ ____   _____ _ __
 | '_ ` _ \| |/ / |     | | | |_    \___ \ / _ \ '__\ \ / / _ \ '__|
@@ -24,22 +23,11 @@ __banner__ = r"""
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def parse_args():
-    '''Parse command line arguments
-    '''
-    parser = ArgumentParser(add_help=True,
-                       description="Manage CTF challenges repository.")
-    parser.add_argument('--debug', '-d', action='store_true', help="output debug messages")
-    parser.add_argument('--repo-dir', '-r', type=Path, default=Path.cwd(), help="absolute path of a mkCTF repository directory")
-    # -- parse args and pre-process if needed
-    return parser.parse_args()
-
 def main():
     '''Main function
     '''
-    app_log.info(__banner__)
-    args = parse_args()
-    log_enable_debug(args.debug)
+    parser = MKCTFArgumentParser(BANNER, "An HTTP API to perform operations on a mkCTF repository.")
+    args = parser.parse_args()
     api = MKCTFAPI(args.repo_dir)
     handler = MKCTFWebHandler(api)
     app = web.Application()

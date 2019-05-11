@@ -7,6 +7,7 @@ from .exception import MKCTFAPIException
 from .helper.log import app_log
 from .model.config import GeneralConfiguration
 from .model.repository import Repository
+from .helper.formatting import format_text
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -15,6 +16,14 @@ class MKCTFAPI:
     '''
     DEFAULT_TIMEOUT = 120 # 2 minutes
     DEFAULT_FLAG_SIZE = 16 # 16 bytes
+    RCODE_MAPPING = {
+        None: ('TIMEOUT', 'magenta'),
+        0: ('SUCCESS', 'green'),
+        2: ('N/A', 'grey'),
+        3: ('MANUAL', 'yellow'),
+        4: ('NOT-IMPLEMENTED', 'yellow'),
+    }
+    HEALTHY_RCODES = {0, 2, 3}
 
     def __init__(self, repo_dir, general_conf_path=None):
         '''Coargstructs a new iargstance
@@ -232,3 +241,22 @@ class MKCTFAPI:
                 result = await challenge.healthcheck(dev, timeout or MKCTFAPI.DEFAULT_TIMEOUT)
                 result.update({'slug': challenge.conf.slug})
                 yield result
+
+    def rcode2str(self, code):
+        '''Convert a return code to a string
+        '''
+        status, color = self.RCODE_MAPPING.get(code, ('FAILURE', 'red'))
+        status = f'[{status}]'
+        if code is not None:
+            status += f'(code={code})'
+        return format_text(status, color, ['bold'])
+
+    def rcode2health_str(self, code):
+        '''Convert a return code to a health string
+        '''
+        color = 'red'
+        status = 'UNHEALTHY'
+        if code in self.HEALTHY_RCODES:
+            color = 'green'
+            status = 'HEALTHY'
+        return format_text(f'[{status}]', color, ['bold'])

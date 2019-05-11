@@ -7,14 +7,6 @@ from termcolor import colored
 # =============================================================================
 TAB = ' ' * 2
 HSEP = '-' * 80
-EXIT_CODE_MAP = {
-    None: ('TIMEOUT', 'magenta'),
-    0: ('SUCCESS', 'green'),
-    2: ('N/A', 'grey'),
-    3: ('MANUAL', 'yellow'),
-    4: ('NOT-IMPLEMENTED', 'yellow'),
-}
-HEALTHY_EXIT_CODES = {0, 2, 3}
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -59,24 +51,3 @@ def format_dict2str(dictionary):
         else:
             text += f"\n+ {key}: {value}"
     return text
-
-def format_rcode2str(code):
-    '''[summary]
-    '''
-    attrs = ['bold']
-    status, color = EXIT_CODE_MAP.get(code, ('FAILURE', 'red'))
-    status = f'[{status}]'
-    if code is not None:
-        status += f'(code={code})'
-    return format_text(status, color, attrs)
-
-def format_rcode2health(code):
-    '''[summary]
-    '''
-    attrs = ['bold']
-    color = 'red'
-    status = 'UNHEALTHY'
-    if code in HEALTHY_EXIT_CODES:
-        color = 'green'
-        status = 'HEALTHY'
-    return format_text(f'[{status}]', color, attrs)
