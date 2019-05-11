@@ -68,6 +68,10 @@ You can enumerate challenges to have a quick overview of the work progression an
 
 ![mkctf-cli enum screenshot](images/mkctf_cli_enum.png)
 
+You can also export public elements of your challenges automatically.
+
+![mkctf-cli enum screenshot](images/mkctf_cli_export.png)
+
 ### mkCTF Monitor
 
 `mkctf-monitor` is a all-in-one monitoring solution based on running healthchecks regularly and send notifications

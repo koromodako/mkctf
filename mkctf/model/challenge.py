@@ -195,14 +195,14 @@ class Challenge:
         '''
         if not include_disabled and not self.conf.enabled:
             app_log.warning(f"export ignored {self.conf.slug} (disabled)")
-            return {'ignored': True}
+            return
 
         app_log.info(f"exporting {self.conf.slug}...")
         archive_name = self.conf.static_url.split('/')[-1]
         if not archive_name:
             app_log.error(f"export ignored {self.conf.slug} (invalid/empty static_url)")
             app_log.error(f"running `mkctf-cli update-meta` should be enough to fix this issue.")
-            return {'ignored': True}
+            return
 
         archive_path = export_dir.joinpath(archive_name)
         checksum_file = ChecksumFile()

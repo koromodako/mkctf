@@ -187,6 +187,8 @@ class MKCTFAPI:
         if not slug:
             for challenge in self._repo.scan(tags, categories):
                 archive_path = challenge.export(export_dir, include_disabled)
+                if not archive_path:
+                    continue
                 yield {
                     'slug': challenge.conf.slug,
                     'archive_path': archive_path
@@ -197,6 +199,8 @@ class MKCTFAPI:
             app_log.error(f"challenge not found: {challenge.conf.slug}")
             return
         archive_path = challenge.export(export_dir, include_disabled)
+        if not archive_path:
+            return
         yield {
             'slug': challenge.conf.slug,
             'archive_path': archive_path
