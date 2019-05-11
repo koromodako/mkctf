@@ -24,6 +24,8 @@ class MetaConfiguration(type):
                 raise AttributeError(f"Missing '{member}' in MetaConfiguration subclass!")
         return ncls
 
+# pylint: disable=E1101
+
 class Configuration(dict, metaclass=MetaConfiguration):
     '''[summary]
     '''

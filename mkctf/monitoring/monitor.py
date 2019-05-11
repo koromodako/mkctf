@@ -11,6 +11,7 @@ from asyncio import (
     Lock,
 )
 from aiohttp import ClientSession, ClientTimeout, BasicAuth
+from humanize import naturaldelta
 from mkctf.helper.log import app_log
 from .task import MonitorTask
 # =============================================================================
@@ -54,7 +55,7 @@ async def worker_routine(worker_id, monitor):
             text = '=' * 80
             text += '\n'
             text += f"[{worker_id}]: reporting for {task.slug}\n"
-            text += f"[{worker_id}]:  - state: {health_state}\n"
+            text += f"[{worker_id}]:  - state: {health}\n"
             text += f"[{worker_id}]:  - check duration: {naturaldelta(task.duration)}\n"
             if not report['healthy']:
                 stdout = f"----------------[{task.slug}:STDOUT]----------------\n"
@@ -77,6 +78,8 @@ class MKCTFMonitor:
         '''
         self._api = api
         self._workers = []
+        self._iter_cnt = iter_cnt
+        self._iter_delay = iter_delay
         self._worker_cnt = worker_cnt
         self._task_queue = Queue()
         self._task_timeout = task_timeout

@@ -91,7 +91,7 @@ class Repository:
         for chall_dirent in scandir(self.challenges_dir, keep):
             chall = Challenge(self, self.challenges_dir.joinpath(chall_dirent.name))
             if not chall.conf.validate(throw=False):
-                app_log.warning(f"challenge has invalid configuration: {slug} => skipped")
+                app_log.warning(f"challenge has invalid configuration: {chall.conf.slug} => skipped")
                 continue
             if not tags or tags.intersection(chall.conf.tags):
                 challs.append(chall)

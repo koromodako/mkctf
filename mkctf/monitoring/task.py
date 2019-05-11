@@ -3,6 +3,7 @@
 # =============================================================================
 from time import time
 from asyncio import sleep
+from mkctf.api import MKCTFAPI
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -61,7 +62,7 @@ class MonitorTask:
         self._iter_cnt += 1
         # run exploit using mkCTF API
         async for report in self._monitor.healthcheck(self.slug):
-            healthy = report['rcode'] in api.HEALTHY_RCODES
+            healthy = report['rcode'] in MKCTFAPI.HEALTHY_RCODES
             report['healthy'] = healthy
             await self._monitor.post(self.slug, healthy)
         self._duration = int(time()) - self._start
