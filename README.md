@@ -1,14 +1,17 @@
-# mkctf
+# mkCTF
 
 ## Why ?
 
-This framework aims at helping your team create CTF challenges following format which will enable efficient integration
-and deployment on the CTF infrastructure.
+This framework aims at helping your team create CTF challenges following a format which will enable efficient
+integration and deployment on the CTF infrastructure.
 
 This project was, initially, created for managing challenges for INS'hAck 2017 event.
-You can find challenges and writeups of the past editions of INS'hAck in [this repository](https://github.com/InsecurityAsso).
 
-This project is evolving constantly to enable even more automation when deploying challenges on a VPS & Docker-based infrastructure.
+You can find challenges and writeups of the past editions of INS'hAck in
+[this repository](https://github.com/InsecurityAsso).
+
+This project is evolving constantly to enable even more automation when deploying challenges on a
+Rancher-based infrastructure.
 
 ## Requirements
 
@@ -16,11 +19,12 @@ This project has been design to run in a Linux environment having Python 3.6+ su
 
 It might work on Mac as well though I'm not using it on this platform.
 
-I won't invest time to make it work on Windows as WSL2 will enable having a Linux environment running on your Windows quite easily.
+I won't invest time in making it work on Windows as WSL2 will enable having a Linux environment running on your PC with
+almost no effort.
 
 ## Installing and Creating a new CTF
 
-mkCTF should be installed using `setup.sh` which does the following:
+mkCTF should be installed (and upgraded) using `setup.sh`. This script performs the following operations:
 
 ```bash
 # clone mkctf repository in tmp directory
@@ -30,14 +34,14 @@ $ mkdir -p ~/bin && cd ~/bin
 # create a Python 3 virtual environment
 $ python3 -m venv .mkctf-venv
 # install mkctf in the venv
-$ .mkctf-venv/bin/pip install /tmp/mkctf
+$ .mkctf-venv/bin/pip install -U /tmp/mkctf
 # create symbolic links for mkctf scripts
-$ ln -s ./mkctf-venv/bin/mkctf-* .
+$ ln -sf ./mkctf-venv/bin/mkctf-* .
 # leave ~/bin
 cd ..
 # ensure that config directory exists and copy configuration files in it
 # note: you might want to review and customize the content of ~/.config/mkctf after its creation
-$ mkdir -p ~/.config && cp -r /tmp/mkctf/config ~/.config/mkctf
+$ mkdir -p ~/.config/mkctf && cp -r /tmp/mkctf/config/* ~/.config/mkctf/
 # ensure that ~/bin is part of your path and try invoking mkctf-cli
 $ mkctf-cli -h
 ```
@@ -64,7 +68,8 @@ the CTF infrastructure won't give you a headache.
 
 ![mkctf-cli -h screenshot](images/mkctf_cli_help.png)
 
-You can enumerate challenges to have a quick overview of the work progression and repartition in terms of tags and categories.
+You can enumerate challenges to have a quick overview of the work progression and repartition in terms of tags and
+categories.
 
 ![mkctf-cli enum screenshot](images/mkctf_cli_enum.png)
 
