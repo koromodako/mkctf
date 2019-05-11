@@ -80,12 +80,13 @@ class Repository:
             return self._save_conf()
         return False
 
-    def scan(self, tags=[]):
+    def scan(self, tags=[], categories=[]):
         '''Returns a list of challenges having at least one tag in common with tags
 
         An empty list of tags means all tags
         '''
         tags = set(tags)
+        categories = set(categories)
         keep = lambda entry: entry.is_dir() and not entry.name.startswith('.')
         challs = []
         for chall_dirent in scandir(self.challenges_dir, keep):
@@ -93,8 +94,13 @@ class Repository:
             if not chall.conf.validate(throw=False):
                 app_log.warning(f"challenge has invalid configuration: {chall.conf.slug} => skipped")
                 continue
-            if not tags or tags.intersection(chall.conf.tags):
-                challs.append(chall)
+            if tags and not tags.intersection(chall.conf.tags):
+                app_log.warning(f"challenge does not match selected tags: {chall.conf.slug} => skipped")
+                continue
+            if categories and chall.conf.category not in categories:
+                app_log.warning(f"challenge does not match selected categories: {chall.conf.slug} => skipped")
+                continue
+            challs.append(chall)
         return sorted(challs, key=lambda chall: chall.conf.slug)
 
     def find(self, slug):

@@ -19,7 +19,8 @@ async def build(api, args):
     exc_sep = format_text(f'{HSEP[:35]} [EXCEPT] {HSEP[:35]}', 'magenta')
     chall_sep = format_text(HSEP, 'blue', attrs=['bold'])
     success = True
-    async for build_result in api.build(args.tags, args.slug, args.dev, args.timeout):
+    async for build_result in api.build(tags=args.tags, categories=args.categories,
+                                        slug=args.slug, dev=args.dev, timeout=args.timeout):
         rcode = build_result['rcode']
         chall_desc = format_text(f"{build_result['slug']}", 'blue')
         chall_status = api.rcode2str(rcode)
@@ -39,7 +40,8 @@ async def build(api, args):
 def setup_build(subparsers):
     parser = subparsers.add_parser('build', help="build challenges. After building challenges you might want to deploy/export.")
     parser.add_argument('--dev', action='store_true', help="Runs the script in development mode.")
-    parser.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
+    parser.add_argument('-t', '--tag', dest='tags', action='append', default=[], help="challenge's tags. Can appear multiple times.")
+    parser.add_argument('-c', '--category', dest='categories', action='append', default=[], help="challenge's category. Can appear multiple times.")
     parser.add_argument('-s', '--slug', help="challenge's slug.")
     parser.add_argument('--timeout', type=int, default=MKCTFAPI.EXEC_TIMEOUT, help="override default timeout for subprocesses.")
     parser.set_defaults(func=build)

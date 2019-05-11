@@ -120,7 +120,7 @@ class MKCTFMonitor:
     async def healthcheck(self, slug):
         '''Performs an healthcheck using MKCTFAPI
         '''
-        async for report in self._api.healthcheck(slug, timeout=self._task_timeout):
+        async for report in self._api.healthcheck(slug=slug, timeout=self._task_timeout):
             yield report
 
     async def post(self, caller_id, slug, healthy):

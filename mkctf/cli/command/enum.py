@@ -11,7 +11,7 @@ async def enum(api, args):
     '''Enumerates challenges
     '''
     found = False
-    for challenge in api.enum(args.tags, args.slug):
+    for challenge in api.enum(tags=args.tags, categories=args.categories, slug=args.slug):
         slug, conf = challenge['slug'], challenge['conf']
         if not found:
             found = True
@@ -39,6 +39,7 @@ async def enum(api, args):
 def setup_enum(subparsers):
     parser = subparsers.add_parser('enum', help="enumerate challenges.")
     parser.add_argument('--summarize', action='store_true', help="Print a list of challenges without details.")
-    parser.add_argument('-t', '--tags', action='append', default=[], help="challenge's tags.")
+    parser.add_argument('-t', '--tag', dest='tags', action='append', default=[], help="challenge's tags. Can appear multiple times.")
+    parser.add_argument('-c', '--category', dest='categories', action='append', default=[], help="challenge's category. Can appear multiple times.")
     parser.add_argument('-s', '--slug', help="challenge's slug.")
     parser.set_defaults(func=enum)
