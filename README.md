@@ -13,6 +13,11 @@ You can find challenges and writeups of the past editions of INS'hAck in
 This project is evolving constantly to enable even more automation when deploying challenges on a
 Rancher-based infrastructure.
 
+## Early Warning
+
+_Your mkCTF repository should remain **private** until the CTF ends because it stores flags in plaintext to allow user
+to rebuild the challenge from sources reusing the same flag!_
+
 ## Requirements
 
 This project has been design to run in a Linux environment having Python 3.6+ support.
@@ -58,7 +63,7 @@ $ mkctf-cli init
 
 ## Commandline tools
 
-_Each tool description might refer to concepts defined in **mkCTF Concepts** so be sure to check it out if you
+_Each tool description might refer to concepts defined in **mkCTF Concepts** section so be sure to check it out if you
 encounter an undefined/ambiguous concept._
 
 ### mkCTF CLI
@@ -73,28 +78,25 @@ categories.
 
 ![mkctf-cli enum screenshot](images/mkctf_cli_enum.png)
 
-You can also export public elements of your challenges automatically.
+You can also export public files of your challenges automatically.
 
 ![mkctf-cli enum screenshot](images/mkctf_cli_export.png)
 
 ### mkCTF Monitor
 
-`mkctf-monitor` is a all-in-one monitoring solution based on running healthchecks regularly and send notifications
-to the _scoreboard_ using an HTTP API defined below.
+`mkctf-monitor` is an all-in-one monitoring solution based on running healthchecks regularly and sending healthcheck reports
+to the _scoreboard_ using an HTTP API defined in **CTF Website** section.
 
 ![mkctf-monitor -h screenshot](images/mkctf_monitor_help.png)
 
 ### mkctf-server
 
-Starts a server exposing an HTTP API which is not production-ready nor well specified right now.
-It is advised not to use it for the moment.
+Starts a server exposing a HTTP API which is not production-ready nor well specified right now.
+**It is advised not to use it for the moment.**
 
 ![mkctf-server -h screenshot](images/mkctf_server_help.png)
 
 ## mkCTF Concepts
-
-**Warning: mkCTF repository should remain private until the CTF ends because it stores flags in plaintext to allow user
-to rebuild the challenge from sources reusing the same flag!**
 
 ### Challenge
 
