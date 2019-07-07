@@ -20,7 +20,7 @@ to rebuild the challenge from sources reusing the same flag!_
 
 ## Requirements
 
-This project has been design to run in a Linux environment having Python 3.6+ support.
+This project has been design to run in a Linux environment having Python 3.7+ support.
 
 It might work on Mac as well though I'm not using it on this platform.
 
