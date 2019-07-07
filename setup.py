@@ -14,7 +14,7 @@ setup(
     name='mkctf',
     version=__version__,
     description='',
-    author='Paul Dautry',
+    author='Koromodako',
     author_email='koromodako@gmail.com',
     url='https://github.com/koromodako/mkctf',
     # package files
