@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-BIN_DIR=~/bin
+BIN_DIR=~/.local/bin
 VENV_DIR=.mkctf-venv
 LOCAL_REPO=/tmp/mkctf
 # everything above this line can be modified -------------------------

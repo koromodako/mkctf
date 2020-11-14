@@ -5,9 +5,11 @@ from mkctf import __version__
 HERE = Path(__file__).absolute().parent
 CONF_DIR = Path.home().joinpath('.config')
 
+
 def requirements():
     with HERE.joinpath('requirements.txt').open() as reqs:
         return list([req.strip() for req in reqs if req.strip()])
+
 
 setup(
     # main information
@@ -27,5 +29,5 @@ setup(
             'mkctf-server = mkctf.mkctf_server:app',
             'mkctf-monitor = mkctf.mkctf_monitor:app',
         ]
-    }
+    },
 )

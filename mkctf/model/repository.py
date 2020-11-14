@@ -2,7 +2,6 @@
 #  IMPORTS
 # =============================================================================
 import shutil
-from pathlib import Path
 from mkctf.helper.fs import scandir
 from mkctf.helper.log import app_log
 from mkctf.cli.wizard import *
@@ -11,15 +10,15 @@ from mkctf.model.config import (
     RepositoryConfiguration,
 )
 from .challenge import Challenge
+
 # =============================================================================
 #  CLASSES
 # =============================================================================
 class Repository:
-    '''[summary]
-    '''
+    """[summary]"""
+
     def __init__(self, repo_dir, general_conf, conf=None):
-        '''[summary]
-        '''
+        """[summary]"""
         self._conf = conf
         self._repo_dir = repo_dir
         self._conf_path = repo_dir.joinpath('.mkctf', 'repo.yml')
@@ -54,8 +53,7 @@ class Repository:
         return self.template_dir.is_dir() and self._conf_path.is_file()
 
     def _save_conf(self):
-        '''Save repository configuration to disk
-        '''
+        """Save repository configuration to disk"""
         if not self._conf.validate(throw=False):
             app_log.error("save operation aborted: invalid configuration")
             return False
@@ -63,8 +61,7 @@ class Repository:
         return True
 
     def init(self):
-        '''[summary]
-        '''
+        """[summary]"""
         if not self.initialized:
             wizard = RepositoryConfigurationWizard(self._general_conf)
             if not wizard.show():
@@ -73,55 +70,70 @@ class Repository:
             self.path.mkdir(parents=True, exist_ok=True)
             self.challenges_dir.mkdir(parents=True, exist_ok=True)
             app_log.info("copying templates...")
-            shutil.copytree(str(GeneralConfiguration.TEMPLATES_DIR), str(self.template_dir))
+            shutil.copytree(
+                str(GeneralConfiguration.TEMPLATES_DIR), str(self.template_dir)
+            )
             app_log.info("copying monitoring...")
-            shutil.copytree(str(GeneralConfiguration.MONITORING_DIR), str(self.monitoring_dir))
+            shutil.copytree(
+                str(GeneralConfiguration.MONITORING_DIR),
+                str(self.monitoring_dir),
+            )
             app_log.info("saving repository configuration...")
             return self._save_conf()
         return False
 
     def scan(self, tags=[], categories=[]):
-        '''Returns a list of challenges having at least one tag in common with tags
+        """Returns a list of challenges having at least one tag in common with tags
 
         An empty list of tags means all tags
-        '''
+        """
         tags = set(tags)
         categories = set(categories)
         keep = lambda entry: entry.is_dir() and not entry.name.startswith('.')
         challs = []
         for chall_dirent in scandir(self.challenges_dir, keep):
-            chall = Challenge(self, self.challenges_dir.joinpath(chall_dirent.name))
+            chall = Challenge(
+                self, self.challenges_dir.joinpath(chall_dirent.name)
+            )
             if not chall.conf.validate(throw=False):
-                app_log.warning(f"{chall.conf.slug} has invalid configuration => skipped")
+                app_log.warning(
+                    "%s has invalid configuration => skipped", chall.conf.slug
+                )
                 continue
             if tags and not tags.intersection(chall.conf.tags):
-                app_log.warning(f"{chall.conf.slug} does not match selected tags => skipped")
+                app_log.warning(
+                    "%s does not match selected tags => skipped",
+                    chall.conf.slug,
+                )
                 continue
             if categories and chall.conf.category not in categories:
-                app_log.warning(f"{chall.conf.slug} does not match selected categories => skipped")
+                app_log.warning(
+                    "%s does not match selected categories => skipped",
+                    chall.conf.slug,
+                )
                 continue
             challs.append(chall)
         return sorted(challs, key=lambda chall: chall.conf.slug)
 
     def find(self, slug):
-        '''Finds challenge
-        '''
+        """Finds challenge"""
         chall_path = self.challenges_dir.joinpath(slug)
         if not chall_path.is_dir():
-            app_log.warning(f"{slug} not found")
+            app_log.warning("%s not found!", slug)
             return None
         chall = Challenge(self, chall_path)
         if not chall.conf.validate(throw=False):
-            app_log.warning(f"{slug} has invalid configuration")
+            app_log.warning("%s has invalid configuration!", slug)
             return None
         return chall
 
     def configure(self, override_conf=None):
-        '''Configures repository
-        '''
+        """Configures repository"""
         final_conf = override_conf
         if not final_conf:
-            wizard = RepositoryConfigurationWizard(self._general_conf, self.conf)
+            wizard = RepositoryConfigurationWizard(
+                self._general_conf, self.conf
+            )
             if not wizard.show():
                 return False
             final_conf = wizard.result
@@ -129,8 +141,7 @@ class Repository:
         return self._save_conf()
 
     def create_chall(self, override_conf=None):
-        '''Creates a challenge
-        '''
+        """Creates a challenge"""
         final_conf = override_conf
         if not final_conf:
             wizard = ChallengeConfigurationWizard(self.conf)
@@ -139,22 +150,22 @@ class Repository:
             final_conf = wizard.result
         chall_path = self.challenges_dir.joinpath(final_conf.slug)
         if chall_path.is_dir():
-            app_log.error(f"{final_conf.slug} already exists")
+            app_log.error("%s already exists", final_conf.slug)
             return False
-        chall = Challenge(self, self.challenges_dir.joinpath(final_conf.slug), final_conf)
+        chall = Challenge(
+            self, self.challenges_dir.joinpath(final_conf.slug), final_conf
+        )
         return chall.init()
 
     def configure_chall(self, slug, override_conf=None):
-        '''Configures a challenge
-        '''
+        """Configures a challenge"""
         chall = self.find(slug)
         if chall is None:
             return False
         return chall.configure(override_conf)
 
     def delete_chall(self, slug):
-        '''Deletes a challenge
-        '''
+        """Deletes a challenge"""
         chall = self.find(slug)
         if chall is None:
             return False
@@ -162,8 +173,7 @@ class Repository:
         return True
 
     def enable_chall(self, slug):
-        '''Enables a chalenge
-        '''
+        """Enables a chalenge"""
         chall = self.find(slug)
         if chall is None:
             return False
@@ -171,8 +181,7 @@ class Repository:
         return True
 
     def disable_chall(self, slug):
-        '''Disables a challenge
-        '''
+        """Disables a challenge"""
         chall = self.find(slug)
         if chall is None:
             return False

@@ -1,20 +1,20 @@
-#===============================================================================
+# ===============================================================================
 # IMPORTS
-#===============================================================================
+# ===============================================================================
 from base64 import b64encode
 from aiohttp import web
-#===============================================================================
+
+# ===============================================================================
 # CLASSES
-#===============================================================================
+# ===============================================================================
 class MKCTFWebHandler:
-    '''[summary]
-    '''
+    """[summary]"""
+
     def __init__(self, api):
-        '''[summary]
-        '''
+        """[summary]"""
         self._api = api
 
-    async def enum_challenges(self, request):
+    async def enum_challenges(self, _):
         slugs = [challenge['slug'] for challenge in self._api.enum()]
         return web.json_response({'challenges': slugs})
 
@@ -35,9 +35,10 @@ class MKCTFWebHandler:
             raise web.HTTPBadRequest(reason="JSON body cannot be parsed.")
         flag = body.get('flag')
         if not flag:
-            raise web.HTTPBadRequest(reason="JSON body does not contain 'flag' key as expected.")
+            raise web.HTTPBadRequest(
+                reason="JSON body does not contain 'flag' key as expected."
+            )
         challenge = self._api.find(request.match_info['slug'])
         if challenge:
-            valid = (challenge['conf'].get('flag') == flag)
+            valid = challenge['conf'].get('flag') == flag
         return web.json_response({'valid': valid})
-

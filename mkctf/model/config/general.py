@@ -4,12 +4,13 @@
 from pathlib import Path
 from mkctf.exception import MKCTFAPIException
 from .configuration import Configuration
+
 # ==============================================================================
 # CLASSES
 # ==============================================================================
 class GeneralConfiguration(Configuration):
-    '''[summary]
-    '''
+    """[summary]"""
+
     TYPE = 'general'
     DEFINITION = {
         'tags': (list,),
@@ -22,7 +23,7 @@ class GeneralConfiguration(Configuration):
         'docker': {
             'user': (str,),
             'registry': (str,),
-        }
+        },
     }
     LOCATION = Path.home().joinpath('.config', 'mkctf', 'mkctf.yml')
     TEMPLATES_DIR = Path.home().joinpath('.config', 'mkctf', 'templates')

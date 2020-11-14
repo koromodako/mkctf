@@ -2,10 +2,10 @@
 #  FUNCTIONS
 # =============================================================================
 async def enable(api, args):
-    '''Enables a challenge
-    '''
+    """Enables a challenge"""
     status = api.enable(args.slug)
     return status['enabled']
+
 
 def setup_enable(subparsers):
     parser = subparsers.add_parser('enable', help="enable a challenge.")

@@ -5,12 +5,13 @@ import os
 from hashlib import sha1
 from mkctf.exception import MKCTFAPIException
 from .configuration import Configuration
+
 # ==============================================================================
 # CLASSES
 # ==============================================================================
 class RepositoryConfiguration(Configuration):
-    '''[summary]
-    '''
+    """[summary]"""
+
     TYPE = 'repository'
     DEFINITION = {
         'name': (str,),
@@ -25,10 +26,7 @@ class RepositoryConfiguration(Configuration):
             'user': (str,),
             'registry': (str,),
         },
-        'static': {
-            'salt': (str,),
-            'base_url': (str,)
-        },
+        'static': {'salt': (str,), 'base_url': (str,)},
         'standard': {
             'dirs': {
                 'public': (list,),
@@ -67,10 +65,10 @@ class RepositoryConfiguration(Configuration):
 
     @classmethod
     def load(cls, path):
-        '''Overrided load classmethod
+        """Overrided load classmethod
 
         Ensure some specific files have exe mode set to True
-        '''
+        """
         conf = super(RepositoryConfiguration, cls).load(path)
         if conf.get('standard'):
             exe = {'exec': True}
@@ -140,10 +138,10 @@ class RepositoryConfiguration(Configuration):
         return self['standard']['description']['name']
 
     def directories(self, category, public_only=False):
-        '''List dirs of given category
+        """List dirs of given category
 
         List public dirs only when public_only is set to True
-        '''
+        """
         dir_list = self['standard']['dirs']['public']
         dir_list += self['categories'][category]['dirs']['public']
         if not public_only:
@@ -152,8 +150,7 @@ class RepositoryConfiguration(Configuration):
         return dir_list
 
     def files(self, category):
-        '''List files of given category
-        '''
+        """List files of given category"""
         file_list = [
             self['standard']['build'],
             self['standard']['deploy'],
@@ -165,13 +162,11 @@ class RepositoryConfiguration(Configuration):
         return file_list
 
     def make_rand_flag(self, size=16):
-        '''Generate a random flag
-        '''
+        """Generate a random flag"""
         return f"{self.flag_prefix}{os.urandom(size).hex()}{self.flag_suffix}"
 
     def make_static_url(self, slug):
-        '''Generate a static url
-        '''
+        """Generate a static url"""
         url = self.static_base_url
         if not url.endswith('/'):
             url += '/'

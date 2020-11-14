@@ -2,12 +2,13 @@
 # IMPORTS
 # ==============================================================================
 from .configuration import Configuration
+
 # ==============================================================================
 # CLASSES
 # ==============================================================================
 class ChallengeConfiguration(Configuration):
-    '''[summary]
-    '''
+    """[summary]"""
+
     TYPE = 'challenge'
     DEFINITION = {
         'name': (str,),

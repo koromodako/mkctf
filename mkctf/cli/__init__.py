@@ -5,6 +5,7 @@ import re
 import enum
 from pick import pick
 from mkctf.helper.log import app_log
+
 # =============================================================================
 # GLOBALS
 # =============================================================================
@@ -33,6 +34,8 @@ class Answer(enum.Enum):
     YES = 'y'
     NO = 'n'
     ABORT = 'abort'
+
+
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
@@ -42,9 +45,9 @@ def build_prompt(prompt, default=None):
         prompt = f"{prompt} [{default}]"
     return f'{prompt}: '
 
+
 def readline(prompt, empty=False, digit=False, default=None):
-    '''Reads one line
-    '''
+    """Reads one line"""
     if isinstance(default, tuple):
         default_str = default[1]
         default = default[0]
@@ -67,9 +70,9 @@ def readline(prompt, empty=False, digit=False, default=None):
         value = int(value, 0)
     return value
 
+
 def confirm(prompt, default=Answer.NO, abort=False):
-    '''Asks user for confirmation
-    '''
+    """Asks user for confirmation"""
     answers = []
     for answer in Answer:
         if not abort and answer == Answer.ABORT:
@@ -86,23 +89,33 @@ def confirm(prompt, default=Answer.NO, abort=False):
         return Answer.ABORT
     return Answer.NO
 
+
 def choose(choices, title, multi=False, min_count=1, custom=False):
-    '''Elect one element among a collection
+    """Elect one element among a collection
 
     You can also allow tht user to enter a custom value
-    '''
+    """
     sep = '=' * ((78 - len(title)) // 2)
     title = f'{sep} {title} {sep}'
     text = [title]
     if multi:
         plural = 's' if min_count > 1 else ''
         text += MULTI_SELECT_CONTROLS.split('\n')
-        text.append(f"Choose {min_count} item{plural} or more from the list below then validate.")
+        text.append(
+            f"Choose {min_count} item{plural} or more from the list below then validate."
+        )
     else:
         min_count = 1
         text += SINGLE_SELECT_CONTROLS.split('\n')
-        text.append(f"Choose exactly one item from the list below then validate.")
-    selection = pick(choices, '\n'.join(text), multi_select=multi, min_selection_count=min_count)
+        text.append(
+            "Choose exactly one item from the list below then validate."
+        )
+    selection = pick(
+        choices,
+        '\n'.join(text),
+        multi_select=multi,
+        min_selection_count=min_count,
+    )
     if isinstance(selection, list):
         selection = [item[0] for item in selection]
     else:
@@ -110,9 +123,14 @@ def choose(choices, title, multi=False, min_count=1, custom=False):
     if custom:
         while True:
             selection_str = '\n - '.join(selection)
-            prompt = f"Do you want to add a custom value to current selection: \n - {selection_str}\nEnter your answer"
+            prompt = "\n".join(
+                [
+                    "Do you want to add a custom value to current selection:",
+                    f" - {selection_str}",
+                    "Enter your answer",
+                ]
+            )
             if confirm(prompt) == Answer.NO:
                 break
             selection.append(readline("Enter a custom value", empty=False))
     return selection
-
