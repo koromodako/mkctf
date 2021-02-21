@@ -6,7 +6,7 @@
 from os import getenv
 from getpass import getpass
 from asyncio import get_event_loop
-from mkctf import __version__
+from mkctf import version
 from mkctf.api import MKCTFAPI, MKCTFAPIException
 from mkctf.helper.log import app_log
 from mkctf.monitoring import MKCTFMonitor
@@ -23,7 +23,7 @@ BANNER = r"""
 | | | | | |   <| |___  | | |  _|   | |  | | (_) | | | | | || (_) | |
 |_| |_| |_|_|\_\\____| |_| |_|     |_|  |_|\___/|_| |_|_|\__\___/|_|   v{}
 """.format(
-    __version__
+    version
 )
 # =============================================================================
 #  FUNCTIONS

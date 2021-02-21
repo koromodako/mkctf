@@ -4,7 +4,7 @@
 #  IMPORTS
 # ===============================================================================
 from aiohttp import web
-from mkctf import __version__
+from mkctf import version
 from mkctf.api import MKCTFAPI
 from mkctf.helper.log import app_log
 from mkctf.web_handler import MKCTFWebHandler
@@ -20,7 +20,7 @@ BANNER = r"""
 | | | | | |   <| |___  | | |  _|    ___) |  __/ |   \ V /  __/ |
 |_| |_| |_|_|\_\\____| |_| |_|     |____/ \___|_|    \_/ \___|_|   v{}
 """.format(
-    __version__
+    version
 )
 # =============================================================================
 #  FUNCTIONS

@@ -1,6 +1,5 @@
 from pathlib import Path
 from setuptools import setup, find_packages
-from mkctf import __version__
 
 HERE = Path(__file__).absolute().parent
 CONF_DIR = Path.home().joinpath('.config')
@@ -14,13 +13,14 @@ def requirements():
 setup(
     # main information
     name='mkctf',
-    version=__version__,
-    description='',
+    description="MaKe Capture The Flag",
     author='Koromodako',
     author_email='koromodako@gmail.com',
     url='https://github.com/koromodako/mkctf',
     # package files
     packages=find_packages(str(HERE)),
+    setup_requires=['setuptools_scm'],
+    use_scm_version={'write_to': 'mkctf/__version__.py'},
     install_requires=requirements(),
     # configuration files
     entry_points={

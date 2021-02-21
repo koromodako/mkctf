@@ -4,7 +4,7 @@
 #  IMPORTS
 # ===============================================================================
 from asyncio import get_event_loop
-from mkctf import __version__
+from mkctf import version
 from mkctf.api import MKCTFAPI
 from mkctf.exception import MKCTFAPIException
 from mkctf.cli.command import *
@@ -22,7 +22,7 @@ BANNER = r"""
 | | | | | |   <| |___  | | |  _|   | |___| |___ | |
 |_| |_| |_|_|\_\\____| |_| |_|      \____|_____|___| v{}
 """.format(
-    __version__
+    version
 )
 # =============================================================================
 #  FUNCTIONS
