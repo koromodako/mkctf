@@ -41,7 +41,7 @@ $ python3 -m venv .mkctf-venv
 # install mkctf in the venv
 $ .mkctf-venv/bin/pip install -U /tmp/mkctf
 # create symbolic links for mkctf scripts
-$ ln -sf ./mkctf-venv/bin/mkctf-* .
+$ ln -sf ./.mkctf-venv/bin/mkctf-* .
 # leave ~/bin
 cd ..
 # ensure that config directory exists and copy configuration files in it
