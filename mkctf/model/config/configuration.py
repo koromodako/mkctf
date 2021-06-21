@@ -93,7 +93,7 @@ class Configuration(dict, metaclass=MetaConfiguration):
     def validate(self, throw=True):
         """Determine if self is valid against expected_obj definition"""
         if not self.__dict_check(self, self.DEFINITION):
-            if not throw:
+            if throw:
                 raise MKCTFAPIException(
                     f"{self.TYPE} configuration is missing or invalid."
                 )
