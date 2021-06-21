@@ -33,31 +33,31 @@ mkCTF should be installed (and upgraded) using `setup.sh`. This script performs 
 
 ```bash
 # clone mkctf repository in tmp directory
-$ git clone https://github.com/koromodako/mkctf /tmp/mkctf
+git clone https://github.com/koromodako/mkctf /tmp/mkctf
 # create ~/bin dir if required and enter ~/bin
-$ mkdir -p ~/bin && cd ~/bin
+mkdir -p ~/bin && cd ~/bin
 # create a Python 3 virtual environment
-$ python3 -m venv .mkctf-venv
+python3 -m venv .mkctf-venv
 # install mkctf in the venv
-$ .mkctf-venv/bin/pip install -U /tmp/mkctf
+.mkctf-venv/bin/pip install -U /tmp/mkctf
 # create symbolic links for mkctf scripts
-$ ln -sf ./.mkctf-venv/bin/mkctf-* .
+ln -sf ./.mkctf-venv/bin/mkctf-* .
 # leave ~/bin
 cd ..
 # ensure that config directory exists and copy configuration files in it
 # note: you might want to review and customize the content of ~/.config/mkctf after its creation
-$ mkdir -p ~/.config/mkctf && cp -r /tmp/mkctf/config/* ~/.config/mkctf/
+mkdir -p ~/.config/mkctf && cp -r /tmp/mkctf/config/* ~/.config/mkctf/
 # ensure that ~/bin is part of your path and try invoking mkctf-cli
-$ mkctf-cli -h
+mkctf-cli -h
 ```
 
 Then lets say you want to create a CTF for INS'hAck 2020:
 
 ```bash
 # create and enter inshack-2020/
-$ mkdir inshack-2020 && cd inshack-2020
+mkdir inshack-2020 && cd inshack-2020
 # initialize a mkCTF repository
-$ mkctf-cli init
+mkctf-cli init
 # then simply follow the instructions
 ```
 
