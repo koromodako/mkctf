@@ -33,10 +33,15 @@ if [ ! -d ${VENV_DIR} ]; then
     print "creating a Python 3 virtual environment"
     python3 -m venv ${VENV_DIR}
 fi
+print "Install dependencies"
+${VENV_DIR}/bin/pip install --upgrade pip
+${VENV_DIR}/bin/pip install wheel
+${VENV_DIR}/bin/pip install multidict attrs yarl async_timeout charset-normalizer aiosignal
+${VENV_DIR}/bin/pip install MarkupSafe==2.0.0
 print "installing/updating mkCTF in the venv"
 ${VENV_DIR}/bin/pip install -U ${LOCAL_REPO}
 print "creating/updating symbolic links for mkctf scripts"
-ln -sf ./mkctf-venv/bin/mkctf-* .
+ln -sf ./.mkctf-venv/bin/mkctf-* .
 print "leaving ${BIN_DIR}"
 cd ${CWD}
 # -- installing mkctf configuration

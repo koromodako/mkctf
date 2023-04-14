@@ -51,6 +51,12 @@ mkdir -p ~/.config/mkctf && cp -r /tmp/mkctf/config/* ~/.config/mkctf/
 mkctf-cli -h
 ```
 
+Please ensure that `~/bin` is part of your `PATH`.
+
+```bash
+export PATH="<your bin path>:$PATH"
+```
+
 Then lets say you want to create a CTF for INS'hAck 2020:
 
 ```bash
