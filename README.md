@@ -2,396 +2,380 @@
 
 ## Why ?
 
-This framework aims at helping your team create CTF challenges following a format which will enable efficient
-integration and deployment on the CTF infrastructure.
+This framework aims at helping your team create jeopardy CTF challenges
+using a configurable structure which will enable efficient integration and
+deployment on the CTF infrastructure.
 
-This project was, initially, created for managing challenges for INS'hAck 2017 event.
+This project was initially created for managing challenges for
+[INS'hAck 2017](https://github.com/HugoDelval/inshack-2017).
 
 You can find challenges and writeups of the past editions of INS'hAck in
 [this repository](https://github.com/InsecurityAsso).
 
-This project is evolving constantly to enable even more automation when deploying challenges on a
-Rancher-based infrastructure.
+This project evolved over time to enable even more automation when deploying
+challenges on a Rancher-based infrastructure.
 
-## Early Warning
 
-_Your mkCTF repository should remain **private** until the CTF ends because it stores flags in plaintext to allow user
-to rebuild the challenge from sources reusing the same flag!_
+## Caution
 
-## Requirements
+Your mkCTF repository **shall remain private until the CTF event ends**. It
+stores flags in plaintext to allow CTF admins to rebuild challenges from
+sources without generating new flags. It is recommended to enable 2FA add
+defensive layers to your repository. Do not generate or manage read-only access
+token lightly. Do not give access to your repository to untrusted users.
 
-This project has been design to run in a Linux environment having Python 3.7+ support.
 
-It might work on Mac as well though I'm not using it on this platform.
+## Dependencies
 
-I won't invest time in making it work on Windows as WSL2 will enable having a Linux environment running on your PC with
-almost no effort.
+This project requires Python 3.9+ and has been designed and tested on Linux
+only. It might work on Darwin and Windows Subsystem for Linux as well.
 
-## Installing and Creating a new CTF
+Other dependencies will depend on the challenges themselves.
 
-mkCTF should be installed (and upgraded) using `setup.sh`. This script performs the following operations:
+
+## Setup
+
+You can setup mkCTF in a few steps:
 
 ```bash
-# clone mkctf repository in tmp directory
-git clone https://github.com/koromodako/mkctf /tmp/mkctf
-# create ~/bin dir if required and enter ~/bin
-mkdir -p ~/bin && cd ~/bin
-# create a Python 3 virtual environment
-python3 -m venv .mkctf-venv
-# install mkctf in the venv
-.mkctf-venv/bin/pip install -U /tmp/mkctf
-# create symbolic links for mkctf scripts
-ln -sf ./.mkctf-venv/bin/mkctf-* .
-# leave ~/bin
-cd ..
-# ensure that config directory exists and copy configuration files in it
-# note: you might want to review and customize the content of ~/.config/mkctf after its creation
-mkdir -p ~/.config/mkctf && cp -r /tmp/mkctf/config/* ~/.config/mkctf/
-# ensure that ~/bin is part of your path and try invoking mkctf-cli
-mkctf-cli -h
+curl -o setup.sh https://raw.githubusercontent.com/koromodako/mkctf/master/setup.sh
+chmod +x setup.sh
+./setup.sh
+rm setup.sh
 ```
 
-Then lets say you want to create a CTF for INS'hAck 2020:
+Then create your first CTF:
 
 ```bash
-# create and enter inshack-2020/
-mkdir inshack-2020 && cd inshack-2020
-# initialize a mkCTF repository
+mkdir example-ctf && cd example-ctf
 mkctf-cli init
-# then simply follow the instructions
+# then simply follow the terminal prompts
 ```
 
-## Commandline tools
 
-_Each tool description might refer to concepts defined in **mkCTF Concepts** section so be sure to check it out if you
-encounter an undefined/ambiguous concept._
+## Tools
 
-### mkCTF CLI
+Each tool description may refer to concepts defined in **Concepts** section so
+make sure to check it out if you encounter an new concept.
 
-`mkctf-cli` helps you and CTF co-authors to manipulate a mkCTF repository. It ensures that challenges integration with
-the CTF infrastructure won't give you a headache.
+
+### mkctf-cli
+
+`mkctf-cli` helps you and CTF co-authors to manipulate a mkCTF repository. It
+ensures that challenges integration with the CTF infrastructure won't give you
+a headache.
 
 ![mkctf-cli -h screenshot](images/mkctf_cli_help.png)
 
-You can enumerate challenges to have a quick overview of the work progression and repartition in terms of tags and
-categories.
+You can enumerate challenges to have a quick overview of the work progression
+and distribution across tags and categories.
 
 ![mkctf-cli enum screenshot](images/mkctf_cli_enum.png)
 
-You can also export public files of your challenges automatically.
+You can also export public files of your challenges in a single command. Public
+files location in a challenge directory can be configured.
 
 ![mkctf-cli enum screenshot](images/mkctf_cli_export.png)
 
-### mkCTF Monitor
 
-`mkctf-monitor` is an all-in-one monitoring solution based on running healthchecks regularly and sending healthcheck reports
-to the _scoreboard_ using an HTTP API defined in **CTF Website** section.
+### mkctf-monitor
+
+`mkctf-monitor` is an all-in-one monitoring solution running healthchecks on a
+regular basis and sending reports to the dashboard using an HTTP API defined in
+**Dashboard** section.
 
 ![mkctf-monitor -h screenshot](images/mkctf_monitor_help.png)
 
-Once you have initialized your mkCTF repository, you can build a monitoring image and run it by following this procedure:
+Once you have initialized your mkCTF repository, you can build a monitoring
+image and run it by following this procedure:
 
 ```bash
-$ cd inshack-2020 && ls
-# challenges  monitoring
-$ sudo docker build -f monitoring/Dockerfile -t inshack-2020/monitoring .
-# docker build proceeds...
-$ sudo docker run --rm --name monitoring inshack-2020/monitoring
+cd example-ctf
+mkdir monitoring/ctf
+cp -r .mkctf challenges monitoring/ctf
+sudo DOCKER_BUILDKIT=1 docker build -t example-ctf-monitoring:1.0.0 .
+sudo docker container run --rm \
+                          --env monitoring.env \
+                          --name monitoring \
+                          example-ctf-monitoring:1.0.0
 ```
 
-### mkCTF Server
 
-`mkctf-server` starts a server exposing a HTTP API which is not production-ready nor well specified right now.
-**It is advised not to use it for the moment.**
-
-![mkctf-server -h screenshot](images/mkctf_server_help.png)
-
-## mkCTF Concepts
+## Concepts
 
 ### Challenge
 
-The challenge is the base of all CTF. It has the following metadata:
+Challenges are the base of jeopardy CTF. Each challenge can be described using
+some metadata:
 
 ```yaml
-# the author to be displayed on the CTF website
-#
+# challenge author to be displayed on the dashboard
 author: someone
-#
-# the challenge category in terms of infrastructure requirements
-#
+# category in terms of infrastructure requirements
+#  - `simple` means that the challenge is static (downloadable elements only)
+#  - `server` means that the challenge requires a server and server can be shared
+#    between all players, challenge vulnerabilities allow read-only access at most
+#  - `sandbox` means that the challenge can be destroyed/altered by a player and
+#    shall be allocated on a per team or player basis
 category: simple
-#
-# the estimated difficulty of the challenge to be displayed on the CTF website
-#
+# challenge estimated difficulty to be displayed on the dashboard
 difficulty: hard
-#
-# when enabled, the challenge is considered production-ready:
+# enabled is set to true when the challenge is considered production-ready:
 #  - it runs
-#  - it's stable
-#  - it's been integrated successfully
-#  - it's been tested (at least manually)
-#  - it can now be deployed on the infrastructure
-#
+#  - it is stable
+#  - it has been integrated successfully with the CTF infrastructure
+#  - it has been tested successfully (at least manually)
 enabled: false
-#
-# the flag to be found by the player and to be used when building or health-checking.
-# It can be set manually or generated automatically.
-#
+# challenge flag to be found by the player and to be used when building or
+# health-checking, it can be set manually or generated automatically
 flag: INSA{Th1s_Is_N0t_A_R34L_flag;)}
-#
-# a logo to be displayed on the CTF website
-#
+# challenge logo to be displayed on the dashboard
 logo_url: ''
-#
-# the name of the challenge.
-#
+# display name of the challenge
 name: My New Challenge
-#
-# the number of points to be awarded when the challenge is solved. `-3` is a specific value meaning
-# that the number of points must be calculated dynamically for this challenge.
-#
+# number of points to be awarded when the challenge is solved. `-3` is a specific
+# value meaning that the number of points must be calculated dynamically for this
+# challenge
 points: -3
-#
-# the slug of the challenge.
-#
+# slug of the challenge
 slug: my-new-challenge
-#
-# the static url of the challenge archive. It is generated automatically from repo `salt` and `base_url`.
-#
+# static url of the challenge archive. It is generated automatically from repo
+# `salt` and `base_url`
 static_url: https://static.ctf.insecurity-insa.fr/9afb7029e93ed50c280c69c8443418c5683d05f8.tar.gz
-#
-# the tags chosen by the author to categorize the challenge
-#
+# tags are chosen by the author to specify the nature the challenge
 tags:
 - forensics
 ```
 
+
 ### Repository
 
-The `Repository` contains a collection of challenges (instances of `Challenge`) and monitoring related resources.
-
-It has the following metadata:
+A repository contains a collection of challenges and monitoring resources. It
+can described using some metadata:
 
 ```yaml
+general:
+  # difficulties holds a list of difficulties which can be used to describe a
+  # challenge complexity
+  difficulties:
+  - very easy
+  - easy
+  - medium
+  - hard
+  - insane
+  # docker holds the information related to the registry where challenge images
+  # will be stored.
+  docker:
+    registry: registry.example.ctf
+    user: examplectf
+  # domain holds the parent domain of all challenges
+  domain: example.ctf
+  # flag holds the prefix and suffix to be used for challenges
+  flag:
+    prefix: ECTF{
+    suffix: '}'
+  # tags holds a list of tags available to categorize challenge content
+  tags:
+  - for
+  - rev
+  - pwn
+  - web
+  - web3
+  - prog
+  - osint
+  - radio
+  - crypto
+  - mobile
+  - bounty
+  - stegano
 # categories holds the list of files and directories to be created for each
-# category (sandbox, server, simple) of challenge.
-#
+# infrastructure category (sandbox, server, simple)
 categories:
   sandbox:
     dirs:
       private:
-      - server-files
+      - server
       public: []
     files:
-    - from: Dockerfile.sandbox-server
-      name: server-files/Dockerfile
-    - from: Dockerfile.server
-      name: server-files/Dockerfile.sandbox
-    - from: banner
-      name: server-files/banner
-    - from: sshd_config
-      name: server-files/sshd_config
+    - exec: false
+      from: Dockerfile.sandbox-server
+      name: server/Dockerfile
+    - exec: false
+      from: Dockerfile.server
+      name: server/Dockerfile.sandbox
+    - exec: false
+      from: banner
+      name: server/banner
+    - exec: false
+      from: sshd_config
+      name: server/sshd_config
     - exec: true
       from: sandbox_start.sh.jinja
-      name: server-files/sandbox_start.sh
+      name: server/sandbox_start.sh
   server:
     dirs:
       private:
-      - server-files
+      - server
       public: []
     files:
-    - from: Dockerfile.server
-      name: server-files/Dockerfile
+    - exec: false
+      from: Dockerfile.server
+      name: server/Dockerfile
   simple:
     dirs:
       private:
-      - private-files
+      - private
       public: []
     files: []
-#
-# difficulties holds a list of difficulties which can be used to evaluate a
-# challenge.
-#
-difficulties:
-- trivial
-- easy
-- medium
-- hard
-- extreme
-#
-# docker holds the information related to the registry where challenge images
-# will be stored.
-#
-docker:
-  registry: registry-chal.infra.insecurity-insa.fr
-  user: insecurity
-#
-# domain holds the parent domain of all challenges
-#
-domain: ctf.insecurity-insa.fr
-#
-# flag holds the prefix and suffix to be used for challenges.
-#
-flag:
-  prefix: INSA{
-  suffix: '}'
-#
-# name holds the display name of the CTF
-#
-name: Example CTF 2019
-#
-# standard holds the standard files and directories to be created for each
-# challenge whatever its category is.
-#
+# display name of the jeopardy CTF
+name: ExampleCTF
+# standard holds the common files and directories to be created for each
+# challenge
 standard:
   build:
+    exec: true
     from: build.jinja
     name: build
   deploy:
+    exec: true
     from: deploy.jinja
     name: deploy
   description:
+    exec: false
     from: description.md.jinja
-    name: public-files/description.md
+    name: description.md
   dirs:
-    private:
-    - healthcheck
+    private: []
     public:
-    - public-files
+    - public
   files:
-  - name: .gitignore
-  - from: ''
+  - exec: false
+    from: null
+    name: .gitignore
+  - exec: false
+    from: writeup.md.jinja
     name: writeup.md
-  - from: healthcheck.deps
-    name: healthcheck/healthcheck.deps
+  - exec: false
+    from: healthcheck.deps
+    name: healthcheck.deps
   healthcheck:
+    exec: true
     from: healthcheck.jinja
-    name: healthcheck/healthcheck
-#
-# static holds information about which domain will be used to serve each challenge archive (exported using
-# `mkctf-cli export /tmp/export-example`) and a salt to make archive name impossible to predict.
-#
+    name: healthcheck
+# static holds information about which domain will be used to serve each
+# challenge archive (exported using `mkctf-cli export /tmp/export-example`)
+# and a salt to make archive name impossible to predict
 static:
-  base_url: https://static.ctf.insecurity-insa.fr/
-  salt: # hexadecimal string like 000000000000 but randomly generated
-#
-# tags holds a list of tags available to categorize challenge content.
-#
-tags:
-- cryptography
-- algorithmics
-- forensics
-- network
-- reverse
-- pwn
-- web
+  base_url: https://static.example.ctf
+  salt: # hex-encoded bytes (randomly generated)
 ```
 
-### Build, deploy and healthcheck executables
 
-mkCTF framework defines some mandatory executbales that have a specific purpose in the context of integrating each
-challenge into the CTF infrastructure. These executables are described underneath.
+### Standard Programs
 
-| **Executable Name** | **Executable Purpose**                                                                                   |
-|:-------------------:|:---------------------------------------------------------------------------------------------------------|
-|       `build`       | This executable builds the challenge from the sources and the configuration (flag)                       |
-|       `deploy`      | This executable perform the deployment-related operations for the challenge                              |
-|    `healthcheck`    | This executable performs a healcheck on the deployed challenge (checking checksum or playing an exploit) |
+mkCTF framework defines some mandatory programs that have a specific purpose
+in the context of integrating each challenge into the CTF infrastructure. These
+programs are described below.
 
-Previously defined executables shall respect the following specifications:
+| Program | Purpose |
+|:-------:|:--------|
+| `build` | This executable builds the challenge from the sources and the configuration (flag) |
+| `deploy` | This executable perform the deployment-related operations for the challenge |
+| `healthcheck` | This executable performs a healcheck on the deployed challenge (checking checksum or playing an exploit) |
 
-| **#** | **Specification**                                                                | **Details**                                                                                                              |
-|:-----:|:---------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------|
-| **1** | The executable **shall not take positional arguments**                         | The caller will not provide any positional argument                                                                      |
-| **2** | The executable **shall be able to to handle an optional** `--dev` **argument** | This argument might be given by the caller which will expect the executable to run in `development` mode when applicable |
-| **3** | The executable **execution shall end before a timeout is triggered**           | Timeout defaults to 2 minutes. `--timeout` option enable you to override this value                                      |
-| **4** | The executable **shall return a code**                                         | This code will be interpreted using the rules defined in the next table                                                  |
+Previously defined programs shall respect the following specifications:
 
-As explained in specification `#4` the executable return code will be interpreted according to the following table:
+|  ID  | Specification                                                                  | Comments |
+|:----:|:-------------------------------------------------------------------------------|:---------|
+| `S0` | The executable **shall not take positional arguments**                         | The caller will not provide any positional argument |
+| `S1` | The executable **shall be able to to handle an optional** `--dev` **argument** | This argument might be given by the caller which will expect the executable to run in `development` mode when applicable |
+| `S2` | The executable **execution shall end before a timeout is triggered**           | Timeout defaults to 2 minutes. `--timeout` option enable you to override this value |
+| `S3` | The executable **shall return an exit code**                                   | This code will be interpreted using the rules defined in the next table |
 
-|   **Exit Code**   |    **Meaning**    | **Description**                                                                         |
-|:-----------------:|:-----------------:|:----------------------------------------------------------------------------------------|
-|        `0`        |     `SUCCESS`     | The executable execution succeeded                                                      |
-|        `2`        |       `N/A`       | The executable does have a meaning in the context of this challenge                     |
-|        `3`        |      `MANUAL`     | The executable cannot perform this task entirely, you will have to get your hands dirty |
-|        `4`        | `NOT IMPLEMENTED` | The executable is not implemented yet                                                   |
-| _any other value_ |     `FAILURE`     | The executable execution failed                                                         |
+As explained in `S3` the program exit code will be interpreted according to
+the following table:
 
-When using `mkctf-cli` `build`, `deploy` or `healthcheck` commands, the CLI will behave as described below.
+| Exit Code | Meaning | Description |
+|:---------:|:-------:|:------------|
+| `0` | `SUCCESS` | The executable execution succeeded |
+| `2` | `N/A` | The executable does have a meaning in the context of this challenge |
+| `3` | `MANUAL` | The executable cannot perform this task entirely, you will have to get your hands dirty |
+| `4` | `NOT IMPLEMENTED` | The executable is not implemented yet |
+| _OTHER_ | `FAILURE` | The executable execution failed |
 
-A special status `TIMEOUT` may occur when using `mkctf-cli` `build`, `deploy` or `healthcheck` command.
-In that case, it means that your executable took too long to execute as explained in specification`#3`.
+When using `build`, `deploy` or `healthcheck` commands, the CLI will behave as
+described below.
 
-If the **exit code** differs from `0` executable output (both _stdout_ and _stderr_) will be printed out.
-You can use this behavior to print meaningful instructions/exceptions from within these _scripts_.
-This behavior is particularly interesting if your executable returns a code `3` (`MANUAL`) which means the user must
-perform a manual operation to complete the task.
+If the **exit code** differs from `0` executable output (both _stdout_ and _stderr_)
+will be printed out. You can use this behavior to print meaningful instructions
+from within these programs. This behavior is particularly interesting if your
+program returns a code `3` which means the user must perform a manual operation
+to complete the task.
 
-### CTF Website
+A special status `TIMEOUT` may occur when using `build`, `deploy` or `healthcheck`
+commands. In that case, it means that your executable took too long to execute
+as explained in specification`S2`.
 
-Lets call the _CTF website_ a _scoreboard_ because it's shorter even if it's more than a scoreboard.
+### Dashboard
 
-This website is expected to provide some HTTP APIs defined below.
+The dashboard is expected to provide HTTP APIs defined below. Generic endpoint
+specifications are the following:
 
-[Here is an example](https://github.com/InsecurityAsso/inshack-scoreboard) of a _scoreboard_ providing these APIs (might not be up to date).
+|  ID  | Specification | Details |
+|:----:|:--------------|:--------|
+| `R1` | The dashboard API **shall implement HTTPS with a valid certificate** | `mkctf-cli` will always use `https` scheme to post the configuration |
+| `R2` | The dashboard API **endpoint shall implement basic authentication**  | `mkctf-cli` will set the Authorization header using Basic method |
+| `R3` | The dashboard API **endpoint shall expect a HTTP POST query**        | `mkctf-cli` will POST challenge configuration to the dashboard |
+| `R4` | The dashboard API **endpoint shall expect a application/json body**  | `mkctf-cli` will POST a JSON body to the dashboard |
 
-Every HTTP API shall respect the specifications defined underneath.
-
-| **#** | **Specification**                                                   | **Details**                                                     |
-|:-----:|:--------------------------------------------------------------------|:----------------------------------------------------------------|
-| **1** | The _scoreboard_ **shall implement HTTPS with a valid certificate** | mkCTF will always use `https` scheme to post the configuration  |
-| **2** | The _scoreboard_ **endpoint shall implement basic authentication**  | mkCTF will set the Authorization header using Basic method      |
-| **3** | The _scoreboard_ **endpoint shall expect a HTTP POST query**        | mkCTF will POST challenge configuration to the _scoreboard_     |
-| **4** | The _scoreboard_ **endpoint shall expect a application/json body**  | mkCTF will POST a JSON body (defined below) to the _scoreboard_ |
 
 #### Configuration Synchronization API
 
-`mkctf-cli` provides a `push` command to push every challenge configuration to the _scoreboard_.
+`mkctf-cli push` command allows to push every challenge configuration to the
+dashboard.
 
-The _scoreboard_ must provide an HTTP API defined below.
-
- - method: `POST`
- - endpoint: `/mkctf-api/push`
- - request body:
-    ```json
+```
+POST /mkctf-api/push
+```
+```json
+{
+  "challenges": [
     {
-        "challenges": [
-            {
-                "author": "someone",
-                "category": "simple",
-                "difficulty": "hard",
-                "enabled": false,
-                "flag": "INSA{Th1s_Is_N0t_A_R34L_flag;)}",
-                "logo_url": "",
-                "name": "My New Challenge",
-                "points": -3,
-                "slug": "my-new-challenge",
-                "static_url": "https://static.ctf.insecurity-insa.fr/9afb7029e93ed50c280c69c8443418c5683d05f8.tar.gz",
-                "tags": [
-                    "forensics",
-                    "network"
-                ]
-            },
-            ...
-        ]
+      "name": "Dont Mess With My Memory",
+      "slug": "dont-mess-with-my-memory",
+      "tags": [
+        "pwn"
+      ],
+      "flag": "ECTF{fake_flag_for_u_buddy}",
+      "author": "koromodako",
+      "points": -3,
+      "enabled": true,
+      "category": "sandbox",
+      "logo_url": "",
+      "difficulty": "easy",
+      "static_url": "https://static.example.ctf/4f9bb3ac75a3cc0e5995aaa1af345ab62de6a697.tar.gz"
     }
-    ```
+  ]
+}
+```
 
-**Warning:** the _scoreboard_ is expected to **store a hash** of the `flag`, not the `flag` itself.
+The dashboard **shall store flags using a secure hashing mecanism** such as
+[argon2](https://pypi.org/project/argon2-cffi).
+
 
 #### Healthcheck Notification API
 
-`mkctf-monitor` will attempt to push healthcheck reports to the _scoreboard_.
+`mkctf-monitor` will push reports to the dashboard.
 
-The _scoreboard_ must provide an HTTP API defined below.
+```
+POST /mkctf-api/healthcheck
+```
+```json
+{
+    "dont-mess-with-my-memory": true,
+    "stylish-leak": false,
+}
+```
 
- - method: `POST`
- - endpoint: `/mkctf-api/healthcheck`
- - request body:
-    ```json
-    {
-        "challenge-1": true
-    }
-    ```
-
-Previous body means `challenge-1` is **healthy**.
+Previous body means `dont-mess-with-my-memory` is healthy and `stylish-leak`
+isn't.

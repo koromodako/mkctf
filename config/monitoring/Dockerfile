@@ -1,36 +1,23 @@
-FROM ubuntu:19.04
-##
-## Install monitoring script dependencies
-##
-RUN apt update && apt upgrade -y
-RUN DEBIAN_FRONTEND=noninteractive apt install -y \
-    git tar wget \
-    python3 python3-dev python3-pip
-##
-## Prepare directories
-##
-RUN mkdir -p /mkctf-mon && mkdir -p /root/.config/mkctf/
-##
-## Install mkCTF
-##
+FROM python:alpine
+
+# setup packages
+RUN apk update && apk upgrade && apk add git tar wget
+
+# setup mkctf
 RUN git clone https://github.com/koromodako/mkctf /mkctf && \
-    pip3 install /mkctf && \
-    cp -r /mkctf/config/* /root/.config/mkctf/
-##
-## Set working directory
-##
-WORKDIR /mkctf-mon
-##
-## Add resources to container
-##
-ADD ./.mkctf /mkctf-mon/.mkctf
-ADD ./challenges /mkctf-mon/challenges
-ADD ./monitoring/mkctf.env /mkctf-mon/run-mkctf-mon.sh
-##
-## Prepare monitoring script
-##
-RUN echo 'mkctf-monitor --task-timeout 600 --iter-delay 600' >> /mkctf-mon/run-mkctf-mon.sh
-##
-## Start monitoring script
-##
-CMD bash /mkctf-mon/run-mkctf-mon.sh
+    python3 -m pip install /mkctf && \
+    mkdir -p /mkctf.d /root/.config && \
+    cp -r /mkctf/config /root/.config/mkctf && \
+    rm -rf /mkctf
+
+# set workdir
+WORKDIR /mkctf.d
+
+# add resources to container
+COPY ctf/.mkctf /mkctf.d/.mkctf
+COPY ctf/challenges /mkctf.d/challenges
+
+# set entrypoint
+COPY docker-entrypoint.sh /mkctf.d/docker-entrypoint.sh
+RUN chmod +x /mkctf.d/docker-entrypoint.sh
+ENTRYPOINT ['/mkctf.d/docker-entrypoint.sh']

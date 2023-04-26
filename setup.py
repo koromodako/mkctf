@@ -1,33 +1,5 @@
-from pathlib import Path
-from setuptools import setup, find_packages
+"""Setup script
+"""
+from setuptools import setup
 
-HERE = Path(__file__).absolute().parent
-CONF_DIR = Path.home().joinpath('.config')
-
-
-def requirements():
-    with HERE.joinpath('requirements.txt').open() as reqs:
-        return list([req.strip() for req in reqs if req.strip()])
-
-
-setup(
-    # main information
-    name='mkctf',
-    description="MaKe Capture The Flag",
-    author='Koromodako',
-    author_email='koromodako@gmail.com',
-    url='https://github.com/koromodako/mkctf',
-    # package files
-    packages=find_packages(str(HERE)),
-    setup_requires=['setuptools_scm'],
-    use_scm_version={'write_to': 'mkctf/__version__.py'},
-    install_requires=requirements(),
-    # configuration files
-    entry_points={
-        'console_scripts': [
-            'mkctf-cli = mkctf.mkctf_cli:app',
-            'mkctf-server = mkctf.mkctf_server:app',
-            'mkctf-monitor = mkctf.mkctf_monitor:app',
-        ]
-    },
-)
+setup()

@@ -1,70 +1,42 @@
-# =============================================================================
-#  IMPORTS
-# =============================================================================
+"""mkctf monitor implementation
+"""
 from time import time
-from asyncio import sleep
-from mkctf.api import MKCTFAPI
+from dataclasses import dataclass
+from ..api import MKCTFAPI
+from ..helper.display import display_cpr
+from ..helper.subprocess import CalledProcessResult
 
-# =============================================================================
-#  CLASSES
-# =============================================================================
+
+@dataclass
 class MonitorTask:
-    """Monitoring task
+    """Monitor task"""
 
-    It provides methods for:
-     - retrieving the slug of the associated challenge: self.slug
-     - retrieving latest execution duration: self.duration
-     - dertermine if the task should run again: self.should_run_again
-     - sleeping some time before next execution: self.sleep()
-     - running the task: self.run()
-    """
-
-    def __init__(self, monitor, slug):
-        """Construct a task"""
-        self._slug = slug
-        self._monitor = monitor
-        self._start = 0
-        self._duration = 0
-        self._iter_cnt = 0
+    mkctf_api: MKCTFAPI
+    slug: str
+    timeout: int
+    beg: int = 0
+    end: int = 0
+    count: int = 0
 
     @property
-    def slug(self):
-        """Retrieve the slug of the challenge"""
-        return self._slug
+    def duration(self) -> int:
+        """Task duration"""
+        return self.end - self.beg
 
-    @property
-    def duration(self):
-        """Retrieve the duration of the latest run (in seconds)"""
-        return self._duration
+    def countdown(self, delay: int) -> int:
+        """Remaining time until next run"""
+        return delay - (int(time()) - self.beg)
 
-    @property
-    def countdown(self):
-        remaining = self._monitor.iter_delay - (int(time()) - self._start)
-        return max(0, remaining)
-
-    @property
-    def should_run_again(self):
-        """Determine if the task should run again"""
-        if self._monitor.iter_cnt > 0:
-            return self._iter_cnt < self._monitor.iter_cnt
-        return True
-
-    async def is_ready(self):
-        """Sleep for some time"""
-        remaining = self.countdown
-        if remaining > 0:
-            await sleep(remaining)
-
-    async def run(self):
+    async def run(self) -> CalledProcessResult:
         """Run the task"""
-        # reset start time
-        self._start = int(time())
-        # increment count if needed
-        self._iter_cnt += 1
-        # run exploit using mkCTF API
-        async for report in self._monitor.healthcheck(self.slug):
-            healthy = report['rcode'] in MKCTFAPI.HEALTHY_RCODES
-            report['healthy'] = healthy
-            self._duration = int(time()) - self._start
-            return report
-        return None
+        self.beg = int(time())
+        self.count += 1
+        result = None
+        async for _, cpr in self.mkctf_api.healthcheck(
+            slug=self.slug, timeout=self.timeout
+        ):
+            result = cpr
+        self.end = int(time())
+        if result:
+            display_cpr(self.slug, result)
+        return result

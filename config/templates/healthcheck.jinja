@@ -9,8 +9,8 @@ set -e
 DEV=0
 CWD=$(pwd)
 PROG=$0
-SLUG={{chal_conf.slug}}
-FLAG=$(grep -Eo 'INSA{.+}' ../.mkctf.yml)
+SLUG={{challenge_config.slug}}
+FLAG=$(grep -Eo 'ECTF{.+}' .mkctf.yml)
 # ------------------------------------------------------------------------------
 # FUNCTIONS
 # ------------------------------------------------------------------------------
@@ -74,14 +74,14 @@ done
 arch=static.tar.gz
 if [ ${DEV} -eq 0 ]; then
     print "- Downloading archive..."
-    wget -O ${arch} {{chal_conf.static_url}}
+    wget -O ${arch} {{challenge_config.static_url}}
 else
     print "- Copying memory dump..."
-    if [ ! -f ../public-files/${arch} ]; then
-        print "- ../public-files/${arch} not found. Aborting."
+    if [ ! -f public/${arch} ]; then
+        print "- public/${arch} not found. Aborting."
         exit_failure
     fi
-    cp ../public-files/${arch} .
+    cp ../public/${arch} .
 fi
 print "- Uncompressing archive..."
 tar xzvf ${arch}

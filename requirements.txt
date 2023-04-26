@@ -1,7 +1,0 @@
-pick
-jinja2
-aiohttp
-humanize
-termcolor
-ruamel.yaml
-python-slugify

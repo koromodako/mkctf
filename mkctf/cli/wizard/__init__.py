@@ -1,2 +1,0 @@
-from .challenge import ChallengeConfigurationWizard
-from .repository import RepositoryConfigurationWizard
