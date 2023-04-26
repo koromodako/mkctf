@@ -28,10 +28,10 @@ rm -rf "${VNV_DIR}"
 python3 -m venv "${VNV_DIR}"
 
 print "install mkctf package"
-"${VNV_DIR}/bin/python" -m pip install "${TMP_DIR}"
+"${VNV_DIR}"/bin/python -m pip install "${TMP_DIR}"
 
 print "create symbolic links"
-ln -sf "${VNV_DIR}"/bin/mkctf-* .
+ln -sf "${VNV_DIR}"/bin/mkctf-* "${BIN_DIR}"/
 
 print "cleanup mkctf repository"
 rm -rf "${TMP_DIR}"
