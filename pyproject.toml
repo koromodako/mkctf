@@ -1,9 +1,62 @@
+[project]
+name = "mkctf"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["ctf", "framework", "cli"]
+description = "MaKe Capture The Flag"
+requires-python = ">=3.10"
+dynamic = ["version"]
+authors = [
+  { name="koromodako", email="koromodako@gmail.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Security",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pick~=1.6",
+    "rich~=13.6",
+    "jinja2~=3.1",
+    "aiohttp~=3.8",
+    "humanize~=4.0",
+    "ruamel.yaml~=0.17",
+    "python-slugify~=8.0",
+]
+
+
+[project.urls]
+"Homepage" = "https://github.com/koromodako/mkctf"
+"Repository" = "https://github.com/koromodako/mkctf"
+"Bug Tracker" = "https://github.com/koromodako/mkctf/issues"
+
+
+[project.scripts]
+"mkctf-cli" = "mkctf.cli:app"
+"mkctf-monitor" = "mkctf.monitor:app"
+
+
 [build-system]
-requires = ["setuptools>=30.3.0", "wheel", "setuptools_scm[toml]>=3.4"]
+requires = ["setuptools>=60", "setuptools_scm>=8.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.packages.find]
+exclude = ["config", "images"]
+
+
+
+[tool.setuptools_scm]
+version_file = "mkctf/__version__.py"
+
 
 [tool.black]
 line-length = 79
 skip-string-normalization = true
-
-[tool.setuptools_scm]
-write_to = "mkctf/__version__.py"
