@@ -44,13 +44,13 @@ dependencies = [
 
 
 [build-system]
-requires = ["setuptools>=60", "setuptools_scm>=8.0", "wheel"]
+requires = ["setuptools>=68", "setuptools_scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 
 [tool.setuptools.packages.find]
-exclude = ["config", "images"]
-
+where = ["."]
+include = ["mkctf", "mkctf.*"]
 
 
 [tool.setuptools_scm]
