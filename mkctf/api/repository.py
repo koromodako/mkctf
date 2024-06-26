@@ -5,6 +5,7 @@ from shutil import copytree
 from typing import Optional, Union
 from pathlib import Path
 from dataclasses import dataclass
+from collections.abc import Iterator
 from ..helper.logging import LOGGER
 from ..wizard import RepositoryConfigWizard, ChallengeConfigWizard
 from .config import GeneralConfig, RepositoryConfig, ChallengeConfig
