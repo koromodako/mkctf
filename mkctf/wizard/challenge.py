@@ -1,5 +1,6 @@
 """challenge wizard
 """
+
 from dataclasses import dataclass, field
 from yarl import URL
 from slugify import slugify

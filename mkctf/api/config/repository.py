@@ -1,6 +1,7 @@
 """Repository configuration
 """
-import typing as t
+
+from typing import Optional
 from dataclasses import dataclass, field
 from yarl import URL
 from ._base import ConfigBase
@@ -11,8 +12,8 @@ from ...helper.checksum import sha1_hexdigest
 
 @dataclass
 class _DirsConfig:
-    public: t.List[str] = field(default_factory=list)
-    private: t.List[str] = field(default_factory=list)
+    public: list[str] = field(default_factory=list)
+    private: list[str] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, dct):
@@ -55,7 +56,7 @@ class _StaticConfig:
 class FileConfig:
     name: str = ''
     exec_: bool = False
-    from_: t.Optional[str] = None
+    from_: Optional[str] = None
 
     @classmethod
     def from_dict(cls, dct):
@@ -82,7 +83,7 @@ class _StandardConfig:
     deploy: FileConfig = field(default_factory=FileConfig)
     healthcheck: FileConfig = field(default_factory=FileConfig)
     description: FileConfig = field(default_factory=FileConfig)
-    files: t.List[FileConfig] = field(default_factory=list)
+    files: list[FileConfig] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, dct):
@@ -114,7 +115,7 @@ class _StandardConfig:
 @dataclass
 class _CategoryConfig:
     dirs: _DirsConfig = field(default_factory=_DirsConfig)
-    files: t.List[FileConfig] = field(default_factory=list)
+    files: list[FileConfig] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, dct):
@@ -191,7 +192,7 @@ class RepositoryConfig(ConfigBase):
     static: _StaticConfig = field(default_factory=_StaticConfig)
     general: GeneralConfig = field(default_factory=GeneralConfig)
     standard: _StandardConfig = field(default_factory=_standard_factory)
-    categories_: t.Mapping[str, _CategoryConfig] = field(
+    categories_: dict[str, _CategoryConfig] = field(
         default_factory=_categories_factory
     )
 
@@ -229,7 +230,7 @@ class RepositoryConfig(ConfigBase):
 
     def directories(
         self, category: str, public_only: bool = False
-    ) -> t.List[str]:
+    ) -> list[str]:
         """List dirs of given category
 
         List public dirs only when public_only is set to True
@@ -242,7 +243,7 @@ class RepositoryConfig(ConfigBase):
             directories_.extend(self.categories_[category].dirs.private)
         return directories_
 
-    def files(self, category: str) -> t.List[str]:
+    def files(self, category: str) -> list[str]:
         """List files of given category"""
         files_ = [
             self.standard.build,

@@ -1,5 +1,6 @@
 """mkctf monitor
 """
+
 from os import getenv
 from sys import exit as sys_exit
 from getpass import getpass

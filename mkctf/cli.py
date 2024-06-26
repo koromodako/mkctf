@@ -1,5 +1,6 @@
 """mkctf command line interface
 """
+
 from sys import exit as sys_exit
 from asyncio import get_event_loop
 from argparse import ArgumentParser

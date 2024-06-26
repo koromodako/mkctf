@@ -1,5 +1,6 @@
 """configure command
 """
+
 from ..helper.logging import LOGGER
 
 

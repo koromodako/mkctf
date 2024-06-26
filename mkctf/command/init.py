@@ -1,5 +1,6 @@
 """init command
 """
+
 from ..helper.logging import LOGGER
 
 

@@ -1,5 +1,6 @@
 """Display helper
 """
+
 from re import compile as re_compile
 from rich.box import ROUNDED
 from rich.text import Text

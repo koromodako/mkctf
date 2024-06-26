@@ -1,8 +1,9 @@
 """Challenge API
 """
-import typing as t
+
 from stat import S_IRWXU
 from shutil import rmtree
+from typing import Optional
 from pathlib import Path
 from tarfile import open as tarfile_open
 from tempfile import NamedTemporaryFile
@@ -26,14 +27,16 @@ class ChallengeAPI:
 
     @property
     def repository_config(self):
+        """Repository configuration"""
         return self.repository_api.config
 
     @property
     def config_path(self):
+        """Configuration file path"""
         return self.directory / '.mkctf.yml'
 
     @property
-    def description(self) -> t.Optional[str]:
+    def description(self) -> Optional[str]:
         """Retrieve challenge description from filesystem"""
         desc_path = (
             self.directory / self.repository_config.standard.description.name
@@ -104,16 +107,16 @@ class ChallengeAPI:
         """Challenge slug matches given slug"""
         return self.config.slug == slug
 
-    def match_tags(self, tags: t.Set[str]) -> bool:
+    def match_tags(self, tags: set[str]) -> bool:
         """Intersection exists between challenge tags and given tags"""
         return bool(tags.intersection(set(self.config.tags)))
 
-    def match_categories(self, categories: t.Set[str]) -> bool:
+    def match_categories(self, categories: set[str]) -> bool:
         """Challenge category matches one of given categories"""
         return self.config.category in categories
 
     def configure(
-        self, chall_config_override: t.Optional[ChallengeConfig] = None
+        self, chall_config_override: Optional[ChallengeConfig] = None
     ) -> bool:
         """Configure challenge"""
         final_config = chall_config_override

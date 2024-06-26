@@ -1,5 +1,6 @@
 """enable command
 """
+
 from ..helper.logging import LOGGER
 
 

@@ -1,5 +1,6 @@
 """renew-flag command
 """
+
 from ..api import FLAG_SIZE
 from ..helper.cli import Answer, confirm
 from ..helper.logging import LOGGER

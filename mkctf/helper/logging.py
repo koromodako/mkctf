@@ -1,5 +1,6 @@
 """logging helper
 """
+
 from logging import getLogger, basicConfig
 from rich.console import Console
 from rich.logging import RichHandler

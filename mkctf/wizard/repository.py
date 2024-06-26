@@ -1,5 +1,6 @@
 """repository wizard command
 """
+
 from dataclasses import dataclass, field
 from yarl import URL
 from ..api.config import RepositoryConfig, GeneralConfig

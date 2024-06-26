@@ -1,5 +1,6 @@
 """Signal module
 """
+
 from signal import SIGHUP, SIGTERM, SIGINT
 from asyncio import all_tasks, current_task, gather, create_task
 from .logging import LOGGER

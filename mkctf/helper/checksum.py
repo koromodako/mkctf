@@ -1,6 +1,6 @@
 """checksum helper
 """
-import typing as t
+
 from pathlib import Path
 from hashlib import sha1, sha256
 from dataclasses import dataclass, field
@@ -16,7 +16,7 @@ def sha1_hexdigest(data: bytes) -> str:
 class ChecksumFile:
     """Represent a checksum file"""
 
-    hashes: t.List[t.Tuple[str, str]] = field(default_factory=list)
+    hashes: list[tuple[str, str]] = field(default_factory=list)
 
     @property
     def content(self):

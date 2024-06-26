@@ -1,6 +1,6 @@
 """challenge model
 """
-import typing as t
+
 from dataclasses import dataclass, field
 from yarl import URL
 from ._base import ConfigBase
@@ -13,7 +13,7 @@ class ChallengeConfig(ConfigBase):
 
     name: str = 'MKCTF Challenge'
     slug: str = ''
-    tags: t.List[str] = ''
+    tags: list[str] = ''
     flag: str = ''
     author: str = ''
     points: int = -3

@@ -1,6 +1,7 @@
 """General configuration
 """
-import typing as t
+
+from typing import Optional
 from pathlib import Path
 from dataclasses import dataclass, field
 from ._base import ConfigBase
@@ -57,8 +58,8 @@ class _DockerConfig:
 class GeneralConfig(ConfigBase):
     """[summary]"""
 
-    tags: t.List[str] = field(default_factory=list)
-    difficulties: t.List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    difficulties: list[str] = field(default_factory=list)
     flag: _FlagConfig = field(default_factory=_FlagConfig)
     domain: str = ''
     docker: _DockerConfig = field(default_factory=_DockerConfig)
@@ -66,7 +67,7 @@ class GeneralConfig(ConfigBase):
     monitoring_dir: Path = _CONF_DIR / 'templates'
 
     @classmethod
-    def load(cls, filepath: t.Optional[Path] = None):
+    def load(cls, filepath: Optional[Path] = None):
         if not filepath:
             filepath = _CONF_FILE
         return super(GeneralConfig, cls).load(filepath)

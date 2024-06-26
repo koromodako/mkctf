@@ -1,6 +1,6 @@
 """Wizard generic interface
 """
-import typing as t
+
 from json import dumps
 from ..helper.cli import Answer, confirm
 from ..helper.logging import LOGGER
@@ -8,10 +8,12 @@ from ..api.config._base import ConfigBase
 
 
 class WizardBase:
-    def _interactive_form(self) -> t.Type[ConfigBase]:
+    """Interactive command line wizard"""
+
+    def _interactive_form(self) -> type[ConfigBase]:
         raise NotImplementedError
 
-    def show(self) -> t.Type[ConfigBase]:
+    def show(self) -> type[ConfigBase]:
         """Show interactive form and loop if needed"""
         while True:
             # create config using interactive form

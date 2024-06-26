@@ -1,5 +1,6 @@
 """enum command
 """
+
 from ..helper.logging import LOGGER
 from ..helper.display import display_challenge_api
 

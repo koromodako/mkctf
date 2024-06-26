@@ -1,8 +1,10 @@
 """MKCTF API implementation
 """
-import typing as t
+
 from enum import Enum
+from typing import Optional
 from pathlib import Path
+from collections.abc import Iterator
 from dataclasses import dataclass
 from yarl import URL
 from aiohttp import ClientSession, ClientTimeout, BasicAuth
@@ -21,7 +23,7 @@ class MKCTFAPI:
 
     repository_api: RepositoryAPI
 
-    def init(self) -> t.Tuple[bool, str]:
+    def init(self) -> tuple[bool, str]:
         """Initialize mkctf repository"""
         return self.repository_api.init()
 
@@ -31,10 +33,10 @@ class MKCTFAPI:
 
     def enum(
         self,
-        tags: t.Optional[t.Set[str]] = None,
-        categories: t.Optional[t.Set[str]] = None,
-        slug: t.Optional[str] = None,
-    ) -> t.Iterator[ChallengeAPI]:
+        tags: Optional[set[str]] = None,
+        categories: Optional[set[str]] = None,
+        slug: Optional[str] = None,
+    ) -> Iterator[ChallengeAPI]:
         """Enumerate challenges"""
         tags = tags or []
         categories = categories or []
@@ -43,7 +45,7 @@ class MKCTFAPI:
                 yield challenge_api
 
     def create(
-        self, challenge_config: t.Optional[ChallengeConfig] = None
+        self, challenge_config: Optional[ChallengeConfig] = None
     ) -> bool:
         """Create a challenge"""
         return self.repository_api.chall_create(challenge_config)
@@ -54,8 +56,8 @@ class MKCTFAPI:
 
     def configure(
         self,
-        repository_config: t.Optional[RepositoryConfig] = None,
-        slug: t.Optional[str] = None,
+        repository_config: Optional[RepositoryConfig] = None,
+        slug: Optional[str] = None,
     ) -> bool:
         """Configure a challenge
 
@@ -79,11 +81,11 @@ class MKCTFAPI:
     def export(
         self,
         export_directory: Path,
-        tags: t.Optional[t.Set[str]] = None,
-        categories: t.Optional[t.Set[str]] = None,
-        slug: t.Optional[str] = None,
+        tags: Optional[set[str]] = None,
+        categories: Optional[set[str]] = None,
+        slug: Optional[str] = None,
         export_disabled: bool = False,
-    ) -> t.Iterator[t.Tuple[str, Path]]:
+    ) -> Iterator[tuple[str, Path]]:
         """Export challenge public data as an archive to given export_directory"""
         tags = tags or []
         categories = categories or []
@@ -99,11 +101,11 @@ class MKCTFAPI:
 
     def renew_flag(
         self,
-        tags: t.Optional[t.Set[str]] = None,
-        categories: t.Optional[t.Set[str]] = None,
-        slug: t.Optional[str] = None,
-        size: t.Optional[int] = None,
-    ) -> t.Iterator[t.Tuple[str, str]]:
+        tags: Optional[set[str]] = None,
+        categories: Optional[set[str]] = None,
+        slug: Optional[str] = None,
+        size: Optional[int] = None,
+    ) -> Iterator[tuple[str, str]]:
         """Renew flag for one challenge or more"""
         tags = tags or []
         categories = categories or []
@@ -114,10 +116,10 @@ class MKCTFAPI:
 
     def update_meta(
         self,
-        tags: t.Optional[t.Set[str]] = None,
-        categories: t.Optional[t.Set[str]] = None,
-        slug: t.Optional[str] = None,
-    ) -> t.Iterator[t.Tuple[str, URL]]:
+        tags: Optional[set[str]] = None,
+        categories: Optional[set[str]] = None,
+        slug: Optional[str] = None,
+    ) -> Iterator[tuple[str, URL]]:
         """Update static metadata
 
         Only static_url might be updated at the moment
@@ -132,12 +134,12 @@ class MKCTFAPI:
     async def push(
         self,
         base_url: URL,
-        tags: t.Optional[t.Set[str]] = None,
-        categories: t.Optional[t.Set[str]] = None,
+        tags: Optional[set[str]] = None,
+        categories: Optional[set[str]] = None,
         username: str = '',
         password: str = '',
         no_verify_ssl: bool = False,
-    ) -> t.Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """Push challenge configuration to a dashboard API"""
         tags = tags or []
         categories = categories or []
@@ -147,9 +149,6 @@ class MKCTFAPI:
                 tags, categories
             )
         ]
-        from json import dumps
-
-        print(dumps(challenges))
         url = base_url.with_path('/mkctf-api/push')
         ssl = False if no_verify_ssl else None
         auth = BasicAuth(username, password)
@@ -167,12 +166,12 @@ class MKCTFAPI:
 
     async def build(
         self,
-        tags: t.Optional[t.Set[str]] = None,
-        categories: t.Optional[t.Set[str]] = None,
-        slug: t.Optional[str] = None,
+        tags: Optional[set[str]] = None,
+        categories: Optional[set[str]] = None,
+        slug: Optional[str] = None,
         dev: bool = False,
-        timeout: t.Optional[int] = None,
-    ) -> t.Tuple[str, CalledProcessResult]:
+        timeout: Optional[int] = None,
+    ) -> tuple[str, CalledProcessResult]:
         """Run build executable"""
         tags = tags or []
         categories = categories or []
@@ -183,12 +182,12 @@ class MKCTFAPI:
 
     async def deploy(
         self,
-        tags: t.Optional[t.Set[str]] = None,
-        categories: t.Optional[t.Set[str]] = None,
-        slug: t.Optional[str] = None,
+        tags: Optional[set[str]] = None,
+        categories: Optional[set[str]] = None,
+        slug: Optional[str] = None,
         dev: bool = False,
-        timeout: t.Optional[int] = None,
-    ) -> t.Tuple[str, CalledProcessResult]:
+        timeout: Optional[int] = None,
+    ) -> tuple[str, CalledProcessResult]:
         """Run deploy executable"""
         tags = tags or []
         categories = categories or []
@@ -199,12 +198,12 @@ class MKCTFAPI:
 
     async def healthcheck(
         self,
-        tags: t.Optional[t.Set[str]] = None,
-        categories: t.Optional[t.Set[str]] = None,
-        slug: t.Optional[str] = None,
+        tags: Optional[set[str]] = None,
+        categories: Optional[set[str]] = None,
+        slug: Optional[str] = None,
         dev: bool = False,
-        timeout: t.Optional[int] = None,
-    ) -> t.Tuple[str, CalledProcessResult]:
+        timeout: Optional[int] = None,
+    ) -> tuple[str, CalledProcessResult]:
         """Run healthcheck executable"""
         tags = tags or []
         categories = categories or []
@@ -214,7 +213,7 @@ class MKCTFAPI:
                 yield challenge_api.config.slug, cpr
 
 
-def create_mkctf_api(repository_directory: Path) -> t.Optional[MKCTFAPI]:
+def create_mkctf_api(repository_directory: Path) -> Optional[MKCTFAPI]:
     """Create MKCTFAPI instance"""
     general_config = GeneralConfig.load()
     repository_api = create_repository_api(

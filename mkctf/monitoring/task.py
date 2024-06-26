@@ -1,5 +1,6 @@
 """mkctf monitor implementation
 """
+
 from time import time
 from dataclasses import dataclass
 from ..api import MKCTFAPI

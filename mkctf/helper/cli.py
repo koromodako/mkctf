@@ -1,5 +1,6 @@
 """Command line helper
 """
+
 import re
 from enum import Enum
 from pick import pick

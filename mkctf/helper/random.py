@@ -1,5 +1,6 @@
 """Random helper
 """
+
 from os import urandom
 
 

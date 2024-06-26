@@ -1,5 +1,6 @@
 """update-meta command
 """
+
 from ..helper.logging import LOGGER
 
 

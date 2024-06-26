@@ -1,5 +1,6 @@
 """delete command
 """
+
 from ..helper.cli import Answer, confirm
 from ..helper.logging import LOGGER
 

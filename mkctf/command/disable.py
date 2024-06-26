@@ -1,5 +1,6 @@
 """disable command
 """
+
 from ..helper.logging import LOGGER
 
 

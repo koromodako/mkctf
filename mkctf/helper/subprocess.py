@@ -1,7 +1,8 @@
 """Subprocess helper
 """
-import typing as t
+
 from enum import Enum
+from typing import Optional
 from pathlib import Path
 from asyncio import (
     wait_for,
@@ -45,9 +46,9 @@ _CALLED_PROCESS_STATES = {
 class CalledProcessResult:
     """Called process result"""
 
-    stdout: t.Optional[bytes] = None
-    stderr: t.Optional[bytes] = None
-    exception: t.Optional[str] = None
+    stdout: Optional[bytes] = None
+    stderr: Optional[bytes] = None
+    exception: Optional[str] = None
     returncode: int = CalledProcessState.EXCEPTION.value
 
     @property
@@ -74,7 +75,7 @@ class CalledProcessResult:
 
 
 async def run_mkctf_prog(
-    prog: str, cwd: Path, dev: bool, timeout: t.Optional[int] = None
+    prog: str, cwd: Path, dev: bool, timeout: Optional[int] = None
 ) -> CalledProcessResult:
     """Runs a script as an asynchronous subprocess"""
 

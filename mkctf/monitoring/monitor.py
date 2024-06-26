@@ -1,6 +1,6 @@
 """mkctf monitor implementation
 """
-import typing as t
+
 from asyncio import (
     Task,
     Queue,
@@ -19,7 +19,7 @@ from ..helper.logging import LOGGER
 
 @dataclass
 class MKCTFMonitor:
-    """[summary]"""
+    """Monitor several challenges"""
 
     mkctf_api: MKCTFAPI
     notifier: MonitorNotifier
@@ -28,10 +28,10 @@ class MKCTFMonitor:
     timeout: int = 120
     worker: int = 4
     _queue: Queue = field(default_factory=Queue)
-    _tasks: t.List[Task] = field(default_factory=list)
+    _workers: list[Task] = field(default_factory=list)
 
-    async def _task_routine(self, worker_id):
-        """Represent a monitoring task"""
+    async def _worker_routine(self, worker_id):
+        """Represent a monitoring worker"""
         while True:
             task = await self._queue.get()
             if task is None:
@@ -73,7 +73,7 @@ class MKCTFMonitor:
             self._queue.task_done()
 
     async def run(self):
-        """[summary]"""
+        """Perform one monitoring round"""
         for challenge_api in self.mkctf_api.enum():
             slug = challenge_api.config.slug
             if not challenge_api.config.enabled:
@@ -92,8 +92,8 @@ class MKCTFMonitor:
         # create N worker tasks to process the queue concurrently
         LOGGER.info("[monitor]: spawning %d workers...", self.worker)
         for k in range(self.worker):
-            task = create_task(self._task_routine(f'task-{k}'))
-            self._tasks.append(task)
+            worker = create_task(self._worker_routine(f'worker-{k}'))
+            self._workers.append(worker)
         # await queue to be processed entirely
         LOGGER.info("[monitor]: waiting for tasks to be processed...")
         try:
@@ -102,9 +102,9 @@ class MKCTFMonitor:
             LOGGER.warning("[monitor]: tasks cancelled.")
         # terminate workers
         LOGGER.info("[monitor]: terminating workers...")
-        for _ in self._tasks:
+        for _ in self._workers:
             await self._queue.put(None)
         # await workers termination
         LOGGER.info("[monitor]: waiting for workers to terminate...")
-        await gather(*self._tasks, return_exceptions=True)
+        await gather(*self._workers, return_exceptions=True)
         LOGGER.info("[monitor]: exiting.")

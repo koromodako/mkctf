@@ -1,5 +1,6 @@
 """Base configuration generic class
 """
+
 from pathlib import Path
 from ruamel.yaml import YAML
 from ...helper.exception import MKCTFAPIException

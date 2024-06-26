@@ -1,5 +1,6 @@
 """Monitor notifier implementation
 """
+
 from dataclasses import dataclass
 from yarl import URL
 from aiohttp import ClientSession, ClientTimeout, BasicAuth
