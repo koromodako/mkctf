@@ -2,7 +2,6 @@
 """
 
 from shutil import copytree
-from typing import Optional, Union
 from pathlib import Path
 from dataclasses import dataclass
 from collections.abc import Iterator
@@ -68,7 +67,7 @@ class RepositoryAPI:
         return True, 'initialized'
 
     def configure(
-        self, repo_config_override: Optional[RepositoryConfig] = None
+        self, repo_config_override: RepositoryConfig | None = None
     ) -> bool:
         """Configures repository"""
         final_repo_config = repo_config_override
@@ -84,7 +83,7 @@ class RepositoryAPI:
         self.config.dump(self.config_path)
         return True
 
-    def chall_find(self, slug: str) -> Optional[ChallengeAPI]:
+    def chall_find(self, slug: str) -> ChallengeAPI | None:
         """Finds challenge"""
         challenge_dir = self.challenges_dir / slug
         if not challenge_dir.is_dir():
@@ -94,8 +93,8 @@ class RepositoryAPI:
 
     def chall_scan(
         self,
-        tags: Optional[Union[list[str], set[str]]] = None,
-        categories: Optional[Union[list[str], set[str]]] = None,
+        tags: list[str] | set[str] | None = None,
+        categories: list[str] | set[str] | None = None,
     ) -> Iterator[ChallengeAPI]:
         """
         Yield challenges having at least one tag in common with tags.
@@ -124,7 +123,7 @@ class RepositoryAPI:
             yield challenge_api
 
     def chall_create(
-        self, chall_config_override: Optional[ChallengeConfig] = None
+        self, chall_config_override: ChallengeConfig | None = None
     ) -> bool:
         """Creates a challenge"""
         final_chall_config = chall_config_override
@@ -145,7 +144,7 @@ class RepositoryAPI:
     def chall_configure(
         self,
         slug: str,
-        chall_config_override: Optional[ChallengeConfig] = None,
+        chall_config_override: ChallengeConfig | None = None,
     ) -> bool:
         """Configures a challenge"""
         challenge_api = self.chall_find(slug)

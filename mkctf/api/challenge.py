@@ -3,7 +3,6 @@
 
 from stat import S_IRWXU
 from shutil import rmtree
-from typing import Optional
 from pathlib import Path
 from tarfile import open as tarfile_open
 from tempfile import NamedTemporaryFile
@@ -36,7 +35,7 @@ class ChallengeAPI:
         return self.directory / '.mkctf.yml'
 
     @property
-    def description(self) -> Optional[str]:
+    def description(self) -> str | None:
         """Retrieve challenge description from filesystem"""
         desc_path = (
             self.directory / self.repository_config.standard.description.name
@@ -116,7 +115,7 @@ class ChallengeAPI:
         return self.config.category in categories
 
     def configure(
-        self, chall_config_override: Optional[ChallengeConfig] = None
+        self, chall_config_override: ChallengeConfig | None = None
     ) -> bool:
         """Configure challenge"""
         final_config = chall_config_override

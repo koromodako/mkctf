@@ -1,7 +1,6 @@
 """General configuration
 """
 
-from typing import Optional
 from pathlib import Path
 from dataclasses import dataclass, field
 from ._base import ConfigBase
@@ -67,7 +66,7 @@ class GeneralConfig(ConfigBase):
     monitoring_dir: Path = _CONF_DIR / 'templates'
 
     @classmethod
-    def load(cls, filepath: Optional[Path] = None):
+    def load(cls, filepath: Path | None = None):
         if not filepath:
             filepath = _CONF_FILE
         return super(GeneralConfig, cls).load(filepath)

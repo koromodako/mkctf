@@ -2,7 +2,6 @@
 """
 
 from enum import Enum
-from typing import Optional
 from pathlib import Path
 from asyncio import (
     wait_for,
@@ -46,9 +45,9 @@ _CALLED_PROCESS_STATES = {
 class CalledProcessResult:
     """Called process result"""
 
-    stdout: Optional[bytes] = None
-    stderr: Optional[bytes] = None
-    exception: Optional[str] = None
+    stdout: bytes | None = None
+    stderr: bytes | None = None
+    exception: str | None = None
     returncode: int = CalledProcessState.EXCEPTION.value
 
     @property
@@ -75,7 +74,7 @@ class CalledProcessResult:
 
 
 async def run_mkctf_prog(
-    prog: str, cwd: Path, dev: bool, timeout: Optional[int] = None
+    prog: str, cwd: Path, dev: bool, timeout: int | None = None
 ) -> CalledProcessResult:
     """Runs a script as an asynchronous subprocess"""
 

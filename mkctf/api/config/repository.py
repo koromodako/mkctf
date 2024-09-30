@@ -1,7 +1,6 @@
 """Repository configuration
 """
 
-from typing import Optional
 from dataclasses import dataclass, field
 from yarl import URL
 from ._base import ConfigBase
@@ -56,7 +55,7 @@ class _StaticConfig:
 class FileConfig:
     name: str = ''
     exec_: bool = False
-    from_: Optional[str] = None
+    from_: str | None = None
 
     @classmethod
     def from_dict(cls, dct):
