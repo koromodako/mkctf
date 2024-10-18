@@ -1,16 +1,17 @@
 """mkctf command line interface
 """
 
-from sys import exit as sys_exit
-from asyncio import get_event_loop
 from argparse import ArgumentParser
+from asyncio import get_event_loop
+from sys import exit as sys_exit
+
 from . import version
 from .api import create_mkctf_api
 from .command import setup_commands
-from .helper.signal import setup_signals_handler
-from .helper.logging import LOGGER
 from .helper.argparse import generic_add_arguments, generic_parse_args
 from .helper.exception import MKCTFAPIException
+from .helper.logging import LOGGER
+from .helper.signal import setup_signals_handler
 
 
 def parse_args():

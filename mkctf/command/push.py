@@ -1,9 +1,11 @@
 """push command
 """
 
-from os import getenv
 from getpass import getpass
+from os import getenv
+
 from yarl import URL
+
 from ..helper.logging import LOGGER
 
 

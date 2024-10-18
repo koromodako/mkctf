@@ -60,3 +60,8 @@ version_file = "mkctf/__version__.py"
 [tool.black]
 line-length = 79
 skip-string-normalization = true
+
+
+[tool.isort]
+profile = "black"
+line_length = 79

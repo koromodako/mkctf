@@ -2,9 +2,10 @@
 """
 
 from json import dumps
+
+from ..api.config._base import ConfigBase
 from ..helper.cli import Answer, confirm
 from ..helper.logging import LOGGER
-from ..api.config._base import ConfigBase
 
 
 class WizardBase:

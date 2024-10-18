@@ -2,8 +2,10 @@
 """
 
 from dataclasses import dataclass
+
+from aiohttp import BasicAuth, ClientSession, ClientTimeout
 from yarl import URL
-from aiohttp import ClientSession, ClientTimeout, BasicAuth
+
 from ..helper.logging import LOGGER
 
 

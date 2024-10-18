@@ -1,11 +1,11 @@
 """General configuration
 """
 
-from pathlib import Path
 from dataclasses import dataclass, field
-from ._base import ConfigBase
-from ...helper.exception import MKCTFAPIException
+from pathlib import Path
 
+from ...helper.exception import MKCTFAPIException
+from ._base import ConfigBase
 
 _CONF_DIR = Path.home() / '.config' / 'mkctf'
 _CONF_FILE = _CONF_DIR / 'mkctf.yml'

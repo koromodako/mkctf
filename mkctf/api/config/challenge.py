@@ -2,9 +2,11 @@
 """
 
 from dataclasses import dataclass, field
+
 from yarl import URL
-from ._base import ConfigBase
+
 from ...helper.exception import MKCTFAPIException
+from ._base import ConfigBase
 
 
 @dataclass

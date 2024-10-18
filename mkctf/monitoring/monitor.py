@@ -1,20 +1,15 @@
 """mkctf monitor implementation
 """
 
-from asyncio import (
-    Task,
-    Queue,
-    CancelledError,
-    sleep,
-    gather,
-    create_task,
-)
+from asyncio import CancelledError, Queue, Task, create_task, gather, sleep
 from dataclasses import dataclass, field
+
 from humanize import naturaldelta
-from .task import MonitorTask
-from .notifier import MonitorNotifier
+
 from ..api import MKCTFAPI
 from ..helper.logging import LOGGER
+from .notifier import MonitorNotifier
+from .task import MonitorTask
 
 
 @dataclass

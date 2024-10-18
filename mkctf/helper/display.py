@@ -2,14 +2,15 @@
 """
 
 from re import compile as re_compile
-from rich.box import ROUNDED
-from rich.text import Text
-from rich.table import Table
-from rich.style import Style
-from rich.console import Console
-from ..api import ChallengeAPI
-from .subprocess import CalledProcessState, CalledProcessResult
 
+from rich.box import ROUNDED
+from rich.console import Console
+from rich.style import Style
+from rich.table import Table
+from rich.text import Text
+
+from ..api import ChallengeAPI
+from .subprocess import CalledProcessResult, CalledProcessState
 
 _CONSOLE = Console()
 _ANSI_ESC_SEQ_PATTERN = re_compile(rb'\x1b[^m]+m')

@@ -3,7 +3,9 @@
 
 import re
 from enum import Enum
+
 from pick import pick
+
 from .logging import LOGGER
 
 INT_RE = re.compile(r'[\-]?[0-9]+')

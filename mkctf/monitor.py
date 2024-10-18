@@ -1,19 +1,21 @@
 """mkctf monitor
 """
 
+from argparse import ArgumentParser
+from asyncio import get_event_loop
+from getpass import getpass
 from os import getenv
 from sys import exit as sys_exit
-from getpass import getpass
-from asyncio import get_event_loop
-from argparse import ArgumentParser
+
 from yarl import URL
+
 from . import version
 from .api import create_mkctf_api
-from .monitoring import MKCTFMonitor, MonitorNotifier
-from .helper.signal import setup_signals_handler
-from .helper.logging import LOGGER
 from .helper.argparse import generic_add_arguments, generic_parse_args
 from .helper.exception import MKCTFAPIException
+from .helper.logging import LOGGER
+from .helper.signal import setup_signals_handler
+from .monitoring import MKCTFMonitor, MonitorNotifier
 
 
 def parse_args():

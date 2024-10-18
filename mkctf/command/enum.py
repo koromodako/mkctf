@@ -1,8 +1,8 @@
 """enum command
 """
 
-from ..helper.logging import LOGGER
 from ..helper.display import display_challenge_api
+from ..helper.logging import LOGGER
 
 
 async def enum(mkctf_api, args):

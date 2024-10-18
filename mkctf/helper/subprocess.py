@@ -1,17 +1,14 @@
 """Subprocess helper
 """
 
+from asyncio import TimeoutError as AsyncioTimeoutError
+from asyncio import create_subprocess_exec, wait_for
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from asyncio import (
-    wait_for,
-    create_subprocess_exec,
-    TimeoutError as AsyncioTimeoutError,
-)
 from subprocess import PIPE, CalledProcessError
-from dataclasses import dataclass
-from .logging import LOGGER
 
+from .logging import LOGGER
 
 DEFAULT_PROG_TIMEOUT = 120  # 2 minutes
 

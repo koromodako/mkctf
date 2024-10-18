@@ -2,11 +2,13 @@
 """
 
 from dataclasses import dataclass, field
+
 from yarl import URL
+
+from ...helper.checksum import sha1_hexdigest
+from ...helper.random import randbytes, randhex
 from ._base import ConfigBase
 from .general import GeneralConfig
-from ...helper.random import randhex, randbytes
-from ...helper.checksum import sha1_hexdigest
 
 
 @dataclass

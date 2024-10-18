@@ -1,18 +1,20 @@
 """Challenge API
 """
 
-from stat import S_IRWXU
-from shutil import rmtree
+from dataclasses import dataclass
 from pathlib import Path
+from shutil import rmtree
+from stat import S_IRWXU
 from tarfile import open as tarfile_open
 from tempfile import NamedTemporaryFile
-from dataclasses import dataclass
-from yarl import URL
+
 from jinja2 import Template
-from ..wizard import ChallengeConfigWizard
-from ..helper.logging import LOGGER
+from yarl import URL
+
 from ..helper.checksum import ChecksumFile
+from ..helper.logging import LOGGER
 from ..helper.subprocess import CalledProcessResult, run_mkctf_prog
+from ..wizard import ChallengeConfigWizard
 from .config import ChallengeConfig, FileConfig
 
 

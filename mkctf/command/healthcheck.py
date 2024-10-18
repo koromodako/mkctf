@@ -2,8 +2,8 @@
 """
 
 from ..helper.cli import Answer, confirm
-from ..helper.logging import LOGGER
 from ..helper.display import display_cpr
+from ..helper.logging import LOGGER
 from ..helper.subprocess import DEFAULT_PROG_TIMEOUT, CalledProcessState
 
 

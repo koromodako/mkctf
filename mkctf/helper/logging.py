@@ -1,10 +1,10 @@
 """logging helper
 """
 
-from logging import getLogger, basicConfig
+from logging import basicConfig, getLogger
+
 from rich.console import Console
 from rich.logging import RichHandler
-
 
 _HANDLER = RichHandler(
     console=Console(stderr=True),

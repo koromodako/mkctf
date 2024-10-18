@@ -1,8 +1,9 @@
 """mkctf monitor implementation
 """
 
-from time import time
 from dataclasses import dataclass
+from time import time
+
 from ..api import MKCTFAPI
 from ..helper.display import display_cpr
 from ..helper.subprocess import CalledProcessResult

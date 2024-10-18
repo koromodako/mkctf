@@ -1,17 +1,18 @@
 """MKCTF API implementation
 """
 
-from enum import Enum
-from pathlib import Path
 from collections.abc import Iterator
 from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+
+from aiohttp import BasicAuth, ClientSession, ClientTimeout
 from yarl import URL
-from aiohttp import ClientSession, ClientTimeout, BasicAuth
+
 from ..helper.subprocess import CalledProcessResult
 from .challenge import ChallengeAPI
+from .config import ChallengeConfig, GeneralConfig, RepositoryConfig
 from .repository import RepositoryAPI, create_repository_api
-from .config import GeneralConfig, ChallengeConfig, RepositoryConfig
-
 
 FLAG_SIZE = 16  # 16 bytes
 

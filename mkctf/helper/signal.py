@@ -1,8 +1,9 @@
 """Signal module
 """
 
-from signal import SIGHUP, SIGTERM, SIGINT
-from asyncio import all_tasks, current_task, gather, create_task
+from asyncio import all_tasks, create_task, current_task, gather
+from signal import SIGHUP, SIGINT, SIGTERM
+
 from .logging import LOGGER
 
 HANDLED_SIGNALS = (SIGHUP, SIGTERM, SIGINT)

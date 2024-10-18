@@ -2,8 +2,10 @@
 """
 
 from dataclasses import dataclass, field
+
 from yarl import URL
-from ..api.config import RepositoryConfig, GeneralConfig
+
+from ..api.config import GeneralConfig, RepositoryConfig
 from ..helper.cli import choose, readline
 from ._base import WizardBase
 

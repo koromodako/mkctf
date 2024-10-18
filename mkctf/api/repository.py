@@ -1,14 +1,15 @@
 """Repository API
 """
 
-from shutil import copytree
-from pathlib import Path
-from dataclasses import dataclass
 from collections.abc import Iterator
+from dataclasses import dataclass
+from pathlib import Path
+from shutil import copytree
+
 from ..helper.logging import LOGGER
-from ..wizard import RepositoryConfigWizard, ChallengeConfigWizard
-from .config import GeneralConfig, RepositoryConfig, ChallengeConfig
+from ..wizard import ChallengeConfigWizard, RepositoryConfigWizard
 from .challenge import ChallengeAPI, create_challenge_api
+from .config import ChallengeConfig, GeneralConfig, RepositoryConfig
 
 
 @dataclass

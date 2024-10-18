@@ -2,13 +2,12 @@
 """
 
 from dataclasses import dataclass, field
-from yarl import URL
+
 from slugify import slugify
-from ..api.config import RepositoryConfig, ChallengeConfig
-from ..helper.cli import (
-    choose,
-    readline,
-)
+from yarl import URL
+
+from ..api.config import ChallengeConfig, RepositoryConfig
+from ..helper.cli import choose, readline
 from ._base import WizardBase
 
 
