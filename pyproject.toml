@@ -44,7 +44,7 @@ dependencies = [
 
 
 [build-system]
-requires = ["setuptools>=68", "setuptools_scm>=8.0", "wheel"]
+requires = ["setuptools>=70", "setuptools_scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 
