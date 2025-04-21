@@ -1,7 +1,8 @@
 [project]
 name = "mkctf"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "MIT"
+license-files = ["LICENSE"]
 keywords = ["ctf", "framework", "cli"]
 description = "MaKe Capture The Flag"
 requires-python = ">=3.10"
@@ -13,7 +14,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
@@ -44,7 +44,7 @@ dependencies = [
 
 
 [build-system]
-requires = ["setuptools>=70", "setuptools_scm>=8.0", "wheel"]
+requires = ["setuptools>=79", "setuptools_scm>=8", "wheel"]
 build-backend = "setuptools.build_meta"
 
 
