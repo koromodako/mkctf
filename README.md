@@ -56,7 +56,7 @@ mkctf-cli init
 ## Tools
 
 Each tool description may refer to concepts defined in **Concepts** section so
-make sure to check it out if you encounter an new concept.
+make sure to check it out if you encounter any unknown concept.
 
 
 ### mkctf-cli
